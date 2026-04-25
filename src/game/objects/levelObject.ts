@@ -92,18 +92,18 @@ export abstract class LevelObject<
         fillColor,
         shadow,
       }),
-      pass(LAYERS.DEBUG, (ctx) => {
-        ctx.strokeStyle = "#0f0";
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        for (let i = 0; i < points.length; i++) {
-          const curr = points[i]!;
-          const next = points[(i + 1) % points.length]!;
-          ctx.moveTo(curr.x, curr.y);
-          ctx.lineTo(next.x, next.y);
-        }
-        ctx.stroke();
-      }),
+      // pass(LAYERS.DEBUG, (ctx) => {
+      //   ctx.strokeStyle = "#0f0";
+      //   ctx.lineWidth = 0.5;
+      //   ctx.beginPath();
+      //   for (let i = 0; i < points.length; i++) {
+      //     const curr = points[i]!;
+      //     const next = points[(i + 1) % points.length]!;
+      //     ctx.moveTo(curr.x, curr.y);
+      //     ctx.lineTo(next.x, next.y);
+      //   }
+      //   ctx.stroke();
+      // }),
     ];
   }
 }

@@ -106,14 +106,6 @@ export class PlayScene extends Scene {
         },
         level,
       ),
-      new Triangle(
-        {
-          position: [300, 150],
-          scale: [400, 100],
-          rotation: "0",
-        },
-        level,
-      ),
     );
   }
 
