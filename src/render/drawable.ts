@@ -1,0 +1,36 @@
+export type RenderPass = {
+  layer: number;
+  draw: (ctx: CanvasRenderingContext2D) => void;
+};
+
+export type RenderInfo = {
+  delta: number;
+  tickInterp: number;
+  tick: number;
+}
+
+export interface Drawable {
+  render(info: RenderInfo): Iterable<RenderPass>;
+};
+
+export function pass(
+  layer: number,
+  draw: (ctx: CanvasRenderingContext2D) => void,
+): RenderPass {
+  return { layer, draw };
+}
+
+export function renderDrawables(
+  drawables: Drawable[],
+  info: RenderInfo,
+  ctx: CanvasRenderingContext2D,
+) {
+  const renderPasses: RenderPass[] = [];
+  for (const drawable of drawables) {
+    renderPasses.push(...drawable.render(info));
+  }
+  renderPasses.sort((a, b) => a.layer - b.layer);
+  for (const pass of renderPasses) {
+    pass.draw(ctx);
+  }
+}
