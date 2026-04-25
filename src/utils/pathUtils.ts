@@ -120,8 +120,8 @@ export function generatePathsFromPoints(
   const outlinePath = new Path2D();
   const fillPath = new Path2D();
 
-  let left = 0;
   let right = 0;
+  let left = Infinity;
 
   for (const point of points) {
     const { x } = point;
@@ -157,8 +157,8 @@ export function generatePathsFromPoints(
     let b: Vector2 | null = null;
 
     if (intersection.x < left || intersection.x > right) {
-      const prevClip = clipLineSegment(offsetPrev.start, a, left, right);
-      const nextClip = clipLineSegment(a, offsetNext.end, left, right);
+      const prevClip = clipLineSegment(offsetPrev.start, intersection, left, right);
+      const nextClip = clipLineSegment(intersection, offsetNext.end, left, right);
 
       if (!prevClip || !nextClip) {
         throw new Error("Failed to clip line segments");
