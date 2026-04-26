@@ -2,14 +2,15 @@ import z from "zod";
 import { Vector2 } from "@/utils/vec";
 import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
 import type { RenderInfo, RenderPass } from "@/render/drawable";
-import { AABB } from "@/utils/aabb";
 import { Segment } from "@/utils/line";
+import type { RigidBody } from "./rigidBody";
 
 export type CollisionInfo = {
   hit: Vector2;
   normal: Vector2;
   newVelocity: Vector2;
   time: number;
+  object: PolyObject;
 };
 
 export const PolyObjectSchema = LevelObjectSchema.extend({
@@ -130,7 +131,7 @@ export abstract class PolyObject<
     const { hit, normal, time } = earliestCollision;
     // Simple reflection for new velocity
     const newVelocity = velocity.sub(normal.mult(2 * velocity.dot(normal)));
-    return { hit, normal, newVelocity, time };
+    return { hit, normal, newVelocity, time, object: this};
   }
 
   /**
@@ -214,5 +215,15 @@ export abstract class PolyObject<
     }
 
     return earliestCollision;
+  }
+
+  /**
+   * Called when a RigidBody collides with this PolyObject.
+   */
+  onCollision(
+    rigidBody: RigidBody,
+    collisionInfo: CollisionInfo,
+  ): { velocity: Vector2 } {
+    return { velocity: collisionInfo.newVelocity };
   }
 }

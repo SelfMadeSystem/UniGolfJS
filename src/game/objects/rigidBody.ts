@@ -67,8 +67,9 @@ export abstract class RigidBody<
     );
 
     if (collision) {
+      const modifiedCollision = collision.object.onCollision(this, collision);
       this.pos = collision.hit;
-      this.velocity = collision.newVelocity;
+      this.velocity = modifiedCollision.velocity;
     } else {
       this.pos = this.pos.add(this.velocity);
     }
