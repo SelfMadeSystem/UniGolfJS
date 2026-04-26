@@ -332,5 +332,7 @@ export abstract class RigidBody<
     this.velocity = this.data.velocity;
     this.prevPos = this.pos;
     this.constraint = null;
+    this.inWater = false;
+    this.waterAnimation = 0;
   }
 }
