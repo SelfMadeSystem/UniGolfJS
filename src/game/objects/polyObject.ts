@@ -41,6 +41,13 @@ export abstract class PolyObject<
     super(options);
   }
 
+  getAABB(): { tl: Vector2; br: Vector2 } {
+    return {
+      tl: this.pos.sub(this.scale.mult(0.5)),
+      br: this.pos.add(this.scale.mult(0.5)),
+    };
+  }
+
   getPoints(): Vector2[] {
     const { shape, rotation } = this.data;
     const basePoints = SHAPE_POINTS[shape];

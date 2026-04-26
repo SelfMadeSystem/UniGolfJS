@@ -39,14 +39,12 @@ export class PlayScene extends Scene {
         position: [300, 100],
         scale: [100, 100],
         shape: 'quarterCircle',
-        rotation: '270',
         ...level,
       }),
       new Wall({
         position: [400, 100],
         scale: [100, 100],
         shape: 'triangle',
-        rotation: '270',
         ...level,
       }),
     );

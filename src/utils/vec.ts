@@ -263,61 +263,6 @@ export function sameHalfPlane(
 }
 
 /**
- * Gets the distance between a point and a line defined by two points on the line
- */
-export function pointLineDistance(
-  point: Vector2,
-  lineStart: Vector2,
-  lineEnd: Vector2,
-): number {
-  const line = lineEnd.sub(lineStart);
-  const pointToLine = lineStart.sub(point);
-  return Math.abs(line.cw90().dot(pointToLine)) / line.length();
-}
-
-/**
- * Gets the distance between a point and a line segment defined by two points
- */
-export function pointSegmentDistance(
-  point: Vector2,
-  lineStart: Vector2,
-  lineEnd: Vector2,
-): number {
-  const l2 = lineStart.distSq(lineEnd);
-
-  if (l2 === 0) return point.dist(lineStart);
-
-  let t = point.sub(lineStart).dot(lineEnd.sub(lineStart)) / l2;
-  t = Math.max(0, Math.min(1, t));
-
-  const projection = lineStart.add(lineEnd.sub(lineStart).mult(t));
-  return point.dist(projection);
-}
-
-/**
- * Gets the intersection point of two lines
- */
-export function lineLineIntersection(
-  a1: Vector2,
-  a2: Vector2,
-  b1: Vector2,
-  b2: Vector2,
-): Vector2 | null {
-  const da = a2.sub(a1);
-  const db = b2.sub(b1);
-  const dp = a1.sub(b1);
-  const dap = da.cw90();
-  const denom = dap.dot(db);
-
-  if (denom === 0) {
-    return null;
-  }
-
-  const num = dap.dot(dp);
-  return b1.add(db.mult(num / denom));
-}
-
-/**
  * Constrain the vector to be at a certain range of the anchor
  */
 export function constrainDistance(

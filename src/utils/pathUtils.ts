@@ -1,5 +1,6 @@
+import { lineLineIntersection } from "./line";
 import { mod } from "./mathUtils";
-import { lineLineIntersection, Vector2 } from "./vec";
+import { Vector2 } from "./vec";
 
 /**
  * Clips a line segment to specified bounds.
