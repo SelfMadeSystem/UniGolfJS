@@ -7,7 +7,7 @@ import {
 import { Scene } from "./scene";
 import { BackMenu } from "@/ui/BackMenu";
 import type { GameObject } from "@/game/objects/gameObject";
-import { LAYERS, type LevelConfig } from "@/game/levelConfig";
+import { LAYERS, WALL_CONFIG, type LevelConfig } from "@/game/levelConfig";
 import { Wall } from "@/game/objects/wall";
 import { Ball } from "@/game/objects/ball";
 import { RigidBody } from "@/game/objects/rigidBody";
@@ -18,6 +18,8 @@ import { Boost } from "@/game/objects/boost";
 import { Tee } from "@/game/objects/tee";
 import { Hole } from "@/game/objects/hole";
 import { Water } from "@/game/objects/water";
+
+const WATER_FILL_COLOR = "#40A0FF";
 
 export class PlayScene extends Scene {
   public objects: GameObject<any>[] = [];
@@ -42,6 +44,16 @@ export class PlayScene extends Scene {
   constructor() {
     super();
 
+    const level: LevelConfig = {
+      wallColor: "#388164",
+      wallOutlineColor: "#29694f",
+      wallShadowColor: "#76b97e",
+      waterWallColor: "#779977",
+      floorColor: "#cce2dd",
+      floorAccentColor: "#d9e6e2",
+      teeColor: "#f79d60",
+    };
+
     this.passes = [
       pass(LAYERS.WATER_WALL_PRE, (ctx) => {
         ctx.save();
@@ -51,21 +63,20 @@ export class PlayScene extends Scene {
       pass(LAYERS.WATER_WALL_CLIP, (ctx) => {
         ctx.clip(this.clipPath);
       }),
+      pass(LAYERS.WATER_FILL, (ctx) => {
+        ctx.fillStyle = level.waterWallColor;
+        ctx.fill(this.clipPath);
+        ctx.save();
+        ctx.translate(0, WALL_CONFIG.waterWallHeight);
+        ctx.fillStyle = WATER_FILL_COLOR;
+        ctx.fill(this.clipPath);
+        ctx.restore();
+      }),
       // walls will render their "water walls" in WATER_WALL_FILL
       pass(LAYERS.WATER_WALL_POST, (ctx) => {
         ctx.restore();
       }),
     ];
-
-    const level: LevelConfig = {
-      wallColor: "#388164",
-      wallOutlineColor: "#29694f",
-      wallShadowColor: "#76b97e",
-      waterWallColor: "#307860",
-      floorColor: "#cce2dd",
-      floorAccentColor: "#d9e6e2",
-      teeColor: "#f79d60",
-    };
 
     this.objects.push(
       new Wall({
@@ -107,6 +118,13 @@ export class PlayScene extends Scene {
         shape: "triangle",
         ...level,
       }),
+      new Wall({
+        position: [360, 220],
+        scale: [100, 100],
+        shape: "triangle",
+        rotation: "180",
+        ...level,
+      }),
       new Ball({
         position: [100, 180],
         scale: [15, 15],
@@ -142,10 +160,10 @@ export class PlayScene extends Scene {
         position: [100, 300],
         ...level,
       }),
-      new Hole({
-        position: [300, 300],
-        ...level,
-      }),
+      // new Hole({
+      //   position: [300, 300],
+      //   ...level,
+      // }),
       new Water({
         position: [300, 175],
         scale: [100, 100],
@@ -153,9 +171,10 @@ export class PlayScene extends Scene {
         ...level,
       }),
       new Water({
-        position: [60, 40],
+        position: [250, 250],
         scale: [100, 100],
         shape: "triangle",
+        rotation: "90",
         ...level,
       }),
     );

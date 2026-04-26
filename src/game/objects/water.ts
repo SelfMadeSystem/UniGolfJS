@@ -8,9 +8,6 @@ import { getPlayScene } from "@/scenes/state";
 
 export const WaterSchema = PolyObjectSchema.extend({});
 
-const OUTLINE_COLOR = "#4060FF";
-const FILL_COLOR = "#40A0FF";
-
 export class Water extends PolyObject<typeof WaterSchema> {
   static override schema = WaterSchema;
 
@@ -39,19 +36,17 @@ export class Water extends PolyObject<typeof WaterSchema> {
       heightLayer: 0,
       outlineLayer: 0,
       fillLayer: LAYERS.WATER_FILL,
-      outlineColor: OUTLINE_COLOR,
-      fillColor: FILL_COLOR,
+      outlineColor: 'transparent',
+      fillColor: 'transparent',
       height: 0,
       outline: 0,
       shadowColor: this.data.wallShadowColor,
       shadow: WALL_CONFIG.shadow,
-      waterWallHeight: WALL_CONFIG.waterWallHeight,
-      waterWallColor: this.data.waterWallColor,
     };
   }
 
   override intersectsRigidBody(rigidBody: RigidBody): boolean {
-    return this.containsRigidBody(rigidBody);
+    return this.isPointInside(rigidBody.pos);
   }
 
   override onIntersects(rigidBody: RigidBody): void {

@@ -252,7 +252,12 @@ export function generatePathsFromPoints(
         const currH = new Vector2(curr.x, curr.y + waterWallHeight);
         const nextH = new Vector2(next.x, next.y + waterWallHeight);
 
-        const cw = generateClockwisePoints([curr, currH, nextH, next]);
+        const cw = generateClockwisePoints([
+          new Vector2(curr.x, curr.y - 0.2),
+          currH,
+          nextH,
+          new Vector2(next.x, next.y - 0.2),
+        ]);
 
         for (let j = 0; j < cw.length; j++) {
           const p = cw[j]!;
