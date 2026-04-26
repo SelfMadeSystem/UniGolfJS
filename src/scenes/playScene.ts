@@ -12,6 +12,7 @@ import { Vector2 } from "@/utils/vec";
 import { Boost } from "@/game/objects/boost";
 import { Tee } from "@/game/objects/tee";
 import { Hole } from "@/game/objects/hole";
+import { Water } from "@/game/objects/water";
 
 export class PlayScene extends Scene {
   public objects: GameObject<any>[] = [];
@@ -120,6 +121,12 @@ export class PlayScene extends Scene {
       }),
       new Hole({
         position: [300, 300],
+        ...level,
+      }),
+      new Water({
+        position: [300, 175],
+        scale: [100, 100],
+        shape: "rectangle",
         ...level,
       }),
     );

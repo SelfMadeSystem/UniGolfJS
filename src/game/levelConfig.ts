@@ -21,7 +21,8 @@ export const WALL_CONFIG = {
 export enum LAYERS {
   FLOOR,
   WALL_SHADOW,
-  WATER,
+  WATER_OUTLINE,
+  WATER_FILL,
   WATER_WALL,
   WALL_HEIGHT,
   OBJECTS_1,

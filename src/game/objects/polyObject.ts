@@ -261,9 +261,9 @@ export abstract class PolyObject<
   onIntersects(rigidBody: RigidBody): void {}
 
   /**
-   * Checks if a RigidBody is inside this PolyObject.
+   * Checks if a RigidBody is intersecting with this PolyObject.
    * @param rigidBody The RigidBody to check.
-   * @returns True if the RigidBody is inside, false otherwise.
+   * @returns True if the RigidBody is intersecting, false otherwise.
    */
   intersectsRigidBody(rigidBody: RigidBody): boolean {
     if (!this.getAABB().intersects(rigidBody.getAABB())) return false;
@@ -285,5 +285,20 @@ export abstract class PolyObject<
       }
     }
     return false;
+  }
+
+  /**
+   * Checks if a RigidBody is fully contained within this PolyObject.
+   * @param rigidBody The RigidBody to check.
+   * @returns True if the RigidBody is fully contained, false otherwise.
+   */
+  containsRigidBody(rigidBody: RigidBody): boolean {
+    const corners = [
+      rigidBody.pos.add(new Vector2(rigidBody.scale.x / 2, rigidBody.scale.y / 2)),
+      rigidBody.pos.add(new Vector2(-rigidBody.scale.x / 2, rigidBody.scale.y / 2)),
+      rigidBody.pos.add(new Vector2(rigidBody.scale.x / 2, -rigidBody.scale.y / 2)),
+      rigidBody.pos.add(new Vector2(-rigidBody.scale.x / 2, -rigidBody.scale.y / 2)),
+    ];
+    return corners.every((corner) => this.isPointInside(corner));
   }
 }

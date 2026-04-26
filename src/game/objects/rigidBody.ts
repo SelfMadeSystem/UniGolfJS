@@ -9,6 +9,7 @@ import { PolyObject, type CollisionInfo } from "./polyObject";
 import { AABB } from "@/utils/aabb";
 import { LAYERS } from "../levelConfig";
 import { CircleObject } from "./circleObject";
+import { lerp } from "@/utils/mathUtils";
 
 export const RigidBodySchema = LevelObjectSchema.extend({
   scale: Vec2Schema.refine((v) => v.x > 0 && v.y > 0, {
@@ -23,6 +24,8 @@ export const RigidBodySchema = LevelObjectSchema.extend({
 });
 
 const DRAG_COEFFICIENT = 0.98;
+const WATER_ANIMATION_TIME = 10;
+const WATER_ANIMATION_SPEED_INFLUENCE = 0.5;
 
 export type Constraint = {
   pos: Vector2;
@@ -43,7 +46,9 @@ export abstract class RigidBody<
   public prevPos: Vector2;
   public velocity: Vector2;
   private readonly rigidBodyId: number;
-  private constraint: Constraint | null = null;
+  protected constraint: Constraint | null = null;
+  public inWater = false;
+  protected waterAnimation = 0;
 
   constructor(options: z.input<SchemaType>) {
     super(options);
@@ -65,6 +70,7 @@ export abstract class RigidBody<
   }
 
   override isPointInside(point: Vector2): boolean {
+    if (this.inWater) return false;
     const radius = this.scale.x / 2;
     return this.pos.sub(point).length() <= radius;
   }
@@ -76,6 +82,13 @@ export abstract class RigidBody<
     this.prevPos = this.pos;
     const scene = $scene.get();
     if (!(scene instanceof PlayScene)) return;
+
+    if (this.inWater) {
+      this.waterAnimation += 1;
+      this.pos = this.pos.add(this.velocity);
+      this.velocity = this.velocity.mult(0.9);
+      return;
+    }
 
     for (const obj of scene.objects) {
       if (
@@ -122,6 +135,8 @@ export abstract class RigidBody<
       if (!(obj instanceof RigidBody) || obj === this) continue;
       const otherConstraint = obj.getConstraint();
 
+      if (obj.inWater) continue;
+
       // Continue if constraints are different
       if (
         !constraint !== !otherConstraint ||
@@ -129,9 +144,8 @@ export abstract class RigidBody<
           otherConstraint &&
           (constraint.pos !== otherConstraint.pos ||
             constraint.radius !== otherConstraint.radius))
-      ) {
+      )
         continue;
-      }
 
       const pairKey =
         this.rigidBodyId < obj.rigidBodyId
@@ -262,22 +276,30 @@ export abstract class RigidBody<
 
     const pos = this.prevPos.lerp(this.pos, tickInterp);
 
+    let size = this.scale.x / 2;
+    let { height } = pathInfo;
+
+    if (this.inWater) {
+      const anim = this.waterAnimation + tickInterp;
+      const speed = this.velocity.length();
+      const speedInfluence = 1 + speed * WATER_ANIMATION_SPEED_INFLUENCE;
+      const interp = (anim / WATER_ANIMATION_TIME) * speedInfluence;
+      size = lerp(size, 0, interp);
+      height = lerp(height, 0, interp);
+    }
+
+    if (size <= pathInfo.outline) return [];
+
     const shadowPath = new Path2D();
-    shadowPath.arc(pos.x, pos.y, this.scale.x / 2, 0, Math.PI * 2);
+    shadowPath.arc(pos.x, pos.y, size, 0, Math.PI * 2);
     const outlinePath = new Path2D();
-    outlinePath.arc(pos.x, pos.y, this.scale.x / 2, 0, Math.PI);
-    outlinePath.arc(
-      pos.x,
-      pos.y - pathInfo.height,
-      this.scale.x / 2,
-      Math.PI,
-      0,
-    );
+    outlinePath.arc(pos.x, pos.y, size, 0, Math.PI);
+    outlinePath.arc(pos.x, pos.y - height, size, Math.PI, 0);
     const fillPath = new Path2D();
     fillPath.arc(
       pos.x,
-      pos.y - pathInfo.height,
-      this.scale.x / 2 - pathInfo.outline,
+      pos.y - height,
+      size - pathInfo.outline,
       0,
       Math.PI * 2,
     );
