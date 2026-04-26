@@ -50,7 +50,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
             ...this.data,
             position: this.pos,
             velocity: new Vector2(0, 0),
-            scale: new Vector2(20, 20),
+            scale: new Vector2(15, 15),
           });
           scene.addObject(newBall);
           this.ball = newBall;

@@ -120,22 +120,6 @@ export class PlayScene extends Scene {
       }),
       new Hole({
         position: [300, 300],
-        scale: [19, 19],
-        ...level,
-      }),
-      new Hole({
-        position: [300, 280],
-        scale: [19, 19],
-        ...level,
-      }),
-      new Hole({
-        position: [300, 260],
-        scale: [19, 19],
-        ...level,
-      }),
-      new Hole({
-        position: [300, 240],
-        scale: [19, 19],
         ...level,
       }),
     );

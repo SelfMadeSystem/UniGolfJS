@@ -3,8 +3,18 @@ import { LAYERS } from "../levelConfig";
 import type { PathInfo } from "./levelObject";
 import type { RigidBody } from "./rigidBody";
 import { CircleObject, CircleObjectSchema } from "./circleObject";
+import { Vector2 } from "@/utils/vec";
+import { Vec2Schema } from "@/utils/data";
 
-export const HoleSchema = CircleObjectSchema.extend({});
+export const HoleSchema = CircleObjectSchema.extend({
+  scale: Vec2Schema.refine((v) => v.x > 0 && v.y > 0, {
+    message: "Scale must be positive",
+  })
+    .refine((v) => v.x === v.y, {
+      message: "CircleObject must be a circle",
+    })
+    .default(new Vector2(30, 30)),
+});
 
 export class Hole extends CircleObject<typeof HoleSchema> {
   static override schema = HoleSchema;
