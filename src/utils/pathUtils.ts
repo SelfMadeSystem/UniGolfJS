@@ -168,7 +168,7 @@ export function generatePathsFromPoints(
     );
 
     if (!intersection) {
-      throw new Error("Failed to calculate intersection");
+      throw new Error(`Failed to calculate intersection for point ${curr.toString()} at index ${i}. Prev: ${prev.toString()}, Next: ${next.toString()}`);
     }
 
     let a = intersection;

@@ -21,6 +21,8 @@ export const RigidBodySchema = LevelObjectSchema.extend({
   velocity: Vec2Schema.default(new Vector2(0, 0)),
 });
 
+const DRAG_COEFFICIENT = 0.98;
+
 export abstract class RigidBody<
   SchemaType extends typeof RigidBodySchema = typeof RigidBodySchema,
 > extends LevelObject<SchemaType> {
@@ -59,6 +61,17 @@ export abstract class RigidBody<
     this.prevPos = this.pos;
     const scene = $scene.get();
     if (!(scene instanceof PlayScene)) return;
+
+    for (const obj of scene.objects) {
+      if (
+        obj instanceof PolyObject &&
+        !obj.isSolid &&
+        obj.intersectsRigidBody(this)
+      ) {
+        obj.onIntersects(this);
+      }
+    }
+
     const collision = RigidBody.getEarliestWallCollision(
       scene,
       this.pos,
@@ -75,6 +88,8 @@ export abstract class RigidBody<
     }
 
     this.resolveRigidBodyCollisions(scene);
+
+    this.velocity = this.velocity.mult(DRAG_COEFFICIENT);
   }
 
   private resolveRigidBodyCollisions(scene: PlayScene): void {
@@ -153,7 +168,9 @@ export abstract class RigidBody<
 
     const polys = scene.objects.filter(
       (obj): obj is PolyObject =>
-        obj instanceof PolyObject && obj.getAABB().intersects(movementAABB),
+        obj instanceof PolyObject &&
+        obj.isSolid &&
+        obj.getAABB().intersects(movementAABB),
     );
 
     let collision: CollisionInfo | null = null;

@@ -9,6 +9,7 @@ import { RigidBody } from "@/game/objects/rigidBody";
 import type { PointerInfo } from "@/render/renderer";
 import { LevelObject } from "@/game/objects/levelObject";
 import { Vector2 } from "@/utils/vec";
+import { Boost } from "@/game/objects/boost";
 
 export class PlayScene extends Scene {
   public objects: GameObject<any>[] = [];
@@ -32,6 +33,7 @@ export class PlayScene extends Scene {
       new Wall({
         position: [100, 100],
         scale: [100, 100],
+        shape: "circle",
         ...level,
       }),
       new Wall({
@@ -84,6 +86,12 @@ export class PlayScene extends Scene {
         scale: [40, 40],
         mass: 2,
         velocity: [10, 0],
+        ...level,
+      }),
+      new Boost({
+        position: [100, 0],
+        scale: [50, 50],
+        shape: "circle",
         ...level,
       }),
     );

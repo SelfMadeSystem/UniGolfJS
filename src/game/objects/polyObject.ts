@@ -15,7 +15,7 @@ export type CollisionInfo = {
 
 export const PolyObjectSchema = LevelObjectSchema.extend({
   shape: z
-    .enum(["rectangle", "triangle", "quarterCircle", "inverseQuarterCircle"])
+    .enum(["rectangle", "triangle", "quarterCircle", "inverseQuarterCircle", "circle"])
     .default("rectangle"),
   rotation: z.enum(["0", "90", "180", "270"]).default("0"),
 });
@@ -42,7 +42,11 @@ const SHAPE_POINTS = {
     new Vector2(0.5, 0.5),
     ...baseQuarterCirclePoints.toReversed(),
   ],
-};
+  circle: Array.from({ length: 128 }, (_, i) => {
+    const angle = (i / 128) * (2 * Math.PI);
+    return new Vector2(Math.cos(angle), Math.sin(angle)).mult(0.5);
+  }),
+} as const;
 
 export abstract class PolyObject<
   SchemaType extends typeof PolyObjectSchema = typeof PolyObjectSchema,
@@ -51,6 +55,10 @@ export abstract class PolyObject<
 
   constructor(options: z.input<SchemaType>) {
     super(options);
+  }
+  
+  get isSolid(): boolean {
+    return true;
   }
 
   getPoints(): Vector2[] {
@@ -131,7 +139,7 @@ export abstract class PolyObject<
     const { hit, normal, time } = earliestCollision;
     // Simple reflection for new velocity
     const newVelocity = velocity.sub(normal.mult(2 * velocity.dot(normal)));
-    return { hit, normal, newVelocity, time, object: this};
+    return { hit, normal, newVelocity, time, object: this };
   }
 
   /**
@@ -225,5 +233,43 @@ export abstract class PolyObject<
     collisionInfo: CollisionInfo,
   ): { velocity: Vector2 } {
     return { velocity: collisionInfo.newVelocity };
+  }
+
+  /**
+   * Called when a RigidBody intersects with this PolyObject.
+   * @param rigidBody The RigidBody intersecting with this PolyObject.
+   */
+  onIntersects(rigidBody: RigidBody): void {
+    // Example: Log intersection or apply effects
+    console.log(
+      `RigidBody ${rigidBody} is intersecting with PolyObject ${this}`,
+    );
+  }
+
+  /**
+   * Checks if a RigidBody is inside this PolyObject.
+   * @param rigidBody The RigidBody to check.
+   * @returns True if the RigidBody is inside, false otherwise.
+   */
+  intersectsRigidBody(rigidBody: RigidBody): boolean {
+    if (!this.getAABB().intersects(rigidBody.getAABB())) return false;
+    const pointsToCheck = [
+      rigidBody.pos,
+      rigidBody.pos.add(new Vector2(rigidBody.scale.x / 2, 0)),
+      rigidBody.pos.add(new Vector2(-rigidBody.scale.x / 2, 0)),
+      rigidBody.pos.add(new Vector2(0, rigidBody.scale.y / 2)),
+      rigidBody.pos.add(new Vector2(0, -rigidBody.scale.y / 2)),
+    ];
+    if (pointsToCheck.some((point) => this.isPointInside(point))) {
+      return true;
+    }
+    const segments = this.getSegments();
+    for (const segment of segments) {
+      const closestPoint = segment.closestPointTo(rigidBody.pos);
+      if (closestPoint.dist(rigidBody.pos) <= rigidBody.scale.x / 2) {
+        return true;
+      }
+    }
+    return false;
   }
 }
