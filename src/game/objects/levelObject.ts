@@ -12,6 +12,7 @@ export const LevelObjectSchema = GameObjectSchema.extend(
 export type PathInfo = {
   shadowLayer?: number;
   outlineLayer: number;
+  heightLayer: number;
   fillLayer: number;
   shadowColor?: string;
   outlineColor: string;
@@ -32,33 +33,25 @@ export abstract class LevelObject<
 
   renderPaths({
     shadowPath,
+    heightPath,
     outlinePath,
     fillPath,
     shadowLayer,
+    heightLayer,
     outlineLayer,
     fillLayer,
     shadowColor,
     outlineColor,
     fillColor,
+    height,
     shadow,
   }: {
     shadowPath?: Path2D;
+    heightPath: Path2D;
     outlinePath: Path2D;
     fillPath: Path2D;
   } & PathInfo): RenderPass[] {
-    return [
-      ...((shadowPath &&
-        shadow &&
-        shadowColor &&
-        shadowLayer !== undefined && [
-          pass(shadowLayer, (ctx) => {
-            ctx.strokeStyle = shadowColor;
-            ctx.lineWidth = shadow;
-            ctx.lineJoin = "round";
-            ctx.stroke(shadowPath);
-          }),
-        ]) ||
-        []),
+    const passes = [
       pass(outlineLayer, (ctx) => {
         ctx.fillStyle = outlineColor;
         ctx.fill(outlinePath);
@@ -68,12 +61,32 @@ export abstract class LevelObject<
         ctx.fill(fillPath);
       }),
     ];
+    if (height > 0) {
+      passes.push(
+        pass(heightLayer, (ctx) => {
+          ctx.fillStyle = outlineColor;
+          ctx.fill(heightPath);
+        }),
+      );
+    }
+    if (shadowPath && shadow && shadowColor && shadowLayer !== undefined) {
+      passes.push(
+        pass(shadowLayer, (ctx) => {
+          ctx.strokeStyle = shadowColor;
+          ctx.lineWidth = shadow;
+          ctx.lineJoin = "round";
+          ctx.stroke(shadowPath);
+        }),
+      );
+    }
+    return passes;
   }
 
   renderPoints({
     points,
     shadowLayer,
     outlineLayer,
+    heightLayer,
     fillLayer,
     shadowColor,
     outlineColor,
@@ -86,17 +99,16 @@ export abstract class LevelObject<
     points: Vector2[];
     debug?: boolean;
   } & PathInfo) {
-    const { shadowPath, outlinePath, fillPath } = generatePathsFromPoints(
-      points,
-      outline,
-      height,
-    );
+    const { shadowPath, heightPath, outlinePath, fillPath } =
+      generatePathsFromPoints(points, outline, height);
 
     const paths = this.renderPaths({
       shadowPath,
+      heightPath,
       outlinePath,
       fillPath,
       shadowLayer,
+      heightLayer,
       outlineLayer,
       fillLayer,
       shadowColor,

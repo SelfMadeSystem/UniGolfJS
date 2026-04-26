@@ -15,6 +15,7 @@ export class Wall extends PolyObject<typeof WallSchema> {
   override getPathInfo(): PathInfo {
     return {
       shadowLayer: LAYERS.WALL_SHADOW,
+      heightLayer: LAYERS.WALL_HEIGHT,
       outlineLayer: LAYERS.WALL_OUTLINE,
       fillLayer: LAYERS.WALL_FILL,
       shadowColor: this.data.wallShadowColor,

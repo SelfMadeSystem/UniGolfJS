@@ -207,9 +207,11 @@ export abstract class RigidBody<
 
     const paths = this.renderPaths({
       shadowPath,
+      heightPath: undefined as unknown as Path2D,
       fillPath,
       outlinePath,
       ...pathInfo,
+      height: 0,
     });
 
     if (this.data.debug) {

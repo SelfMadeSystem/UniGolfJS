@@ -122,11 +122,13 @@ export function generatePathsFromPoints(
   height: number,
 ): {
   shadowPath: Path2D;
+  heightPath: Path2D;
   outlinePath: Path2D;
   fillPath: Path2D;
 } {
   points = generateCounterClockwisePoints(points);
   const shadowPath = new Path2D();
+  const heightPath = new Path2D();
   const outlinePath = new Path2D();
   const fillPath = new Path2D();
 
@@ -224,27 +226,29 @@ export function generatePathsFromPoints(
       const curr = newPoints[i]!;
       const next = newPoints[mod(i + 1, newPoints.length)]!;
 
-      const currH = new Vector2(curr.x, curr.y - height);
-      const nextH = new Vector2(next.x, next.y - height);
+      // 0.2 because otherwise there's some weird rendering artifact where the
+      // transparent antialiased pixels are visible
+      const currH = new Vector2(curr.x, curr.y - height - 0.2);
+      const nextH = new Vector2(next.x, next.y - height - 0.2);
 
       const cw = generateClockwisePoints([curr, currH, nextH, next]);
 
       for (let j = 0; j < cw.length; j++) {
         const p = cw[j]!;
         const op = j === 0 ? "moveTo" : "lineTo";
-        outlinePath[op](...p.a);
+        heightPath[op](...p.a);
       }
 
-      outlinePath.closePath();
+      heightPath.closePath();
     }
   }
 
   for (let i = 0; i < newPoints.length; i++) {
     const curr = newPoints[newPoints.length - i - 1]!;
     const op = i === 0 ? "moveTo" : "lineTo";
-    outlinePath[op](...curr.a);
+    outlinePath[op](curr.x, curr.y - height + 0.2);
   }
   outlinePath.closePath();
 
-  return { shadowPath, outlinePath, fillPath };
+  return { shadowPath, heightPath, outlinePath, fillPath };
 }
