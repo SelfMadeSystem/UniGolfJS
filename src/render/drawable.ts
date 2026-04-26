@@ -7,6 +7,7 @@ export type RenderInfo = {
   delta: number;
   tickInterp: number;
   tick: number;
+  tickWithInterp: number;
 }
 
 export interface Drawable {

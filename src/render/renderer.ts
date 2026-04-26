@@ -12,14 +12,15 @@ export type PointerInfo = {
   alt: boolean;
   event: PointerEvent;
   eventType: "pointerdown" | "pointermove" | "pointerup";
-}
+};
 
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
-  private lastTime: number = performance.now();
+  private lastTime: number = 0;
   private requestId: number | null = null;
   private readonly tickInterval: number = 1000 / 30;
   private tickAccumulator: number = 0;
+  private tickCount: number = 0;
   private readonly stopCbs: (() => void)[] = [];
 
   constructor(ctx: CanvasRenderingContext2D) {
@@ -28,12 +29,14 @@ export class Renderer {
 
   start() {
     const loop = (time: number) => {
+      if (!this.lastTime) this.lastTime = time;
       const delta = time - this.lastTime;
       this.lastTime = time;
       this.tickAccumulator += delta;
 
       while (this.tickAccumulator >= this.tickInterval) {
         this.tick();
+        this.tickCount++;
         this.tickAccumulator -= this.tickInterval;
       }
 
@@ -41,7 +44,8 @@ export class Renderer {
       const renderInfo: RenderInfo = {
         delta,
         tickInterp,
-        tick: Math.floor(this.lastTime / this.tickInterval),
+        tick: this.tickCount,
+        tickWithInterp: this.tickCount + tickInterp,
       };
 
       this.ctx.save();

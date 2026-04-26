@@ -4,8 +4,14 @@ import { PolyObject, PolyObjectSchema } from "./polyObject";
 import type { PathInfo } from "./levelObject";
 import type { RigidBody } from "./rigidBody";
 import { blendColors } from "@/utils/colorUtils";
+import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 
 export const BoostSchema = PolyObjectSchema.extend({});
+const SPEED = 15;
+const BOOST_EFFECT_TIME = 10; // frames
+
+const C1 = "#66FF00";
+const C2 = "#FFFF00";
 
 export class Boost extends PolyObject<typeof BoostSchema> {
   static override schema = BoostSchema;
@@ -26,6 +32,41 @@ export class Boost extends PolyObject<typeof BoostSchema> {
     }
   }
 
+  override render(info: RenderInfo): Iterable<RenderPass> {
+    return [
+      ...super.render(info),
+      pass(LAYERS.OBJECTS_3, (ctx) => {
+        const { tickWithInterp } = info;
+        const path = this.getPath();
+        const gradient = ctx.createRadialGradient(
+          this.pos.x,
+          this.pos.y,
+          0,
+          this.pos.x,
+          this.pos.y,
+          this.scale.x * Math.SQRT2,
+        );
+
+        const t = tickWithInterp / 15;
+
+        const c1 = blendColors(C1, C2, this.boostTime / BOOST_EFFECT_TIME);
+
+        gradient.addColorStop(
+          0,
+          blendColors(c1, C2, Math.abs(((t + 1) % 2) - 1)),
+        );
+        gradient.addColorStop(
+          t % 1,
+          blendColors(c1, C2, Math.sign((t % 2) - 1) * 0.5 + 0.5),
+        );
+        gradient.addColorStop(1, blendColors(c1, C2, Math.abs((t % 2) - 1)));
+
+        ctx.fillStyle = gradient;
+        ctx.fill(path);
+      }),
+    ];
+  }
+
   override getPathInfo(): PathInfo {
     return {
       shadowLayer: 0,
@@ -33,15 +74,14 @@ export class Boost extends PolyObject<typeof BoostSchema> {
       outlineLayer: LAYERS.OBJECTS_1,
       fillLayer: LAYERS.OBJECTS_2,
       outlineColor: "#00FF00",
-      fillColor: blendColors("#66FF00", "#FFFF00", this.boostTime / 60),
+      fillColor: blendColors(C1, C2, this.boostTime / BOOST_EFFECT_TIME),
       height: 0,
       outline: WALL_CONFIG.outline,
     };
   }
 
   override onIntersects(rigidBody: RigidBody): void {
-    const SPEED = 15;
     rigidBody.velocity = rigidBody.velocity.setLength(SPEED);
-    this.boostTime = 60;
+    this.boostTime = BOOST_EFFECT_TIME;
   }
 }

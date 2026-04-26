@@ -94,6 +94,12 @@ export class PlayScene extends Scene {
         shape: "circle",
         ...level,
       }),
+      new Boost({
+        position: [400, 0],
+        scale: [50, 50],
+        shape: "quarterCircle",
+        ...level,
+      }),
     );
   }
 

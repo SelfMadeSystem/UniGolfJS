@@ -79,6 +79,19 @@ export abstract class PolyObject<
     return segments;
   }
 
+  getPath(): Path2D {
+    const path = new Path2D();
+    const points = this.getPoints();
+    if (points.length > 0) {
+      path.moveTo(points[0]!.x, points[0]!.y);
+      for (let i = 1; i < points.length; i++) {
+        path.lineTo(points[i]!.x, points[i]!.y);
+      }
+      path.closePath();
+    }
+    return path;
+  }
+
   override isPointInside(point: Vector2): boolean {
     if (!this.getAABB().containsPoint(point)) return false;
     const segments = this.getSegments();
