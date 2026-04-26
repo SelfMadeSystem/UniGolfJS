@@ -7,6 +7,7 @@ import { BackMenu } from "@/ui/BackMenu";
 import type { GameObject } from "@/game/objects/gameObject";
 import type { LevelConfig } from "@/game/levelConfig";
 import { Wall } from "@/game/objects/wall";
+import { Ball } from "@/game/objects/ball";
 
 export class PlayScene extends Scene {
   private objects: GameObject<any>[] = [];
@@ -47,6 +48,11 @@ export class PlayScene extends Scene {
         shape: 'triangle',
         ...level,
       }),
+      new Ball({
+        position: [100, 180],
+        scale: [20, 20],
+        ...level,
+      })
     );
   }
 

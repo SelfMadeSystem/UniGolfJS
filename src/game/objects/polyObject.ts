@@ -1,5 +1,4 @@
 import z from "zod";
-import { type LevelConfig } from "../levelConfig";
 import { Vector2 } from "@/utils/vec";
 import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
 import type { RenderInfo, RenderPass } from "@/render/drawable";

@@ -5,16 +5,18 @@ import { type RenderPass, pass } from "@/render/drawable";
 import { generatePathsFromPoints } from "@/utils/pathUtils";
 import type { Vector2 } from "@/utils/vec";
 
-export const LevelObjectSchema = GameObjectSchema.extend(levelConfigSchema.shape);
+export const LevelObjectSchema = GameObjectSchema.extend(
+  levelConfigSchema.shape,
+);
 
 export type PathInfo = {
   shadowLayer?: number;
   outlineLayer: number;
   fillLayer: number;
-  shadowColor: string;
+  shadowColor?: string;
   outlineColor: string;
   fillColor: string;
-  height?: number;
+  height: number;
   shadow?: number;
   outline: number;
 };
@@ -47,6 +49,7 @@ export abstract class LevelObject<
     return [
       ...((shadowPath &&
         shadow &&
+        shadowColor &&
         shadowLayer !== undefined && [
           pass(shadowLayer, (ctx) => {
             ctx.strokeStyle = shadowColor;

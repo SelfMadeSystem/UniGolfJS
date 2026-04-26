@@ -119,7 +119,7 @@ export function generateCounterClockwisePoints(points: Vector2[]): Vector2[] {
 export function generatePathsFromPoints(
   points: Vector2[],
   outline: number,
-  height?: number,
+  height: number,
 ): {
   shadowPath: Path2D;
   outlinePath: Path2D;
@@ -206,7 +206,7 @@ export function generatePathsFromPoints(
     const op = i === 0 ? "moveTo" : "lineTo";
 
     shadowPath[op](...a.a);
-    fillPath[op](curr.x, curr.y - (height ?? 0));
+    fillPath[op](curr.x, curr.y - height);
 
     if (b) {
       shadowPath.lineTo(...b.a);
@@ -219,7 +219,7 @@ export function generatePathsFromPoints(
   shadowPath.closePath();
   fillPath.closePath();
 
-  if (height) {
+  if (height > 0) {
     for (let i = 0; i < newPoints.length; i++) {
       const curr = newPoints[i]!;
       const next = newPoints[mod(i + 1, newPoints.length)]!;
