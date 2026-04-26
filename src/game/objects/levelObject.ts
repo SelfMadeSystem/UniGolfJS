@@ -18,9 +18,11 @@ export type PathInfo = {
   shadowColor?: string;
   outlineColor: string;
   fillColor: string;
+  waterWallColor?: string;
   height: number;
   shadow?: number;
   outline: number;
+  waterWallHeight?: number;
 };
 
 export abstract class LevelObject<
@@ -46,6 +48,7 @@ export abstract class LevelObject<
     heightPath,
     outlinePath,
     fillPath,
+    waterWallPath,
     shadowLayer,
     heightLayer,
     outlineLayer,
@@ -53,6 +56,7 @@ export abstract class LevelObject<
     shadowColor,
     outlineColor,
     fillColor,
+    waterWallColor,
     height,
     shadow,
   }: {
@@ -60,6 +64,7 @@ export abstract class LevelObject<
     heightPath: Path2D;
     outlinePath: Path2D;
     fillPath: Path2D;
+    waterWallPath?: Path2D;
   } & PathInfo): RenderPass[] {
     const passes = [
       pass(outlineLayer, (ctx) => {
@@ -89,6 +94,14 @@ export abstract class LevelObject<
         }),
       );
     }
+    if (waterWallPath && waterWallColor) {
+      passes.push(
+        pass(LAYERS.WATER_WALL_FILL, (ctx) => {
+          ctx.fillStyle = waterWallColor;
+          ctx.fill(waterWallPath);
+        }),
+      );
+    }
     return passes;
   }
 
@@ -101,22 +114,25 @@ export abstract class LevelObject<
     shadowColor,
     outlineColor,
     fillColor,
+    waterWallColor,
     height,
     shadow,
     outline,
+    waterWallHeight,
     debug = false,
   }: {
     points: Vector2[];
     debug?: boolean;
   } & PathInfo) {
-    const { shadowPath, heightPath, outlinePath, fillPath } =
-      generatePathsFromPoints(points, outline, height);
+    const { shadowPath, heightPath, outlinePath, fillPath, waterWallPath } =
+      generatePathsFromPoints(points, outline, height, waterWallHeight ?? 0);
 
     const paths = this.renderPaths({
       shadowPath,
       heightPath,
       outlinePath,
       fillPath,
+      waterWallPath,
       shadowLayer,
       heightLayer,
       outlineLayer,
@@ -124,9 +140,11 @@ export abstract class LevelObject<
       shadowColor,
       outlineColor,
       fillColor,
+      waterWallColor,
       height,
       shadow,
       outline,
+      waterWallHeight,
     });
 
     if (debug) {

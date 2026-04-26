@@ -8,11 +8,11 @@ export type RenderInfo = {
   tickInterp: number;
   tick: number;
   tickWithInterp: number;
-}
+};
 
 export interface Drawable {
   render(info: RenderInfo): Iterable<RenderPass>;
-};
+}
 
 export function pass(
   layer: number,
@@ -25,8 +25,9 @@ export function renderDrawables(
   drawables: Drawable[],
   info: RenderInfo,
   ctx: CanvasRenderingContext2D,
+  passes: RenderPass[] = [],
 ) {
-  const renderPasses: RenderPass[] = [];
+  const renderPasses: RenderPass[] = [...passes];
   for (const drawable of drawables) {
     renderPasses.push(...drawable.render(info));
   }

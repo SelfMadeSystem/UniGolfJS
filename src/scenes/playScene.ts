@@ -1,8 +1,13 @@
-import { renderDrawables, type RenderInfo } from "@/render/drawable";
+import {
+  pass,
+  renderDrawables,
+  type RenderInfo,
+  type RenderPass,
+} from "@/render/drawable";
 import { Scene } from "./scene";
 import { BackMenu } from "@/ui/BackMenu";
 import type { GameObject } from "@/game/objects/gameObject";
-import type { LevelConfig } from "@/game/levelConfig";
+import { LAYERS, type LevelConfig } from "@/game/levelConfig";
 import { Wall } from "@/game/objects/wall";
 import { Ball } from "@/game/objects/ball";
 import { RigidBody } from "@/game/objects/rigidBody";
@@ -20,6 +25,8 @@ export class PlayScene extends Scene {
   public cameraZoom: number = 1;
   private _lastPointer: PointerInfo | null = null;
   public tickPointers: PointerInfo[] = [];
+  public clipPath: Path2D = new Path2D();
+  public readonly passes: RenderPass[];
 
   get lastPointer(): PointerInfo | null {
     return this._lastPointer;
@@ -35,10 +42,26 @@ export class PlayScene extends Scene {
   constructor() {
     super();
 
+    this.passes = [
+      pass(LAYERS.WATER_WALL_PRE, (ctx) => {
+        ctx.save();
+        this.clipPath = new Path2D();
+      }),
+      // water will add to the clipPath in WATER_WALL_CLIP_REGIONS
+      pass(LAYERS.WATER_WALL_CLIP, (ctx) => {
+        ctx.clip(this.clipPath);
+      }),
+      // walls will render their "water walls" in WATER_WALL_FILL
+      pass(LAYERS.WATER_WALL_POST, (ctx) => {
+        ctx.restore();
+      }),
+    ];
+
     const level: LevelConfig = {
       wallColor: "#388164",
       wallOutlineColor: "#29694f",
       wallShadowColor: "#76b97e",
+      waterWallColor: "#307860",
       floorColor: "#cce2dd",
       floorAccentColor: "#d9e6e2",
       teeColor: "#f79d60",
@@ -87,7 +110,7 @@ export class PlayScene extends Scene {
       new Ball({
         position: [100, 180],
         scale: [15, 15],
-        velocity: [1, -1],
+        velocity: [0, 0],
         ...level,
       }),
       new Ball({
@@ -129,6 +152,12 @@ export class PlayScene extends Scene {
         shape: "rectangle",
         ...level,
       }),
+      new Water({
+        position: [60, 40],
+        scale: [100, 100],
+        shape: "triangle",
+        ...level,
+      }),
     );
   }
 
@@ -155,7 +184,7 @@ export class PlayScene extends Scene {
     ctx.save();
     ctx.translate(-this.cameraPos.x, -this.cameraPos.y);
     ctx.scale(this.cameraZoom, this.cameraZoom);
-    renderDrawables(this.objects, info, ctx);
+    renderDrawables(this.objects, info, ctx, this.passes);
     ctx.restore();
   }
 

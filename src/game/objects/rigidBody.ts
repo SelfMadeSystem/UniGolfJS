@@ -3,7 +3,7 @@ import { Vector2 } from "@/utils/vec";
 import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 import { Vec2Schema } from "@/utils/data";
-import { $scene } from "@/scenes/state";
+import { $scene, getPlayScene } from "@/scenes/state";
 import { PlayScene } from "@/scenes/playScene";
 import { PolyObject, type CollisionInfo } from "./polyObject";
 import { AABB } from "@/utils/aabb";
@@ -80,8 +80,8 @@ export abstract class RigidBody<
   override tick(): void {
     super.tick();
     this.prevPos = this.pos;
-    const scene = $scene.get();
-    if (!(scene instanceof PlayScene)) return;
+    const scene = getPlayScene();
+    if (!scene) return;
 
     if (this.inWater) {
       this.waterAnimation += 1;

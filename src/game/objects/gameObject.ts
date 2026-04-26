@@ -2,7 +2,7 @@ import { Vec2Schema } from "@/utils/data";
 import type { Drawable, RenderInfo, RenderPass } from "@/render/drawable";
 import { Vector2 } from "@/utils/vec";
 import z from "zod";
-import { $scene } from "@/scenes/state";
+import { $scene, getPlayScene } from "@/scenes/state";
 import { PlayScene } from "@/scenes/playScene";
 
 export const GameObjectSchema = z.object({
@@ -103,9 +103,8 @@ export abstract class GameObject<
   tick(): void {}
 
   delete(): void {
-    const scene = $scene.get();
-    // TODO: make a util for this
-    if (!scene || !(scene instanceof PlayScene)) return;
+    const scene = getPlayScene();
+    if (!scene) return;
     scene.removeObject(this);
   }
 

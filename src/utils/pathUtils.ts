@@ -120,17 +120,20 @@ export function generatePathsFromPoints(
   points: Vector2[],
   outline: number,
   height: number,
+  waterWallHeight: number,
 ): {
   shadowPath: Path2D;
   heightPath: Path2D;
   outlinePath: Path2D;
   fillPath: Path2D;
+  waterWallPath: Path2D;
 } {
   points = generateCounterClockwisePoints(points);
   const shadowPath = new Path2D();
   const heightPath = new Path2D();
   const outlinePath = new Path2D();
   const fillPath = new Path2D();
+  const waterWallPath = new Path2D();
 
   let right = -Infinity;
   let left = Infinity;
@@ -168,7 +171,9 @@ export function generatePathsFromPoints(
     );
 
     if (!intersection) {
-      throw new Error(`Failed to calculate intersection for point ${curr.toString()} at index ${i}. Prev: ${prev.toString()}, Next: ${next.toString()}`);
+      throw new Error(
+        `Failed to calculate intersection for point ${curr.toString()} at index ${i}. Prev: ${prev.toString()}, Next: ${next.toString()}`,
+      );
     }
 
     let a = intersection;
@@ -221,25 +226,42 @@ export function generatePathsFromPoints(
   shadowPath.closePath();
   fillPath.closePath();
 
-  if (height > 0) {
+  if (height > 0 || waterWallHeight > 0) {
     for (let i = 0; i < newPoints.length; i++) {
       const curr = newPoints[i]!;
       const next = newPoints[mod(i + 1, newPoints.length)]!;
 
-      // 0.2 because otherwise there's some weird rendering artifact where the
-      // transparent antialiased pixels are visible
-      const currH = new Vector2(curr.x, curr.y - height - 0.2);
-      const nextH = new Vector2(next.x, next.y - height - 0.2);
+      if (height > 0) {
+        // 0.2 because otherwise there's some weird rendering artifact where the
+        // transparent antialiased pixels are visible
+        const currH = new Vector2(curr.x, curr.y - height - 0.2);
+        const nextH = new Vector2(next.x, next.y - height - 0.2);
 
-      const cw = generateClockwisePoints([curr, currH, nextH, next]);
+        const cw = generateClockwisePoints([curr, currH, nextH, next]);
 
-      for (let j = 0; j < cw.length; j++) {
-        const p = cw[j]!;
-        const op = j === 0 ? "moveTo" : "lineTo";
-        heightPath[op](...p.a);
+        for (let j = 0; j < cw.length; j++) {
+          const p = cw[j]!;
+          const op = j === 0 ? "moveTo" : "lineTo";
+          heightPath[op](...p.a);
+        }
+
+        heightPath.closePath();
       }
 
-      heightPath.closePath();
+      if (waterWallHeight > 0) {
+        const currH = new Vector2(curr.x, curr.y + waterWallHeight);
+        const nextH = new Vector2(next.x, next.y + waterWallHeight);
+
+        const cw = generateClockwisePoints([curr, currH, nextH, next]);
+
+        for (let j = 0; j < cw.length; j++) {
+          const p = cw[j]!;
+          const op = j === 0 ? "moveTo" : "lineTo";
+          waterWallPath[op](...p.a);
+        }
+
+        waterWallPath.closePath();
+      }
     }
   }
 
@@ -250,5 +272,5 @@ export function generatePathsFromPoints(
   }
   outlinePath.closePath();
 
-  return { shadowPath, heightPath, outlinePath, fillPath };
+  return { shadowPath, heightPath, outlinePath, fillPath, waterWallPath };
 }

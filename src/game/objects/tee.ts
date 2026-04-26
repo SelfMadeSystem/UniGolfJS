@@ -5,7 +5,7 @@ import type z from "zod";
 import { LAYERS } from "../levelConfig";
 import { Vec2Schema } from "@/utils/data";
 import { Ball } from "./ball";
-import { $scene } from "@/scenes/state";
+import { $scene, getPlayScene } from "@/scenes/state";
 import { PlayScene } from "@/scenes/playScene";
 
 const TeeSchema = LevelObjectSchema.extend({
@@ -30,8 +30,8 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   }
 
   override tick(): void {
-    const scene = $scene.get();
-    if (!scene || !(scene instanceof PlayScene)) return;
+    const scene = getPlayScene();
+    if (!scene) return;
 
     const pointers = scene.tickPointers;
     if (!pointers.length) return;

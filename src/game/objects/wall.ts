@@ -21,9 +21,11 @@ export class Wall extends PolyObject<typeof WallSchema> {
       shadowColor: this.data.wallShadowColor,
       outlineColor: this.data.wallOutlineColor,
       fillColor: this.data.wallColor,
+      waterWallColor: this.data.waterWallColor,
       height: WALL_CONFIG.height,
       shadow: WALL_CONFIG.shadow,
       outline: WALL_CONFIG.outline,
+      waterWallHeight: WALL_CONFIG.waterWallHeight,
     };
   }
 }
