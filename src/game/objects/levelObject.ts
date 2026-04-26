@@ -45,7 +45,7 @@ export abstract class LevelObject<
     shadowPath?: Path2D;
     outlinePath: Path2D;
     fillPath: Path2D;
-  } & PathInfo): Iterable<RenderPass> {
+  } & PathInfo): RenderPass[] {
     return [
       ...((shadowPath &&
         shadow &&
@@ -92,37 +92,37 @@ export abstract class LevelObject<
       height,
     );
 
-    return [
-      ...this.renderPaths({
-        shadowPath,
-        outlinePath,
-        fillPath,
-        shadowLayer,
-        outlineLayer,
-        fillLayer,
-        shadowColor,
-        outlineColor,
-        fillColor,
-        height,
-        shadow,
-        outline,
-      }),
-      ...(debug
-        ? [
-            pass(LAYERS.DEBUG, (ctx) => {
-              ctx.strokeStyle = "#0f0";
-              ctx.lineWidth = 0.5;
-              ctx.beginPath();
-              for (let i = 0; i < points.length; i++) {
-                const curr = points[i]!;
-                const next = points[(i + 1) % points.length]!;
-                ctx.moveTo(curr.x, curr.y);
-                ctx.lineTo(next.x, next.y);
-              }
-              ctx.stroke();
-            }),
-          ]
-        : []),
-    ];
+    const paths = this.renderPaths({
+      shadowPath,
+      outlinePath,
+      fillPath,
+      shadowLayer,
+      outlineLayer,
+      fillLayer,
+      shadowColor,
+      outlineColor,
+      fillColor,
+      height,
+      shadow,
+      outline,
+    });
+
+    if (debug) {
+      paths.push(
+        pass(LAYERS.DEBUG, (ctx) => {
+          ctx.strokeStyle = "#0f0";
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          for (let i = 0; i < points.length; i++) {
+            const curr = points[i]!;
+            const next = points[(i + 1) % points.length]!;
+            ctx.moveTo(curr.x, curr.y);
+            ctx.lineTo(next.x, next.y);
+          }
+          ctx.stroke();
+        }),
+      );
+    }
+    return paths;
   }
 }

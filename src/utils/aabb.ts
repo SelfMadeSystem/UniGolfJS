@@ -107,6 +107,13 @@ export class AABB {
     );
   }
 
+  expandVec(amount: Vector2): AABB {
+    return new AABB(
+      new Vector2(this.tl.x + Math.min(0, amount.x), this.tl.y + Math.min(0, amount.y)),
+      new Vector2(this.br.x + Math.max(0, amount.x), this.br.y + Math.max(0, amount.y)),
+    );
+  }
+
   lineIntersects(start: Vector2, end: Vector2): boolean {
     const lineAABB = new AABB(start, end);
     if (!this.intersects(lineAABB)) {

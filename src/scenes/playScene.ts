@@ -10,7 +10,7 @@ import { Wall } from "@/game/objects/wall";
 import { Ball } from "@/game/objects/ball";
 
 export class PlayScene extends Scene {
-  private objects: GameObject<any>[] = [];
+  public objects: GameObject<any>[] = [];
 
   constructor() {
     super();
@@ -34,12 +34,31 @@ export class PlayScene extends Scene {
         position: [200, 100],
         scale: [100, 100],
         shape: 'inverseQuarterCircle',
+        debug: true,
+        ...level,
+      }),
+      new Wall({
+        position: [200, 0],
+        scale: [100, 100],
+        shape: 'inverseQuarterCircle',
+        rotation: '90',
+        debug: true,
+        ...level,
+      }),
+      new Wall({
+        position: [100, 0],
+        scale: [100, 100],
+        shape: 'inverseQuarterCircle',
+        rotation: '180',
+        debug: true,
         ...level,
       }),
       new Wall({
         position: [300, 100],
         scale: [100, 100],
         shape: 'quarterCircle',
+        rotation: '180',
+        debug: true,
         ...level,
       }),
       new Wall({
@@ -51,6 +70,14 @@ export class PlayScene extends Scene {
       new Ball({
         position: [100, 180],
         scale: [20, 20],
+        velocity: [1, -1],
+        ...level,
+      }),
+      new Ball({
+        position: [200, 100],
+        scale: [20, 20],
+        velocity: [10, 0],
+        debug: true,
         ...level,
       })
     );
@@ -60,7 +87,16 @@ export class PlayScene extends Scene {
     return BackMenu;
   }
 
+  override tick(): void {
+    for (const obj of this.objects) {
+      obj.tick();
+    }
+  }
+
   override render(info: RenderInfo, ctx: CanvasRenderingContext2D): void {
+    ctx.save();
+    ctx.translate(100, 100);
     renderDrawables(this.objects, info, ctx);
+    ctx.restore();
   }
 }

@@ -8,6 +8,7 @@ export const GameObjectSchema = z.object({
   position: Vec2Schema.default(new Vector2(0, 0)),
   /** The size of the object. Represents the width and height of the object's AABB. */
   scale: Vec2Schema.default(new Vector2(1, 1)),
+  debug: z.boolean().default(false),
 });
 
 type GameObjectKey<SchemaType extends typeof GameObjectSchema> = Extract<
@@ -37,8 +38,15 @@ export abstract class GameObject<
     return (this.constructor as typeof GameObject).schema as SchemaType;
   }
 
+  public pos: Vector2;
+
+  get scale(): Vector2 {
+    return this.data.scale;
+  }
+
   constructor(options: z.input<typeof GameObjectSchema>) {
     this.data = this.schema.parse(options);
+    this.pos = this.data.position;
   }
 
   on<K extends SchemaKeys | 'position' | 'scale'>(
@@ -104,13 +112,5 @@ export abstract class GameObject<
       y >= pos.y - scale.y / 2 &&
       y <= pos.y + scale.y / 2
     );
-  }
-
-  get pos(): Vector2 {
-    return this.data.position;
-  }
-
-  get scale(): Vector2 {
-    return this.data.scale;
   }
 }
