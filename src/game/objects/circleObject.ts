@@ -45,13 +45,25 @@ export abstract class CircleObject<
     const { pos } = this;
 
     const shadowPath = new Path2D();
-    shadowPath.arc(pos.x, pos.y, this.scale.x / 2, 0, Math.PI * 2);
+    shadowPath.arc(
+      pos.x,
+      pos.y,
+      this.scale.x / 2 + pathInfo.outline,
+      0,
+      Math.PI * 2,
+    );
     const outlinePath = new Path2D();
-    outlinePath.arc(pos.x, pos.y, this.scale.x / 2, 0, Math.PI);
+    outlinePath.arc(
+      pos.x,
+      pos.y,
+      this.scale.x / 2 + pathInfo.outline,
+      0,
+      Math.PI,
+    );
     outlinePath.arc(
       pos.x,
       pos.y - pathInfo.height,
-      this.scale.x / 2,
+      this.scale.x / 2 + pathInfo.outline,
       Math.PI,
       0,
     );
@@ -59,7 +71,7 @@ export abstract class CircleObject<
     fillPath.arc(
       pos.x,
       pos.y - pathInfo.height,
-      this.scale.x / 2 - pathInfo.outline,
+      this.scale.x / 2,
       0,
       Math.PI * 2,
     );

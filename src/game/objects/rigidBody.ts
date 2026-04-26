@@ -308,5 +308,7 @@ export abstract class RigidBody<
   override reset(): void {
     super.reset();
     this.velocity = this.data.velocity;
+    this.prevPos = this.pos;
+    this.constraint = null;
   }
 }

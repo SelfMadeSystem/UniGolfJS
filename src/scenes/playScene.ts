@@ -85,7 +85,7 @@ export class PlayScene extends Scene {
       }),
       new Ball({
         position: [100, 180],
-        scale: [20, 20],
+        scale: [15, 15],
         velocity: [1, -1],
         ...level,
       }),
@@ -118,39 +118,26 @@ export class PlayScene extends Scene {
         position: [100, 300],
         ...level,
       }),
-      new Tee({
-        position: [80, 300],
-        ...level,
-      }),
-      new Tee({
-        position: [60, 300],
-        ...level,
-      }),
-      new Tee({
-        position: [40, 300],
-        ...level,
-      }),
-      new Tee({
-        position: [100, 300],
-        ...level,
-      }),
-      new Tee({
-        position: [80, 300],
-        ...level,
-      }),
-      new Tee({
-        position: [60, 300],
-        ...level,
-      }),
-      new Tee({
-        position: [40, 300],
+      new Hole({
+        position: [300, 300],
+        scale: [19, 19],
         ...level,
       }),
       new Hole({
-        position: [300, 300],
-        scale: [50, 50],
+        position: [300, 280],
+        scale: [19, 19],
         ...level,
-      })
+      }),
+      new Hole({
+        position: [300, 260],
+        scale: [19, 19],
+        ...level,
+      }),
+      new Hole({
+        position: [300, 240],
+        scale: [19, 19],
+        ...level,
+      }),
     );
   }
 
@@ -200,7 +187,7 @@ export class PlayScene extends Scene {
   getObjectAtPointer(pointer: PointerInfo | null): GameObject<any> | null {
     if (!pointer) return null;
     const worldPos = this.getPointerPositionInWorld(pointer.pos);
-    for (const obj of this.objects) {
+    for (const obj of this.objects.toReversed()) {
       if (obj instanceof LevelObject && obj.isPointInside(worldPos)) return obj;
     }
     return null;

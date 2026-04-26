@@ -9,7 +9,7 @@ import { $scene } from "@/scenes/state";
 import { PlayScene } from "@/scenes/playScene";
 
 const TeeSchema = LevelObjectSchema.extend({
-  scale: Vec2Schema.default(new Vector2(40, 25)),
+  scale: Vec2Schema.default(new Vector2(60, 40)),
 });
 
 const MAX_DRIVER_DISTANCE = 150;
@@ -50,7 +50,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
             ...this.data,
             position: this.pos,
             velocity: new Vector2(0, 0),
-            scale: new Vector2(15, 15),
+            scale: new Vector2(20, 20),
           });
           scene.addObject(newBall);
           this.ball = newBall;
