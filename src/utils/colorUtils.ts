@@ -1,4 +1,4 @@
-export type HexColor = `#${string}`;
+export type HexColor = string;
 export type RGBA = {
   r: number;
   g: number;

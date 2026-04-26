@@ -49,7 +49,11 @@ export class Boost extends PolyObject<typeof BoostSchema> {
 
         const t = tickWithInterp / 15;
 
-        const c1 = blendColors(C1, C2, this.boostTime / BOOST_EFFECT_TIME);
+        const c1 = blendColors(
+          C1 + "00",
+          C2,
+          this.boostTime / BOOST_EFFECT_TIME,
+        );
 
         gradient.addColorStop(
           0,

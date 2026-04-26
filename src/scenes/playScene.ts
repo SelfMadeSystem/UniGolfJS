@@ -95,9 +95,9 @@ export class PlayScene extends Scene {
         ...level,
       }),
       new Boost({
-        position: [400, 0],
+        position: [120, 0],
         scale: [50, 50],
-        shape: "quarterCircle",
+        shape: "rectangle",
         ...level,
       }),
     );
