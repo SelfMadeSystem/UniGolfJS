@@ -15,7 +15,13 @@ export type CollisionInfo = {
 
 export const PolyObjectSchema = LevelObjectSchema.extend({
   shape: z
-    .enum(["rectangle", "triangle", "quarterCircle", "inverseQuarterCircle", "circle"])
+    .enum([
+      "rectangle",
+      "triangle",
+      "quarterCircle",
+      "inverseQuarterCircle",
+      "circle",
+    ])
     .default("rectangle"),
   rotation: z.enum(["0", "90", "180", "270"]).default("0"),
 });
@@ -56,7 +62,7 @@ export abstract class PolyObject<
   constructor(options: z.input<SchemaType>) {
     super(options);
   }
-  
+
   get isSolid(): boolean {
     return true;
   }
@@ -252,12 +258,7 @@ export abstract class PolyObject<
    * Called when a RigidBody intersects with this PolyObject.
    * @param rigidBody The RigidBody intersecting with this PolyObject.
    */
-  onIntersects(rigidBody: RigidBody): void {
-    // Example: Log intersection or apply effects
-    console.log(
-      `RigidBody ${rigidBody} is intersecting with PolyObject ${this}`,
-    );
-  }
+  onIntersects(rigidBody: RigidBody): void {}
 
   /**
    * Checks if a RigidBody is inside this PolyObject.

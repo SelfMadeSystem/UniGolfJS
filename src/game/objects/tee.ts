@@ -12,7 +12,7 @@ const TeeSchema = LevelObjectSchema.extend({
   scale: Vec2Schema.default(new Vector2(40, 25)),
 });
 
-const MAX_DRIVER_DISTANCE = 200;
+const MAX_DRIVER_DISTANCE = 150;
 const DRIVER_POWER_MULTIPLIER = 0.2;
 
 export class Tee extends LevelObject<typeof TeeSchema> {

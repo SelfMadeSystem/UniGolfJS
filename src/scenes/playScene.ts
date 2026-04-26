@@ -11,6 +11,7 @@ import { LevelObject } from "@/game/objects/levelObject";
 import { Vector2 } from "@/utils/vec";
 import { Boost } from "@/game/objects/boost";
 import { Tee } from "@/game/objects/tee";
+import { Hole } from "@/game/objects/hole";
 
 export class PlayScene extends Scene {
   public objects: GameObject<any>[] = [];
@@ -117,6 +118,39 @@ export class PlayScene extends Scene {
         position: [100, 300],
         ...level,
       }),
+      new Tee({
+        position: [80, 300],
+        ...level,
+      }),
+      new Tee({
+        position: [60, 300],
+        ...level,
+      }),
+      new Tee({
+        position: [40, 300],
+        ...level,
+      }),
+      new Tee({
+        position: [100, 300],
+        ...level,
+      }),
+      new Tee({
+        position: [80, 300],
+        ...level,
+      }),
+      new Tee({
+        position: [60, 300],
+        ...level,
+      }),
+      new Tee({
+        position: [40, 300],
+        ...level,
+      }),
+      new Hole({
+        position: [300, 300],
+        scale: [50, 50],
+        ...level,
+      })
     );
   }
 

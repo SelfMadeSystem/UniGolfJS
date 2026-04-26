@@ -8,6 +8,7 @@ import { PlayScene } from "@/scenes/playScene";
 import { PolyObject, type CollisionInfo } from "./polyObject";
 import { AABB } from "@/utils/aabb";
 import { LAYERS } from "../levelConfig";
+import { CircleObject } from "./circleObject";
 
 export const RigidBodySchema = LevelObjectSchema.extend({
   scale: Vec2Schema.refine((v) => v.x > 0 && v.y > 0, {
@@ -23,6 +24,11 @@ export const RigidBodySchema = LevelObjectSchema.extend({
 
 const DRAG_COEFFICIENT = 0.98;
 
+export type Constraint = {
+  pos: Vector2;
+  radius: number;
+};
+
 export abstract class RigidBody<
   SchemaType extends typeof RigidBodySchema = typeof RigidBodySchema,
 > extends LevelObject<SchemaType> {
@@ -37,12 +43,21 @@ export abstract class RigidBody<
   public prevPos: Vector2;
   public velocity: Vector2;
   private readonly rigidBodyId: number;
+  private constraint: Constraint | null = null;
 
   constructor(options: z.input<SchemaType>) {
     super(options);
     this.velocity = this.data.velocity;
     this.prevPos = this.pos;
     this.rigidBodyId = RigidBody.nextRigidBodyId++;
+  }
+
+  setConstraint(constraint: Constraint | null): void {
+    this.constraint = constraint;
+  }
+
+  getConstraint(): Constraint | null {
+    return this.constraint;
   }
 
   getMovementAABB(): AABB {
@@ -70,6 +85,9 @@ export abstract class RigidBody<
       ) {
         obj.onIntersects(this);
       }
+      if (obj instanceof CircleObject && obj.intersectsRigidBody(this)) {
+        obj.onIntersects(this);
+      }
     }
 
     const collision = RigidBody.getEarliestWallCollision(
@@ -89,6 +107,8 @@ export abstract class RigidBody<
 
     this.resolveRigidBodyCollisions(scene);
 
+    this.resolveConstraint();
+
     this.velocity = this.velocity.mult(DRAG_COEFFICIENT);
   }
 
@@ -96,19 +116,32 @@ export abstract class RigidBody<
     const myRadius = this.scale.x / 2;
     const myInvMass = 1 / this.data.mass;
 
+    const constraint = this.getConstraint();
+
     for (const obj of scene.objects) {
       if (!(obj instanceof RigidBody) || obj === this) continue;
+      const otherConstraint = obj.getConstraint();
 
-      const other = obj;
+      // Continue if constraints are different
+      if (
+        !constraint !== !otherConstraint ||
+        (constraint &&
+          otherConstraint &&
+          (constraint.pos !== otherConstraint.pos ||
+            constraint.radius !== otherConstraint.radius))
+      ) {
+        continue;
+      }
+
       const pairKey =
-        this.rigidBodyId < other.rigidBodyId
-          ? `${this.rigidBodyId}:${other.rigidBodyId}`
-          : `${other.rigidBodyId}:${this.rigidBodyId}`;
+        this.rigidBodyId < obj.rigidBodyId
+          ? `${this.rigidBodyId}:${obj.rigidBodyId}`
+          : `${obj.rigidBodyId}:${this.rigidBodyId}`;
       if (RigidBody.resolvedPairsThisFrame.has(pairKey)) continue;
       RigidBody.resolvedPairsThisFrame.add(pairKey);
 
-      const otherRadius = other.scale.x / 2;
-      const delta = other.pos.sub(this.pos);
+      const otherRadius = obj.scale.x / 2;
+      const delta = obj.pos.sub(this.pos);
       const distSq = delta.lenSq();
       const minDist = myRadius + otherRadius;
       const minDistSq = minDist * minDist;
@@ -119,7 +152,7 @@ export abstract class RigidBody<
       const normal = dist === 0 ? new Vector2(1, 0) : delta.div(dist);
 
       // Separate circles so they are no longer overlapping.
-      const otherInvMass = 1 / other.data.mass;
+      const otherInvMass = 1 / obj.data.mass;
       const invMassSum = myInvMass + otherInvMass;
       const penetration = minDist - dist;
       const correction = normal.mult(penetration / invMassSum);
@@ -131,15 +164,15 @@ export abstract class RigidBody<
         myRadius,
         thisDelta,
       );
-      other.pos = RigidBody.sweepPositionAgainstWalls(
+      obj.pos = RigidBody.sweepPositionAgainstWalls(
         scene,
-        other.pos,
+        obj.pos,
         otherRadius,
         otherDelta,
       );
 
       // Apply an elastic impulse if circles are moving toward each other.
-      const relativeVelocity = other.velocity.sub(this.velocity);
+      const relativeVelocity = obj.velocity.sub(this.velocity);
       const velAlongNormal = relativeVelocity.dot(normal);
       if (velAlongNormal > 0) continue;
 
@@ -148,8 +181,36 @@ export abstract class RigidBody<
         (-(1 + restitution) * velAlongNormal) / invMassSum;
       const impulse = normal.mult(impulseMagnitude);
       this.velocity = this.velocity.sub(impulse.mult(myInvMass));
-      other.velocity = other.velocity.add(impulse.mult(otherInvMass));
+      obj.velocity = obj.velocity.add(impulse.mult(otherInvMass));
     }
+  }
+
+  private resolveConstraint(): void {
+    if (!this.constraint) return;
+    const delta = this.pos.sub(this.constraint.pos);
+    const distSq = delta.lenSq();
+    const maxDist = this.constraint.radius - this.scale.x / 2;
+    const maxDistSq = maxDist * maxDist;
+
+    if (distSq > maxDistSq) {
+      const dist = Math.sqrt(distSq);
+      const correction = delta.mult((dist - maxDist) / dist);
+      this.pos = this.pos.sub(correction);
+
+      // Reflect velocity if moving outward
+      const velAlongNormal = this.velocity.dot(delta.normalize());
+      if (velAlongNormal > 0) {
+        this.velocity = this.velocity.sub(
+          delta.normalize().mult(2 * velAlongNormal),
+        );
+      }
+    }
+
+    // Spring toward center
+    const SPRING_STRENGTH = 0.1;
+    const desiredPos = this.constraint.pos;
+    const springForce = desiredPos.sub(this.pos).mult(SPRING_STRENGTH);
+    this.velocity = this.velocity.add(springForce).mult(0.95);
   }
 
   private static getEarliestWallCollision(
