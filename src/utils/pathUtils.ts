@@ -2,38 +2,47 @@ import { mod } from "./mathUtils";
 import { lineLineIntersection, Vector2 } from "./vec";
 
 /**
- * Clips a line segment to specified horizontal bounds.
+ * Clips a line segment to specified bounds.
  */
 export function clipLineSegment(
   start: Vector2,
   end: Vector2,
   left: number,
   right: number,
+  top: number,
+  bottom: number,
 ): { start: Vector2; end: Vector2 } | null {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
 
-  if (dx === 0) {
-    // Vertical line
-    if (start.x < left || start.x > right) return null;
-    return { start, end };
+  let t0 = 0;
+  let t1 = 1;
+
+  const p = [-dx, dx, -dy, dy];
+  const q = [start.x - left, right - start.x, start.y - top, bottom - start.y];
+
+  for (let i = 0; i < 4; i++) {
+    const qi = q[i]!;
+    const pi = p[i]!;
+
+    if (pi === 0) {
+      if (qi < 0) return null; // Line is parallel and outside the bounds
+    } else {
+      const t = qi / pi;
+      if (pi < 0) {
+        t0 = Math.max(t0, t);
+      } else {
+        t1 = Math.min(t1, t);
+      }
+    }
   }
 
-  const tLeft = (left - start.x) / dx;
-  const tRight = (right - start.x) / dx;
+  if (t0 > t1) return null; // No intersection
 
-  let tMin = Math.min(tLeft, tRight);
-  let tMax = Math.max(tLeft, tRight);
-
-  if (tMax < 0 || tMin > 1) return null; // Line is completely outside
-
-  tMin = Math.max(tMin, 0);
-  tMax = Math.min(tMax, 1);
-
-  const clippedStart = new Vector2(start.x + tMin * dx, start.y + tMin * dy);
-  const clippedEnd = new Vector2(start.x + tMax * dx, start.y + tMax * dy);
-
-  return { start: clippedStart, end: clippedEnd };
+  return {
+    start: new Vector2(start.x + t0 * dx, start.y + t0 * dy),
+    end: new Vector2(start.x + t1 * dx, start.y + t1 * dy),
+  };
 }
 
 /**
@@ -120,18 +129,23 @@ export function generatePathsFromPoints(
   const outlinePath = new Path2D();
   const fillPath = new Path2D();
 
-  // TODO: limit vertically as well
-  let right = 0;
+  let right = -Infinity;
   let left = Infinity;
+  let top = Infinity;
+  let bottom = -Infinity;
 
   for (const point of points) {
-    const { x } = point;
+    const { x, y } = point;
     if (x < left) left = x;
     if (x > right) right = x;
+    if (y < top) top = y;
+    if (y > bottom) bottom = y;
   }
 
   left -= outline;
   right += outline;
+  top -= outline;
+  bottom += outline;
 
   const newPoints: Vector2[] = [];
 
@@ -157,18 +171,27 @@ export function generatePathsFromPoints(
     let a = intersection;
     let b: Vector2 | null = null;
 
-    if (intersection.x < left || intersection.x > right) {
+    if (
+      intersection.x < left ||
+      intersection.x > right ||
+      intersection.y < top ||
+      intersection.y > bottom
+    ) {
       const prevClip = clipLineSegment(
         offsetPrev.start,
         intersection,
         left,
         right,
+        top,
+        bottom,
       );
       const nextClip = clipLineSegment(
         intersection,
         offsetNext.end,
         left,
         right,
+        top,
+        bottom,
       );
 
       if (!prevClip || !nextClip) {

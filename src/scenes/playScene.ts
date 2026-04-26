@@ -1,20 +1,12 @@
 import {
-  pass,
   renderDrawables,
-  type Drawable,
   type RenderInfo,
 } from "@/render/drawable";
 import { Scene } from "./scene";
 import { BackMenu } from "@/ui/BackMenu";
-import { Vector2 } from "@/utils/vec";
 import type { GameObject } from "@/game/objects/gameObject";
 import type { LevelConfig } from "@/game/levelConfig";
 import { Wall } from "@/game/objects/wall";
-
-type PlayObject = Drawable & {
-  aabb: [Vector2, Vector2];
-  setHover(hover: boolean): void;
-};
 
 export class PlayScene extends Scene {
   private objects: GameObject<any>[] = [];
@@ -47,12 +39,14 @@ export class PlayScene extends Scene {
         position: [300, 100],
         scale: [100, 100],
         shape: 'quarterCircle',
+        rotation: '270',
         ...level,
       }),
       new Wall({
         position: [400, 100],
         scale: [100, 100],
         shape: 'triangle',
+        rotation: '270',
         ...level,
       }),
     );
