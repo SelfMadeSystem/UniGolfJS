@@ -1,58 +1,66 @@
 import type z from "zod";
 import { GameObject, GameObjectSchema } from "./gameObject";
-import { LAYERS, type LevelConfig } from "../levelConfig";
+import { LAYERS, levelConfigSchema, type LevelConfig } from "../levelConfig";
 import { type RenderPass, pass } from "@/render/drawable";
 import { generatePathsFromPoints } from "@/utils/pathUtils";
 import type { Vector2 } from "@/utils/vec";
 
-export const LevelObjectSchema = GameObjectSchema.extend({
-  // Nothing yet...
-});
+export const LevelObjectSchema = GameObjectSchema.extend(levelConfigSchema.shape);
+
+export type PathInfo = {
+  shadowLayer?: number;
+  outlineLayer: number;
+  fillLayer: number;
+  shadowColor: string;
+  outlineColor: string;
+  fillColor: string;
+  height?: number;
+  shadow?: number;
+  outline: number;
+};
 
 export abstract class LevelObject<
   SchemaType extends typeof LevelObjectSchema = typeof LevelObjectSchema,
 > extends GameObject<SchemaType> {
   static override schema = LevelObjectSchema;
-  protected levelConfig: LevelConfig;
 
-  constructor(options: z.input<SchemaType>, levelConfig: LevelConfig) {
+  constructor(options: z.input<SchemaType>) {
     super(options);
-    this.levelConfig = levelConfig;
   }
 
   renderPaths({
     shadowPath,
     outlinePath,
     fillPath,
+    shadowLayer,
+    outlineLayer,
+    fillLayer,
     shadowColor,
     outlineColor,
     fillColor,
     shadow,
   }: {
-    shadowPath: Path2D;
+    shadowPath?: Path2D;
     outlinePath: Path2D;
     fillPath: Path2D;
-    shadowColor: string;
-    outlineColor: string;
-    fillColor: string;
-    shadow: number;
-  }): Iterable<RenderPass> {
+  } & PathInfo): Iterable<RenderPass> {
     return [
-      pass(LAYERS.WALL_SHADOW, (ctx) => {
-        ctx.strokeStyle = shadowColor;
-        ctx.lineWidth = shadow;
-        ctx.lineJoin = "round";
-        ctx.stroke(shadowPath);
-      }),
-      pass(LAYERS.WALL_OUTLINE, (ctx) => {
+      ...((shadowPath &&
+        shadow &&
+        shadowLayer !== undefined && [
+          pass(shadowLayer, (ctx) => {
+            ctx.strokeStyle = shadowColor;
+            ctx.lineWidth = shadow;
+            ctx.lineJoin = "round";
+            ctx.stroke(shadowPath);
+          }),
+        ]) ||
+        []),
+      pass(outlineLayer, (ctx) => {
         ctx.fillStyle = outlineColor;
         ctx.fill(outlinePath);
-
-        // ctx.strokeStyle = '#f00';
-        // ctx.lineWidth = 0.5;
-        // ctx.stroke(outlinePath);
       }),
-      pass(LAYERS.WALL, (ctx) => {
+      pass(fillLayer, (ctx) => {
         ctx.fillStyle = fillColor;
         ctx.fill(fillPath);
       }),
@@ -61,21 +69,20 @@ export abstract class LevelObject<
 
   renderPoints({
     points,
+    shadowLayer,
+    outlineLayer,
+    fillLayer,
     shadowColor,
     outlineColor,
     fillColor,
     height,
     shadow,
     outline,
+    debug = false,
   }: {
     points: Vector2[];
-    shadowColor: string;
-    outlineColor: string;
-    fillColor: string;
-    height: number;
-    shadow: number;
-    outline: number;
-  }) {
+    debug?: boolean;
+  } & PathInfo) {
     const { shadowPath, outlinePath, fillPath } = generatePathsFromPoints(
       points,
       outline,
@@ -87,23 +94,32 @@ export abstract class LevelObject<
         shadowPath,
         outlinePath,
         fillPath,
+        shadowLayer,
+        outlineLayer,
+        fillLayer,
         shadowColor,
         outlineColor,
         fillColor,
+        height,
         shadow,
+        outline,
       }),
-      // pass(LAYERS.DEBUG, (ctx) => {
-      //   ctx.strokeStyle = "#0f0";
-      //   ctx.lineWidth = 0.5;
-      //   ctx.beginPath();
-      //   for (let i = 0; i < points.length; i++) {
-      //     const curr = points[i]!;
-      //     const next = points[(i + 1) % points.length]!;
-      //     ctx.moveTo(curr.x, curr.y);
-      //     ctx.lineTo(next.x, next.y);
-      //   }
-      //   ctx.stroke();
-      // }),
+      ...(debug
+        ? [
+            pass(LAYERS.DEBUG, (ctx) => {
+              ctx.strokeStyle = "#0f0";
+              ctx.lineWidth = 0.5;
+              ctx.beginPath();
+              for (let i = 0; i < points.length; i++) {
+                const curr = points[i]!;
+                const next = points[(i + 1) % points.length]!;
+                ctx.moveTo(curr.x, curr.y);
+                ctx.lineTo(next.x, next.y);
+              }
+              ctx.stroke();
+            }),
+          ]
+        : []),
     ];
   }
 }

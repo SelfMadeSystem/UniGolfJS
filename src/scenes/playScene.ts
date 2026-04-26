@@ -9,8 +9,7 @@ import { BackMenu } from "@/ui/BackMenu";
 import { Vector2 } from "@/utils/vec";
 import type { GameObject } from "@/game/objects/gameObject";
 import type { LevelConfig } from "@/game/levelConfig";
-import { Box } from "@/game/objects/box";
-import { Triangle } from "@/game/objects/triangle";
+import { Wall } from "@/game/objects/wall";
 
 type PlayObject = Drawable & {
   aabb: [Vector2, Vector2];
@@ -33,79 +32,29 @@ export class PlayScene extends Scene {
     };
 
     this.objects.push(
-      new Box(
-        {
-          position: [100, 100],
-          scale: [50, 50],
-        },
-        level,
-      ),
-      new Triangle(
-        {
-          position: [200, 100],
-          scale: [25, 50],
-          rotation: "0",
-        },
-        level,
-      ),
-      new Triangle(
-        {
-          position: [300, 100],
-          scale: [25, 50],
-          rotation: "90",
-        },
-        level,
-      ),
-      new Triangle(
-        {
-          position: [400, 100],
-          scale: [25, 50],
-          rotation: "180",
-        },
-        level,
-      ),
-      new Triangle(
-        {
-          position: [500, 100],
-          scale: [25, 50],
-          rotation: "270",
-        },
-        level,
-      ),
-
-
-      new Triangle(
-        {
-          position: [200, 200],
-          scale: [50, 25],
-          rotation: "0",
-        },
-        level,
-      ),
-      new Triangle(
-        {
-          position: [300, 200],
-          scale: [50, 25],
-          rotation: "90",
-        },
-        level,
-      ),
-      new Triangle(
-        {
-          position: [400, 200],
-          scale: [50, 25],
-          rotation: "180",
-        },
-        level,
-      ),
-      new Triangle(
-        {
-          position: [500, 200],
-          scale: [50, 25],
-          rotation: "270",
-        },
-        level,
-      ),
+      new Wall({
+        position: [100, 100],
+        scale: [100, 100],
+        ...level,
+      }),
+      new Wall({
+        position: [200, 100],
+        scale: [100, 100],
+        shape: 'inverseQuarterCircle',
+        ...level,
+      }),
+      new Wall({
+        position: [300, 100],
+        scale: [100, 100],
+        shape: 'quarterCircle',
+        ...level,
+      }),
+      new Wall({
+        position: [400, 100],
+        scale: [100, 100],
+        shape: 'triangle',
+        ...level,
+      }),
     );
   }
 

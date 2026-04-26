@@ -109,7 +109,7 @@ export function generateCounterClockwisePoints(points: Vector2[]): Vector2[] {
 export function generatePathsFromPoints(
   points: Vector2[],
   outline: number,
-  height: number,
+  height?: number,
 ): {
   shadowPath: Path2D;
   outlinePath: Path2D;
@@ -120,6 +120,7 @@ export function generatePathsFromPoints(
   const outlinePath = new Path2D();
   const fillPath = new Path2D();
 
+  // TODO: limit vertically as well
   let right = 0;
   let left = Infinity;
 
@@ -157,8 +158,18 @@ export function generatePathsFromPoints(
     let b: Vector2 | null = null;
 
     if (intersection.x < left || intersection.x > right) {
-      const prevClip = clipLineSegment(offsetPrev.start, intersection, left, right);
-      const nextClip = clipLineSegment(intersection, offsetNext.end, left, right);
+      const prevClip = clipLineSegment(
+        offsetPrev.start,
+        intersection,
+        left,
+        right,
+      );
+      const nextClip = clipLineSegment(
+        intersection,
+        offsetNext.end,
+        left,
+        right,
+      );
 
       if (!prevClip || !nextClip) {
         throw new Error("Failed to clip line segments");
@@ -171,7 +182,7 @@ export function generatePathsFromPoints(
     const op = i === 0 ? "moveTo" : "lineTo";
 
     shadowPath[op](...a.a);
-    fillPath[op](curr.x, curr.y - height);
+    fillPath[op](curr.x, curr.y - (height ?? 0));
 
     if (b) {
       shadowPath.lineTo(...b.a);
@@ -184,25 +195,24 @@ export function generatePathsFromPoints(
   shadowPath.closePath();
   fillPath.closePath();
 
-  for (let i = 0; i < newPoints.length; i++) {
-    const curr = newPoints[i]!;
-    const next = newPoints[mod(i + 1, newPoints.length)]!;
+  if (height) {
+    for (let i = 0; i < newPoints.length; i++) {
+      const curr = newPoints[i]!;
+      const next = newPoints[mod(i + 1, newPoints.length)]!;
 
-    // const op = i === 0 ? "moveTo" : "lineTo";
-    // outlinePath[op](...curr.a);
+      const currH = new Vector2(curr.x, curr.y - height);
+      const nextH = new Vector2(next.x, next.y - height);
 
-    const currH = new Vector2(curr.x, curr.y - height);
-    const nextH = new Vector2(next.x, next.y - height);
+      const cw = generateClockwisePoints([curr, currH, nextH, next]);
 
-    const cw = generateClockwisePoints([curr, currH, nextH, next]);
+      for (let j = 0; j < cw.length; j++) {
+        const p = cw[j]!;
+        const op = j === 0 ? "moveTo" : "lineTo";
+        outlinePath[op](...p.a);
+      }
 
-    for (let j = 0; j < cw.length; j++) {
-      const p = cw[j]!;
-      const op = j === 0 ? "moveTo" : "lineTo";
-      outlinePath[op](...p.a);
+      outlinePath.closePath();
     }
-
-    outlinePath.closePath();
   }
 
   for (let i = 0; i < newPoints.length; i++) {

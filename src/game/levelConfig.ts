@@ -31,7 +31,7 @@ export enum LAYERS {
   HOLE,
   BALL,
   WALL_OUTLINE,
-  WALL,
+  WALL_FILL,
   INDICATORS,
   LIGHTS,
   DEBUG,
