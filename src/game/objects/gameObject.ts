@@ -2,6 +2,8 @@ import { Vec2Schema } from "@/utils/data";
 import type { Drawable, RenderInfo, RenderPass } from "@/render/drawable";
 import { Vector2 } from "@/utils/vec";
 import z from "zod";
+import { $scene } from "@/scenes/state";
+import { PlayScene } from "@/scenes/playScene";
 
 export const GameObjectSchema = z.object({
   /** The center position of the object. */
@@ -99,4 +101,11 @@ export abstract class GameObject<
 
   abstract render(info: RenderInfo): Iterable<RenderPass>;
   tick(): void {}
+
+  delete(): void {
+    const scene = $scene.get();
+    // TODO: make a util for this
+    if (!scene || !(scene instanceof PlayScene)) return;
+    scene.removeObject(this);
+  }
 }

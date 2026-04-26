@@ -149,8 +149,9 @@ export class Vector2 {
     }
   }
 
-  setMag(magnitude: number): Vector2 {
-    return this.normalize().mult(magnitude);
+  maxLength(max: number): Vector2 {
+    if (this.lenSq() <= max * max) return this;
+    return this.setLength(max);
   }
 
   angle(): number {
@@ -270,7 +271,7 @@ export function constrainDistance(
   anchor: Vector2,
   constraint: number,
 ): Vector2 {
-  return anchor.add(pos.sub(anchor).setMag(constraint));
+  return anchor.add(pos.sub(anchor).setLength(constraint));
 }
 
 /**
@@ -284,8 +285,8 @@ export function constrainDistanceBoth(
   constraint: number,
 ): [vecA: Vector2, vecB: Vector2] {
   const avg = a.add(b).mult(0.5);
-  const vecA = a.sub(avg).setMag(constraint / 2);
-  const vecB = b.sub(avg).setMag(constraint / 2);
+  const vecA = a.sub(avg).setLength(constraint / 2);
+  const vecB = b.sub(avg).setLength(constraint / 2);
   return [vecA.add(avg), vecB.add(avg)];
 }
 
@@ -351,5 +352,5 @@ export function midpointShortestArc(
   center: Vector2,
   radius: number,
 ): Vector2 {
-  return center.add(a.avg(b).sub(center).setMag(radius));
+  return center.add(a.avg(b).sub(center).setLength(radius));
 }

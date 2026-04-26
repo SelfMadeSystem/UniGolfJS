@@ -10,12 +10,25 @@ import type { PointerInfo } from "@/render/renderer";
 import { LevelObject } from "@/game/objects/levelObject";
 import { Vector2 } from "@/utils/vec";
 import { Boost } from "@/game/objects/boost";
+import { Tee } from "@/game/objects/tee";
 
 export class PlayScene extends Scene {
   public objects: GameObject<any>[] = [];
   public cameraPos: Vector2 = new Vector2(-100, -100);
   public cameraZoom: number = 1;
-  public lastPointer: PointerInfo | null = null;
+  private _lastPointer: PointerInfo | null = null;
+  public tickPointers: PointerInfo[] = [];
+
+  get lastPointer(): PointerInfo | null {
+    return this._lastPointer;
+  }
+
+  set lastPointer(info: PointerInfo | null) {
+    this._lastPointer = info;
+    if (info) {
+      this.tickPointers.push(info);
+    }
+  }
 
   constructor() {
     super();
@@ -26,7 +39,7 @@ export class PlayScene extends Scene {
       wallShadowColor: "#76b97e",
       floorColor: "#cce2dd",
       floorAccentColor: "#d9e6e2",
-      teeColor: "#ff0000",
+      teeColor: "#f79d60",
     };
 
     this.objects.push(
@@ -95,9 +108,13 @@ export class PlayScene extends Scene {
         ...level,
       }),
       new Boost({
-        position: [120, 0],
+        position: [125, 0],
         scale: [50, 50],
         shape: "rectangle",
+        ...level,
+      }),
+      new Tee({
+        position: [300, 0],
         ...level,
       }),
     );
@@ -118,6 +135,8 @@ export class PlayScene extends Scene {
     if (obj) {
       obj.set("debug", true);
     }
+
+    this.tickPointers = [];
   }
 
   override render(info: RenderInfo, ctx: CanvasRenderingContext2D): void {
@@ -140,16 +159,27 @@ export class PlayScene extends Scene {
     this.lastPointer = info;
   }
 
-  getPointerPositionInWorld(pointer: PointerInfo): Vector2 {
-    return pointer.pos.div(this.cameraZoom).add(this.cameraPos);
+  getPointerPositionInWorld(pos: Vector2): Vector2 {
+    return pos.div(this.cameraZoom).add(this.cameraPos);
   }
 
   getObjectAtPointer(pointer: PointerInfo | null): GameObject<any> | null {
     if (!pointer) return null;
-    const worldPos = this.getPointerPositionInWorld(pointer);
+    const worldPos = this.getPointerPositionInWorld(pointer.pos);
     for (const obj of this.objects) {
       if (obj instanceof LevelObject && obj.isPointInside(worldPos)) return obj;
     }
     return null;
+  }
+
+  removeObject(obj: GameObject<any>): void {
+    const index = this.objects.indexOf(obj);
+    if (index !== -1) {
+      this.objects.splice(index, 1);
+    }
+  }
+
+  addObject(obj: GameObject<any>): void {
+    this.objects.push(obj);
   }
 }
