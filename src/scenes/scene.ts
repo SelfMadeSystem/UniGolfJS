@@ -1,4 +1,6 @@
 import type { RenderInfo } from "@/render/drawable";
+import type { PointerInfo } from "@/render/renderer";
+import type { Vector2 } from "@/utils/vec";
 
 export abstract class Scene {
   readonly key = Math.random();
@@ -7,9 +9,9 @@ export abstract class Scene {
     return () => null;
   }
 
-  pointerdown(x: number, y: number): void {}
-  pointermove(x: number, y: number): void {}
-  pointerup(x: number, y: number): void {}
+  pointerdown(info: PointerInfo): void {}
+  pointermove(info: PointerInfo): void {}
+  pointerup(info: PointerInfo): void {}
 
   tick(): void {}
 

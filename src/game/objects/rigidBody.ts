@@ -43,15 +43,13 @@ export abstract class RigidBody<
     this.rigidBodyId = RigidBody.nextRigidBodyId++;
   }
 
-  getAABB(): AABB {
-    return new AABB(
-      this.pos.sub(this.scale.mult(0.5)),
-      this.pos.add(this.scale.mult(0.5)),
-    );
-  }
-
   getMovementAABB(): AABB {
     return this.getAABB().expandVec(this.velocity);
+  }
+
+  override isPointInside(point: Vector2): boolean {
+    const radius = this.scale.x / 2;
+    return this.pos.sub(point).length() <= radius;
   }
 
   abstract getPathInfo(): PathInfo;

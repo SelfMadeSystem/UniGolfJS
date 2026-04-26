@@ -52,13 +52,6 @@ export abstract class PolyObject<
     super(options);
   }
 
-  getAABB(): AABB {
-    return new AABB(
-      this.pos.sub(this.scale.mult(0.5)),
-      this.pos.add(this.scale.mult(0.5)),
-    );
-  }
-
   getPoints(): Vector2[] {
     const { shape, rotation } = this.data;
     const basePoints = SHAPE_POINTS[shape];
@@ -75,6 +68,26 @@ export abstract class PolyObject<
       segments.push(new Segment(start, end));
     }
     return segments;
+  }
+
+  override isPointInside(point: Vector2): boolean {
+    if (!this.getAABB().containsPoint(point)) return false;
+    const segments = this.getSegments();
+    let windingNumber = 0;
+    for (const segment of segments) {
+      const startToPoint = point.sub(segment.start);
+      const endToPoint = point.sub(segment.end);
+      if (segment.start.y <= point.y) {
+        if (segment.end.y > point.y && startToPoint.cross(endToPoint) > 0) {
+          windingNumber++;
+        }
+      } else {
+        if (segment.end.y <= point.y && startToPoint.cross(endToPoint) < 0) {
+          windingNumber--;
+        }
+      }
+    }
+    return windingNumber !== 0;
   }
 
   abstract getPathInfo(): PathInfo;

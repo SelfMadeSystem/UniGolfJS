@@ -99,18 +99,4 @@ export abstract class GameObject<
 
   abstract render(info: RenderInfo): Iterable<RenderPass>;
   tick(): void {}
-  isHovered(x: number, y: number): boolean {
-    return this.isInAABB(x, y);
-  }
-
-  isInAABB(x: number, y: number): boolean {
-    const pos = this.pos;
-    const scale = this.scale;
-    return (
-      x >= pos.x - scale.x / 2 &&
-      x <= pos.x + scale.x / 2 &&
-      y >= pos.y - scale.y / 2 &&
-      y <= pos.y + scale.y / 2
-    );
-  }
 }

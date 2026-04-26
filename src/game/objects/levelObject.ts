@@ -4,6 +4,7 @@ import { LAYERS, levelConfigSchema, type LevelConfig } from "../levelConfig";
 import { type RenderPass, pass } from "@/render/drawable";
 import { generatePathsFromPoints } from "@/utils/pathUtils";
 import type { Vector2 } from "@/utils/vec";
+import { AABB } from "@/utils/aabb";
 
 export const LevelObjectSchema = GameObjectSchema.extend(
   levelConfigSchema.shape,
@@ -30,6 +31,15 @@ export abstract class LevelObject<
   constructor(options: z.input<SchemaType>) {
     super(options);
   }
+  
+  getAABB(): AABB {
+    return new AABB(
+      this.pos.sub(this.scale.mult(0.5)),
+      this.pos.add(this.scale.mult(0.5)),
+    );
+  }
+
+  abstract isPointInside(point: Vector2): boolean;
 
   renderPaths({
     shadowPath,

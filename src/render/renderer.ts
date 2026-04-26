@@ -1,5 +1,18 @@
 import { $scene } from "@/scenes/state";
 import type { RenderInfo } from "./drawable";
+import { Vector2 } from "@/utils/vec";
+
+export type PointerInfo = {
+  pos: Vector2;
+  leftButton: boolean;
+  rightButton: boolean;
+  middleButton: boolean;
+  shift: boolean;
+  ctrl: boolean;
+  alt: boolean;
+  event: PointerEvent;
+  eventType: "pointerdown" | "pointermove" | "pointerup";
+}
 
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
@@ -81,29 +94,37 @@ export class Renderer {
     scene.tick();
   }
 
-  getPointerPos(event: PointerEvent): { x: number; y: number } {
+  getPointerPos(event: PointerEvent): Vector2 {
     const rect = this.ctx.canvas.getBoundingClientRect();
+    return new Vector2(event.clientX - rect.left, event.clientY - rect.top);
+  }
+
+  getPointerInfo(event: PointerEvent): PointerInfo {
     return {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
+      pos: this.getPointerPos(event),
+      leftButton: (event.buttons & 1) !== 0,
+      rightButton: (event.buttons & 2) !== 0,
+      middleButton: (event.buttons & 4) !== 0,
+      shift: event.shiftKey,
+      ctrl: event.ctrlKey,
+      alt: event.altKey,
+      event,
+      eventType: event.type as "pointerdown" | "pointermove" | "pointerup",
     };
   }
 
   handlePointerDown(event: PointerEvent) {
-    const pos = this.getPointerPos(event);
     const scene = $scene.get();
-    scene.pointerdown(pos.x, pos.y);
+    scene.pointerdown(this.getPointerInfo(event));
   }
 
   handlePointerMove(event: PointerEvent) {
-    const pos = this.getPointerPos(event);
     const scene = $scene.get();
-    scene.pointermove(pos.x, pos.y);
+    scene.pointermove(this.getPointerInfo(event));
   }
 
   handlePointerUp(event: PointerEvent) {
-    const pos = this.getPointerPos(event);
     const scene = $scene.get();
-    scene.pointerup(pos.x, pos.y);
+    scene.pointerup(this.getPointerInfo(event));
   }
 }
