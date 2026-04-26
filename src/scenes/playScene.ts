@@ -1,13 +1,11 @@
-import {
-  renderDrawables,
-  type RenderInfo,
-} from "@/render/drawable";
+import { renderDrawables, type RenderInfo } from "@/render/drawable";
 import { Scene } from "./scene";
 import { BackMenu } from "@/ui/BackMenu";
 import type { GameObject } from "@/game/objects/gameObject";
 import type { LevelConfig } from "@/game/levelConfig";
 import { Wall } from "@/game/objects/wall";
 import { Ball } from "@/game/objects/ball";
+import { RigidBody } from "@/game/objects/rigidBody";
 
 export class PlayScene extends Scene {
   public objects: GameObject<any>[] = [];
@@ -33,38 +31,34 @@ export class PlayScene extends Scene {
       new Wall({
         position: [200, 100],
         scale: [100, 100],
-        shape: 'inverseQuarterCircle',
-        debug: true,
+        shape: "inverseQuarterCircle",
         ...level,
       }),
       new Wall({
         position: [200, 0],
         scale: [100, 100],
-        shape: 'inverseQuarterCircle',
-        rotation: '90',
-        debug: true,
+        shape: "inverseQuarterCircle",
+        rotation: "90",
         ...level,
       }),
       new Wall({
         position: [100, 0],
         scale: [100, 100],
-        shape: 'inverseQuarterCircle',
-        rotation: '180',
-        debug: true,
+        shape: "inverseQuarterCircle",
+        rotation: "180",
         ...level,
       }),
       new Wall({
         position: [300, 100],
         scale: [100, 100],
-        shape: 'quarterCircle',
-        rotation: '180',
-        debug: true,
+        shape: "quarterCircle",
+        rotation: "180",
         ...level,
       }),
       new Wall({
         position: [400, 100],
         scale: [100, 100],
-        shape: 'triangle',
+        shape: "triangle",
         ...level,
       }),
       new Ball({
@@ -77,9 +71,15 @@ export class PlayScene extends Scene {
         position: [200, 100],
         scale: [20, 20],
         velocity: [10, 0],
-        debug: true,
         ...level,
-      })
+      }),
+      new Ball({
+        position: [220, 60],
+        scale: [40, 40],
+        mass: 2,
+        velocity: [10, 0],
+        ...level,
+      }),
     );
   }
 
@@ -88,6 +88,7 @@ export class PlayScene extends Scene {
   }
 
   override tick(): void {
+    RigidBody.beginFrame();
     for (const obj of this.objects) {
       obj.tick();
     }
