@@ -64,8 +64,8 @@ export class Tee extends LevelObject<typeof TeeSchema> {
           break;
         }
         case "pointerup": {
-          if (this.driverPos) {
-            const velocity = this.pos
+          if (this.driverPos && this.ball) {
+            const velocity = this.ball.pos
               .sub(this.driverPos)
               .maxLength(MAX_DRIVER_DISTANCE)
               .mult(DRIVER_POWER_MULTIPLIER);
@@ -94,15 +94,15 @@ export class Tee extends LevelObject<typeof TeeSchema> {
         );
       }),
       pass(LAYERS.INDICATORS, (ctx) => {
-        if (!this.driverPos) return;
+        if (!this.driverPos || !this.ball) return;
         ctx.strokeStyle = "#444";
         ctx.fillStyle = "#bbb";
         ctx.lineWidth = 1;
         ctx.save();
         ctx.translate(...this.driverPos.a);
         const angle = Math.atan2(
-          this.driverPos.y - this.pos.y,
-          this.driverPos.x - this.pos.x,
+          this.driverPos.y - this.ball.pos.y,
+          this.driverPos.x - this.ball.pos.x,
         );
         ctx.rotate(angle);
 
@@ -112,12 +112,12 @@ export class Tee extends LevelObject<typeof TeeSchema> {
 
         ctx.restore();
         ctx.save();
-        ctx.translate(...this.pos.a);
+        ctx.translate(...this.ball.pos.a);
         ctx.rotate(angle);
 
         // Arrow pointing in direction of the shot
         const arrowLength = Math.min(
-          this.pos.sub(this.driverPos).length(),
+          this.ball.pos.sub(this.driverPos).length(),
           MAX_DRIVER_DISTANCE,
         );
         ctx.beginPath();

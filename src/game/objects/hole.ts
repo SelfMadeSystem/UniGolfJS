@@ -31,11 +31,6 @@ export class Hole extends CircleObject<typeof HoleSchema> {
     };
   }
 
-  override intersectsRigidBody(rigidBody: RigidBody): boolean {
-    const radius = (this.scale.x - rigidBody.scale.x) / 2;
-    return this.pos.distSq(rigidBody.pos) <= radius * radius;
-  }
-
   override onIntersects(rigidBody: RigidBody): void {
     rigidBody.setConstraint({
       pos: this.pos,
