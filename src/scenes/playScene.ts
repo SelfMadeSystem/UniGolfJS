@@ -114,7 +114,7 @@ export class PlayScene extends Scene {
         ...level,
       }),
       new Tee({
-        position: [300, 0],
+        position: [100, 300],
         ...level,
       }),
     );
@@ -181,5 +181,11 @@ export class PlayScene extends Scene {
 
   addObject(obj: GameObject<any>): void {
     this.objects.push(obj);
+  }
+
+  resetAllObjects(): void {
+    for (const obj of this.objects) {
+      obj.reset();
+    }
   }
 }

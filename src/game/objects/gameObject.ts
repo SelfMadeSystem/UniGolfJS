@@ -108,4 +108,8 @@ export abstract class GameObject<
     if (!scene || !(scene instanceof PlayScene)) return;
     scene.removeObject(this);
   }
+
+  reset(): void {
+    this.pos = this.data.position;
+  }
 }

@@ -243,4 +243,9 @@ export abstract class RigidBody<
     }
     return paths;
   }
+
+  override reset(): void {
+    super.reset();
+    this.velocity = this.data.velocity;
+  }
 }

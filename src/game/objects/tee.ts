@@ -19,6 +19,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   static override schema = TeeSchema;
   public ball: Ball | null = null;
   public driverPos: Vector2 | null = null;
+  public shot = true;
 
   constructor(options: z.input<typeof TeeSchema>) {
     super(options);
@@ -38,9 +39,22 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     for (const pointer of pointers) {
       switch (pointer.eventType) {
         case "pointerdown": {
+          if (!this.shot) {
+            break;
+          }
+          this.shot = false;
           if (this.ball) {
             this.ball.delete();
           }
+          const newBall = new Ball({
+            ...this.data,
+            position: this.pos,
+            velocity: new Vector2(0, 0),
+            scale: new Vector2(15, 15),
+          });
+          scene.addObject(newBall);
+          this.ball = newBall;
+          scene.resetAllObjects();
           break;
         }
         case "pointermove": {
@@ -51,16 +65,16 @@ export class Tee extends LevelObject<typeof TeeSchema> {
         }
         case "pointerup": {
           if (this.driverPos) {
-            const newBall = new Ball({
-              ...this.data,
-              position: this.pos,
-              velocity: this.pos.sub(this.driverPos).maxLength(MAX_DRIVER_DISTANCE).mult(DRIVER_POWER_MULTIPLIER),
-              scale: new Vector2(15, 15),
-            });
-            scene.addObject(newBall);
-            this.ball = newBall;
-            this.driverPos = null;
+            const velocity = this.pos
+              .sub(this.driverPos)
+              .maxLength(MAX_DRIVER_DISTANCE)
+              .mult(DRIVER_POWER_MULTIPLIER);
+            if (this.ball) {
+              this.shot = true;
+              this.ball.velocity = velocity;
+            }
           }
+          this.driverPos = null;
           break;
         }
       }
