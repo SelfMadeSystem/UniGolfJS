@@ -42,10 +42,8 @@ export class Tee extends LevelObject<typeof TeeSchema> {
           if (!this.shot) {
             break;
           }
+          scene.resetAllObjects();
           this.shot = false;
-          if (this.ball) {
-            this.ball.delete();
-          }
           const newBall = new Ball({
             ...this.data,
             position: this.pos,
@@ -54,7 +52,6 @@ export class Tee extends LevelObject<typeof TeeSchema> {
           });
           scene.addObject(newBall);
           this.ball = newBall;
-          scene.resetAllObjects();
           break;
         }
         case "pointermove": {
@@ -131,5 +128,15 @@ export class Tee extends LevelObject<typeof TeeSchema> {
         ctx.restore();
       }),
     ];
+  }
+
+  override reset(): void {
+    super.reset();
+    if (this.ball) {
+      this.ball.delete();
+      this.ball = null;
+    }
+    this.driverPos = null;
+    this.shot = true;
   }
 }

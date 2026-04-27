@@ -160,10 +160,10 @@ export class PlayScene extends Scene {
         position: [100, 300],
         ...level,
       }),
-      // new Hole({
-      //   position: [300, 300],
-      //   ...level,
-      // }),
+      new Hole({
+        position: [300, 325],
+        ...level,
+      }),
       new Water({
         position: [300, 175],
         scale: [100, 100],
