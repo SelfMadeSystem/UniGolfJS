@@ -54,9 +54,8 @@ export class Tee extends LevelObject<typeof TeeSchema> {
           break;
         }
         case "pointermove": {
-          if (pointer.leftButton) {
-            this.driverPos = scene.getPointerPositionInWorld(pointer.pos);
-          }
+          if (this.shot || !pointer.leftButton) return;
+          this.driverPos = scene.getPointerPositionInWorld(pointer.pos);
           break;
         }
         case "pointerup": {
