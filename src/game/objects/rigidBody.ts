@@ -23,7 +23,8 @@ export const RigidBodySchema = LevelObjectSchema.extend({
   velocity: Vec2Schema.default(new Vector2(0, 0)),
 });
 
-const DRAG_COEFFICIENT = 0.97;
+const DRAG_COEFFICIENT = 0.99;
+const FRICTION_FORCE = 0.35;
 const CONSTRAINED_DRAG_MULTIPLIER = 0.9;
 const WATER_ANIMATION_TIME = 10;
 const WATER_ANIMATION_SPEED_INFLUENCE = 0.5;
@@ -124,6 +125,14 @@ export abstract class RigidBody<
     this.resolveConstraint();
 
     this.velocity = this.velocity.mult(DRAG_COEFFICIENT);
+    const lenSq = this.velocity.lenSq();
+    if (lenSq > FRICTION_FORCE) {
+      this.velocity = this.velocity.sub(
+        this.velocity.setLength(FRICTION_FORCE),
+      );
+    } else {
+      this.velocity = this.velocity.mult(1 - FRICTION_FORCE);
+    }
   }
 
   private resolveRigidBodyCollisions(scene: LevelScene): void {
