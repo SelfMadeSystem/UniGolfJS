@@ -5,15 +5,14 @@ import type z from "zod";
 import { LAYERS } from "../levelConfig";
 import { Vec2Schema } from "@/utils/data";
 import { Ball } from "./ball";
-import { $scene, getPlayScene } from "@/scenes/state";
-import { PlayScene } from "@/scenes/playScene";
+import { getLevelScene } from "@/scenes/state";
 
 const TeeSchema = LevelObjectSchema.extend({
   scale: Vec2Schema.default(new Vector2(60, 40)),
 });
 
 const MAX_DRIVER_DISTANCE = 150;
-const DRIVER_POWER_MULTIPLIER = 0.2;
+const DRIVER_POWER_MULTIPLIER = 0.3;
 
 export class Tee extends LevelObject<typeof TeeSchema> {
   static override schema = TeeSchema;
@@ -30,7 +29,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   }
 
   override tick(): void {
-    const scene = getPlayScene();
+    const scene = getLevelScene();
     if (!scene) return;
 
     const pointers = scene.tickPointers;

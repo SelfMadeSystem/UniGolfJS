@@ -2,8 +2,7 @@ import { Vec2Schema } from "@/utils/data";
 import type { Drawable, RenderInfo, RenderPass } from "@/render/drawable";
 import { Vector2 } from "@/utils/vec";
 import z from "zod";
-import { $scene, getPlayScene } from "@/scenes/state";
-import { PlayScene } from "@/scenes/playScene";
+import { getLevelScene } from "@/scenes/state";
 
 export const GameObjectSchema = z.object({
   /** The center position of the object. */
@@ -19,7 +18,7 @@ type GameObjectKey<SchemaType extends typeof GameObjectSchema> = Extract<
 >;
 type GameObjectListener<
   SchemaType extends typeof GameObjectSchema,
-  K extends GameObjectKey<SchemaType> | 'position' | 'scale',
+  K extends GameObjectKey<SchemaType> | "position" | "scale",
 > = (value: z.infer<SchemaType>[K]) => void;
 
 export abstract class GameObject<
@@ -51,7 +50,7 @@ export abstract class GameObject<
     this.pos = this.data.position;
   }
 
-  on<K extends SchemaKeys | 'position' | 'scale'>(
+  on<K extends SchemaKeys | "position" | "scale">(
     key: K,
     listener: GameObjectListener<SchemaType, K>,
   ): void;
@@ -69,10 +68,10 @@ export abstract class GameObject<
     this.anyListeners.add(listener);
   }
 
-  protected emit<K extends GameObjectKey<SchemaType> | 'position' | 'scale'>(
+  protected emit<K extends GameObjectKey<SchemaType> | "position" | "scale">(
     key: K,
     value: z.infer<SchemaType>[K],
-  ): void
+  ): void;
   protected emit<K extends GameObjectKey<SchemaType>>(
     key: K,
     value: z.infer<SchemaType>[K],
@@ -81,17 +80,12 @@ export abstract class GameObject<
     this.anyListeners.forEach((listener) => listener(key, value));
   }
 
-  set<K extends SchemaKeys>(
-    key: K,
-    value: z.infer<SchemaType>[K],
-  ): void {
+  set<K extends SchemaKeys>(key: K, value: z.infer<SchemaType>[K]): void {
     this.data[key] = value;
     this.emit(key, value);
   }
 
-  get<K extends SchemaKeys>(
-    key: K,
-  ): z.infer<SchemaType>[K] {
+  get<K extends SchemaKeys>(key: K): z.infer<SchemaType>[K] {
     return this.data[key];
   }
 
@@ -103,7 +97,7 @@ export abstract class GameObject<
   tick(): void {}
 
   delete(): void {
-    const scene = getPlayScene();
+    const scene = getLevelScene();
     if (!scene) return;
     scene.removeObject(this);
   }

@@ -1,5 +1,6 @@
 import { rgbSchema } from "@/utils/data";
 import z from "zod";
+import { GameObject } from "./objects/gameObject";
 
 export const levelConfigSchema = z.object({
   wallColor: rgbSchema,
@@ -11,6 +12,16 @@ export const levelConfigSchema = z.object({
   teeColor: rgbSchema,
 });
 export type LevelConfig = z.infer<typeof levelConfigSchema>;
+
+export const defaultLevelConfig: LevelConfig = {
+  wallColor: "#388164",
+  wallOutlineColor: "#29694f",
+  wallShadowColor: "#76b97e",
+  waterWallColor: "#779977",
+  floorColor: "#cce2dd",
+  floorAccentColor: "#d9e6e2",
+  teeColor: "#f79d60",
+};
 
 // Globals
 export const WALL_CONFIG = {
@@ -44,3 +55,10 @@ export enum LAYERS {
   LIGHTS,
   DEBUG,
 }
+
+export const levelSchema = z.object({
+  config: levelConfigSchema,
+  // TODO: make this game object's schemas rather than straight up instances
+  objects: z.array(z.instanceof(GameObject as typeof GameObject<any>)),
+});
+export type Level = z.infer<typeof levelSchema>;

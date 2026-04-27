@@ -1,3 +1,4 @@
+import { defaultLevel } from "@/game/defaultLevel";
 import { PlayScene } from "@/scenes/playScene";
 import { $scene } from "@/scenes/state";
 import { motion } from "motion/react";
@@ -15,7 +16,7 @@ export function MainMenu() {
       <button
         className="mt-4 rounded bg-green-500 px-4 py-2 text-white cursor-pointer"
         onClick={() => {
-          $scene.set(new PlayScene());
+          $scene.set(new PlayScene(defaultLevel()));
         }}
       >
         Start Game

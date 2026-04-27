@@ -2,7 +2,7 @@ import { MenuScene } from "@/scenes/menuScene";
 import { $scene } from "@/scenes/state";
 import { motion } from "motion/react";
 
-export function BackMenu() {
+export function PlayMenu() {
   return (
     <motion.div
       className="absolute top-0 left-0 flex items-center justify-center"

@@ -3,8 +3,8 @@ import { Vector2 } from "@/utils/vec";
 import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 import { Vec2Schema } from "@/utils/data";
-import { $scene, getPlayScene } from "@/scenes/state";
-import { PlayScene } from "@/scenes/playScene";
+import { $scene, getLevelScene } from "@/scenes/state";
+import { LevelScene } from "@/scenes/levelScene";
 import { PolyObject, type CollisionInfo } from "./polyObject";
 import { AABB } from "@/utils/aabb";
 import { LAYERS } from "../levelConfig";
@@ -23,7 +23,8 @@ export const RigidBodySchema = LevelObjectSchema.extend({
   velocity: Vec2Schema.default(new Vector2(0, 0)),
 });
 
-const DRAG_COEFFICIENT = 0.98;
+const DRAG_COEFFICIENT = 0.97;
+const CONSTRAINED_DRAG_MULTIPLIER = 0.9;
 const WATER_ANIMATION_TIME = 10;
 const WATER_ANIMATION_SPEED_INFLUENCE = 0.5;
 
@@ -80,7 +81,7 @@ export abstract class RigidBody<
   override tick(): void {
     super.tick();
     this.prevPos = this.pos;
-    const scene = getPlayScene();
+    const scene = getLevelScene();
     if (!scene) return;
 
     if (this.inWater) {
@@ -125,7 +126,7 @@ export abstract class RigidBody<
     this.velocity = this.velocity.mult(DRAG_COEFFICIENT);
   }
 
-  private resolveRigidBodyCollisions(scene: PlayScene): void {
+  private resolveRigidBodyCollisions(scene: LevelScene): void {
     const myRadius = this.scale.x / 2;
     const myInvMass = 1 / this.data.mass;
 
@@ -224,11 +225,13 @@ export abstract class RigidBody<
     const SPRING_STRENGTH = 0.1;
     const desiredPos = this.constraint.pos;
     const springForce = desiredPos.sub(this.pos).mult(SPRING_STRENGTH);
-    this.velocity = this.velocity.add(springForce).mult(0.95);
+    this.velocity = this.velocity
+      .add(springForce)
+      .mult(CONSTRAINED_DRAG_MULTIPLIER);
   }
 
   private static getEarliestWallCollision(
-    scene: PlayScene,
+    scene: LevelScene,
     pos: Vector2,
     radius: number,
     velocity: Vector2,
@@ -261,7 +264,7 @@ export abstract class RigidBody<
   }
 
   private static sweepPositionAgainstWalls(
-    scene: PlayScene,
+    scene: LevelScene,
     pos: Vector2,
     radius: number,
     delta: Vector2,

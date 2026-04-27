@@ -4,7 +4,7 @@ import { PolyObject, PolyObjectSchema } from "./polyObject";
 import type { PathInfo } from "./levelObject";
 import type { RigidBody } from "./rigidBody";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { getPlayScene } from "@/scenes/state";
+import { getLevelScene } from "@/scenes/state";
 
 export const WaterSchema = PolyObjectSchema.extend({});
 
@@ -23,7 +23,7 @@ export class Water extends PolyObject<typeof WaterSchema> {
     return [
       ...super.render(info),
       pass(LAYERS.WATER_WALL_CLIP_REGIONS, () => {
-        const scene = getPlayScene();
+        const scene = getLevelScene();
         if (!scene) return;
         scene.clipPath.addPath(this.getPath());
       }),
@@ -36,8 +36,8 @@ export class Water extends PolyObject<typeof WaterSchema> {
       heightLayer: 0,
       outlineLayer: 0,
       fillLayer: LAYERS.WATER_FILL,
-      outlineColor: 'transparent',
-      fillColor: 'transparent',
+      outlineColor: "transparent",
+      fillColor: "transparent",
       height: 0,
       outline: 0,
       shadowColor: this.data.wallShadowColor,
