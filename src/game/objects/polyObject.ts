@@ -317,9 +317,7 @@ export abstract class PolyObject<
   }
 
   override editorScale(scale: Vector2): void {
-    this.data.scale = new Vector2(
-      this.data.scale.x * scale.x,
-      this.data.scale.y * scale.y,
-    );
+    // @ts-expect-error abstract classes don't work well with generic schemas
+    this.set("scale", this.scale.mult(scale));
   }
 }

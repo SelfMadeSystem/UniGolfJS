@@ -355,4 +355,9 @@ export abstract class RigidBody<
     this.inWater = false;
     this.waterAnimation = 0;
   }
+
+  override editorScale(scale: Vector2): void {
+    // @ts-expect-error abstract classes don't work well with generic schemas
+    this.set("radius", (this.radius * (scale.x + scale.y)) / 2);
+  }
 }

@@ -116,6 +116,7 @@ export abstract class CircleObject<
   onIntersects(rigidBody: RigidBody): void {}
 
   override editorScale(scale: Vector2): void {
-    this.data.radius *= (scale.x + scale.y) / 2;
+    // @ts-expect-error abstract classes don't work well with generic schemas
+    this.set("radius", (this.radius * (scale.x + scale.y)) / 2);
   }
 }
