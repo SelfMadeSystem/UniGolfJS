@@ -3,6 +3,10 @@ import { RigidBody } from "@/game/objects/rigidBody";
 import { PlayMenu } from "@/ui/PlayMenu";
 
 export class PlayScene extends LevelScene {
+  override get playing() {
+    return true;
+  }
+
   override get ui() {
     return PlayMenu;
   }

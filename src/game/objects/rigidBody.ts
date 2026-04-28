@@ -291,10 +291,15 @@ export abstract class RigidBody<
     return pos.add(delta);
   }
 
-  override render({ tickInterp }: RenderInfo): Iterable<RenderPass> {
+  override *render({ tickInterp }: RenderInfo): Iterable<RenderPass> {
     const pathInfo = this.getPathInfo();
 
-    const pos = this.prevPos.lerp(this.pos, tickInterp);
+    const scene = getLevelScene();
+
+    const pos = this.prevPos.lerp(
+      this.pos,
+      scene?.playing ? tickInterp : 1,
+    );
 
     let { radius } = this;
     let { height } = pathInfo;
@@ -308,7 +313,7 @@ export abstract class RigidBody<
       height = lerp(height, 0, interp);
     }
 
-    if (radius <= pathInfo.outline) return [];
+    if (radius <= pathInfo.outline) return;
 
     const shadowPath = new Path2D();
     shadowPath.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
@@ -324,7 +329,7 @@ export abstract class RigidBody<
       Math.PI * 2,
     );
 
-    const paths = this.renderPaths({
+    yield* this.renderPaths({
       shadowPath,
       heightPath: undefined as unknown as Path2D,
       fillPath,
@@ -334,23 +339,13 @@ export abstract class RigidBody<
     });
 
     if (this.data.debug) {
-      paths.push(
-        pass(LAYERS.DEBUG, (ctx) => {
-          ctx.strokeStyle = "#f00";
-          ctx.lineWidth = 0.5;
-          ctx.beginPath();
-          ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
-          ctx.stroke();
-        }),
-      );
-    }
-    return paths;
-  }
-
-  override set<K extends Extract<keyof z.core.output<SchemaType>, string>>(key: K, value: z.core.output<SchemaType>[K]): void {
-    super.set(key, value);
-    if (key === "position") {
-      this.prevPos = value as Vector2;
+      yield pass(LAYERS.DEBUG, (ctx) => {
+        ctx.strokeStyle = "#f00";
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
+        ctx.stroke();
+      });
     }
   }
 

@@ -292,12 +292,16 @@ export abstract class PolyObject<
    */
   intersectsRigidBody(rigidBody: RigidBody): boolean {
     if (!this.getAABB().intersects(rigidBody.getAABB())) return false;
-    const collision = this.getCollision(
-      rigidBody.pos,
-      rigidBody.radius,
-      new Vector2(0, 0),
-    );
-    return collision !== null;
+    if (this.isPointInside(rigidBody.pos)) return true;
+    const segments = this.getSegments();
+    for (const segment of segments) {
+      if (
+        segment.distanceToPoint(rigidBody.pos) <= rigidBody.radius
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

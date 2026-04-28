@@ -1,4 +1,4 @@
-import { Scene } from "@/scenes/scene";
+import type { Scene } from "@/scenes/scene";
 import { atom } from "nanostores";
 import { LevelScene } from "./levelScene";
 import { defaultLevel } from "@/game/defaultLevel";

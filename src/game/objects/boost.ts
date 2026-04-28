@@ -7,7 +7,7 @@ import { blendColors } from "@/utils/colorUtils";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 
 export const BoostSchema = PolyObjectSchema.extend({});
-const SPEED = 15;
+const SPEED = 60;
 const BOOST_EFFECT_TIME = 10; // frames
 
 const C1 = "#66FF00";

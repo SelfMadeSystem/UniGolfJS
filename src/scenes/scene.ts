@@ -4,6 +4,10 @@ import type { PointerEventHandler, PointerInfo } from "@/render/pointerEvents";
 export abstract class Scene implements PointerEventHandler {
   readonly key = Math.random();
 
+  get playing(): boolean {
+    return false;
+  }
+
   get ui(): React.FC {
     return () => null;
   }
