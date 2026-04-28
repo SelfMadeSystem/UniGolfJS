@@ -69,6 +69,18 @@ export class Renderer {
     window.addEventListener("pointermove", pointerMoveHandler);
     window.addEventListener("pointerup", pointerUpHandler);
 
+    const touchStartHandler = (e: TouchEvent) => {
+      if (e.target !== this.ctx.canvas) return;
+      // prevent touch from doing shenanigans
+      e.preventDefault();
+    };
+
+    window.addEventListener("touchstart", touchStartHandler, { passive: false });
+
+    this.stopCbs.push(() => {
+      window.removeEventListener("touchstart", touchStartHandler);
+    });
+
     this.stopCbs.push(() => {
       window.removeEventListener("pointerdown", pointerDownHandler);
       window.removeEventListener("pointermove", pointerMoveHandler);
