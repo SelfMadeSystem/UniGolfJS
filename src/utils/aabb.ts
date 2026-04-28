@@ -1,18 +1,24 @@
 import { lineLineIntersection } from "./line";
-import { Vector2 } from "./vec";
+import { Vector2, type VecLike } from "./vec";
 
 export class AABB {
   public readonly tl: Vector2;
   public readonly br: Vector2;
 
   constructor(
-    a: [number, number] | { x: number; y: number },
-    b: [number, number] | { x: number; y: number },
+    a: VecLike,
+    b: VecLike,
   ) {
     const vecA = new Vector2(a);
     const vecB = new Vector2(b);
     this.tl = new Vector2(Math.min(vecA.x, vecB.x), Math.min(vecA.y, vecB.y));
     this.br = new Vector2(Math.max(vecA.x, vecB.x), Math.max(vecA.y, vecB.y));
+  }
+
+  static fromCenterSize(center: VecLike, size: VecLike): AABB {
+    const c = new Vector2(center);
+    const s = new Vector2(size).mult(0.5);
+    return new AABB(c.sub(s), c.add(s));
   }
 
   get top() {
@@ -147,6 +153,14 @@ export class AABB {
     }
 
     return false;
+  }
+
+  fillRect(ctx: CanvasRenderingContext2D) {
+    ctx.fillRect(this.left, this.top, this.width, this.height);
+  }
+
+  strokeRect(ctx: CanvasRenderingContext2D) {
+    ctx.strokeRect(this.left, this.top, this.width, this.height);
   }
 
   toString(): string {

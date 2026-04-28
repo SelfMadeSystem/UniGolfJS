@@ -2,20 +2,12 @@ import z from "zod";
 import { Vector2 } from "@/utils/vec";
 import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { Vec2Schema } from "@/utils/data";
 import { LAYERS } from "../levelConfig";
 import type { RigidBody } from "./rigidBody";
+import { AABB } from "@/utils/aabb";
 
 export const CircleObjectSchema = LevelObjectSchema.extend({
-  scale: Vec2Schema.refine((v) => v.x > 0 && v.y > 0, {
-    message: "Scale must be positive",
-  })
-    .refine((v) => v.x === v.y, {
-      message: "CircleObject must be a circle",
-    })
-    .default(new Vector2(1, 1)),
-  mass: z.number().positive().default(1),
-  velocity: Vec2Schema.default(new Vector2(0, 0)),
+  radius: z.number().positive().default(10),
 });
 
 export type Constraint = {
@@ -32,9 +24,16 @@ export abstract class CircleObject<
     super(options);
   }
 
+  public get radius(): number {
+    return this.data.radius;
+  }
+
+  override getAABB(): AABB {
+    return AABB.fromCenterSize(this.pos, [this.radius * 2, this.radius * 2]);
+  }
+
   override isPointInside(point: Vector2): boolean {
-    const radius = this.scale.x / 2;
-    return this.pos.sub(point).length() <= radius;
+    return this.pos.sub(point).length() <= this.data.radius;
   }
 
   abstract getPathInfo(): PathInfo;
@@ -48,7 +47,7 @@ export abstract class CircleObject<
     shadowPath.arc(
       pos.x,
       pos.y,
-      this.scale.x / 2 + pathInfo.outline,
+      this.data.radius + pathInfo.outline,
       0,
       Math.PI * 2,
     );
@@ -56,14 +55,14 @@ export abstract class CircleObject<
     outlinePath.arc(
       pos.x,
       pos.y,
-      this.scale.x / 2 + pathInfo.outline,
+      this.data.radius + pathInfo.outline,
       0,
       Math.PI,
     );
     outlinePath.arc(
       pos.x,
       pos.y - pathInfo.height,
-      this.scale.x / 2 + pathInfo.outline,
+      this.data.radius + pathInfo.outline,
       Math.PI,
       0,
     );
@@ -71,7 +70,7 @@ export abstract class CircleObject<
     fillPath.arc(
       pos.x,
       pos.y - pathInfo.height,
-      this.scale.x / 2,
+      this.data.radius,
       0,
       Math.PI * 2,
     );
@@ -91,7 +90,7 @@ export abstract class CircleObject<
           ctx.strokeStyle = "#f00";
           ctx.lineWidth = 0.5;
           ctx.beginPath();
-          ctx.arc(this.pos.x, this.pos.y, this.scale.x / 2, 0, Math.PI * 2);
+          ctx.arc(this.pos.x, this.pos.y, this.data.radius, 0, Math.PI * 2);
           ctx.stroke();
         }),
       );
@@ -100,7 +99,7 @@ export abstract class CircleObject<
   }
 
   intersectsRigidBody(rigidBody: RigidBody): boolean {
-    const radius = (this.scale.x + rigidBody.scale.x) / 2;
+    const radius = (this.data.radius + rigidBody.radius) / 2;
     return this.pos.distSq(rigidBody.pos) <= radius * radius;
   }
 

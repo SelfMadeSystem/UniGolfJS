@@ -7,8 +7,6 @@ import { getLevelScene } from "@/scenes/state";
 export const GameObjectSchema = z.object({
   /** The center position of the object. */
   position: Vec2Schema.default(new Vector2(0, 0)),
-  /** The size of the object. Represents the width and height of the object's AABB. */
-  scale: Vec2Schema.default(new Vector2(1, 1)),
   debug: z.boolean().default(false),
 });
 
@@ -18,7 +16,7 @@ type GameObjectKey<SchemaType extends typeof GameObjectSchema> = Extract<
 >;
 type GameObjectListener<
   SchemaType extends typeof GameObjectSchema,
-  K extends GameObjectKey<SchemaType> | "position" | "scale",
+  K extends GameObjectKey<SchemaType> | "position",
 > = (value: z.infer<SchemaType>[K]) => void;
 
 export abstract class GameObject<
@@ -41,16 +39,12 @@ export abstract class GameObject<
 
   public pos: Vector2;
 
-  get scale(): Vector2 {
-    return this.data.scale;
-  }
-
   constructor(options: z.input<typeof GameObjectSchema>) {
     this.data = this.schema.parse(options);
     this.pos = this.data.position;
   }
 
-  on<K extends SchemaKeys | "position" | "scale">(
+  on<K extends SchemaKeys | "position">(
     key: K,
     listener: GameObjectListener<SchemaType, K>,
   ): void;
@@ -68,7 +62,7 @@ export abstract class GameObject<
     this.anyListeners.add(listener);
   }
 
-  protected emit<K extends GameObjectKey<SchemaType> | "position" | "scale">(
+  protected emit<K extends GameObjectKey<SchemaType> | "position">(
     key: K,
     value: z.infer<SchemaType>[K],
   ): void;

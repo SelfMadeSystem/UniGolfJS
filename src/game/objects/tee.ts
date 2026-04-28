@@ -1,15 +1,17 @@
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 import { Vector2 } from "@/utils/vec";
 import { LevelObject, LevelObjectSchema } from "./levelObject";
-import type z from "zod";
+import z from "zod";
 import { LAYERS } from "../levelConfig";
-import { Vec2Schema } from "@/utils/data";
 import { Ball } from "./ball";
 import { getLevelScene } from "@/scenes/state";
+import { AABB } from "@/utils/aabb";
 
 const TeeSchema = LevelObjectSchema.extend({
-  scale: Vec2Schema.default(new Vector2(60, 40)),
+  radius: z.number().positive().default(7.5),
 });
+
+const TEE_SIZE = new Vector2(60, 40);
 
 const MAX_DRIVER_DISTANCE = 150;
 const DRIVER_POWER_MULTIPLIER = 0.3;
@@ -22,6 +24,10 @@ export class Tee extends LevelObject<typeof TeeSchema> {
 
   constructor(options: z.input<typeof TeeSchema>) {
     super(options);
+  }
+
+  override getAABB(): AABB {
+    return AABB.fromCenterSize(this.pos, TEE_SIZE);
   }
 
   override isPointInside(point: Vector2): boolean {
@@ -47,7 +53,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
             ...this.data,
             position: this.pos,
             velocity: new Vector2(0, 0),
-            scale: new Vector2(15, 15),
+            radius: this.data.radius,
           });
           scene.addObject(newBall);
           this.ball = newBall;
@@ -81,12 +87,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
       pass(LAYERS.TEE, (ctx) => {
         const { teeColor } = this.data;
         ctx.fillStyle = teeColor;
-        ctx.fillRect(
-          this.pos.x - this.scale.x / 2,
-          this.pos.y - this.scale.y / 2,
-          this.scale.x,
-          this.scale.y,
-        );
+        this.getAABB().fillRect(ctx);
       }),
       pass(LAYERS.INDICATORS, (ctx) => {
         if (!this.driverPos || !this.ball) return;

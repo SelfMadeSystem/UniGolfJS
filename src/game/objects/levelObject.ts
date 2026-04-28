@@ -1,6 +1,6 @@
 import type z from "zod";
 import { GameObject, GameObjectSchema } from "./gameObject";
-import { LAYERS, levelConfigSchema, type LevelConfig } from "../levelConfig";
+import { LAYERS, levelConfigSchema } from "../levelConfig";
 import { type RenderPass, pass } from "@/render/drawable";
 import { generatePathsFromPoints } from "@/utils/pathUtils";
 import type { Vector2 } from "@/utils/vec";
@@ -13,7 +13,7 @@ export const LevelObjectSchema = GameObjectSchema.extend(
 export type PathInfo = {
   shadowLayer?: number;
   outlineLayer: number;
-  heightLayer: number;
+  heightLayer?: number;
   fillLayer: number;
   shadowColor?: string;
   outlineColor: string;
@@ -34,12 +34,7 @@ export abstract class LevelObject<
     super(options);
   }
   
-  getAABB(): AABB {
-    return new AABB(
-      this.pos.sub(this.scale.mult(0.5)),
-      this.pos.add(this.scale.mult(0.5)),
-    );
-  }
+  abstract getAABB(): AABB;
 
   abstract isPointInside(point: Vector2): boolean;
 
@@ -76,7 +71,7 @@ export abstract class LevelObject<
         ctx.fill(fillPath);
       }),
     ];
-    if (height > 0) {
+    if (height > 0 && heightLayer !== undefined && outlineColor) {
       passes.push(
         pass(heightLayer, (ctx) => {
           ctx.fillStyle = outlineColor;

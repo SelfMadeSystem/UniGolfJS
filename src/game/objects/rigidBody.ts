@@ -3,7 +3,7 @@ import { Vector2 } from "@/utils/vec";
 import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 import { Vec2Schema } from "@/utils/data";
-import { $scene, getLevelScene } from "@/scenes/state";
+import { getLevelScene } from "@/scenes/state";
 import { LevelScene } from "@/scenes/levelScene";
 import { PolyObject, type CollisionInfo } from "./polyObject";
 import { AABB } from "@/utils/aabb";
@@ -12,13 +12,7 @@ import { CircleObject } from "./circleObject";
 import { lerp } from "@/utils/mathUtils";
 
 export const RigidBodySchema = LevelObjectSchema.extend({
-  scale: Vec2Schema.refine((v) => v.x > 0 && v.y > 0, {
-    message: "Scale must be positive",
-  })
-    .refine((v) => v.x === v.y, {
-      message: "RigidBody must be a circle",
-    })
-    .default(new Vector2(1, 1)),
+  radius: z.number().positive().default(15),
   mass: z.number().positive().default(1),
   velocity: Vec2Schema.default(new Vector2(0, 0)),
 });
@@ -59,6 +53,14 @@ export abstract class RigidBody<
     this.rigidBodyId = RigidBody.nextRigidBodyId++;
   }
 
+  public get radius(): number {
+    return this.data.radius;
+  }
+
+  override getAABB(): AABB {
+    return AABB.fromCenterSize(this.pos, [this.radius * 2, this.radius * 2]);
+  }
+
   setConstraint(constraint: Constraint | null): void {
     this.constraint = constraint;
   }
@@ -73,7 +75,7 @@ export abstract class RigidBody<
 
   override isPointInside(point: Vector2): boolean {
     if (this.inWater) return false;
-    const radius = this.scale.x / 2;
+    const radius = this.radius;
     return this.pos.sub(point).length() <= radius;
   }
 
@@ -108,7 +110,7 @@ export abstract class RigidBody<
     const collision = RigidBody.getEarliestWallCollision(
       scene,
       this.pos,
-      this.scale.x / 2,
+      this.radius,
       this.velocity,
     );
 
@@ -136,7 +138,7 @@ export abstract class RigidBody<
   }
 
   private resolveRigidBodyCollisions(scene: LevelScene): void {
-    const myRadius = this.scale.x / 2;
+    const myRadius = this.radius;
     const myInvMass = 1 / this.data.mass;
 
     const constraint = this.getConstraint();
@@ -164,7 +166,7 @@ export abstract class RigidBody<
       if (RigidBody.resolvedPairsThisFrame.has(pairKey)) continue;
       RigidBody.resolvedPairsThisFrame.add(pairKey);
 
-      const otherRadius = obj.scale.x / 2;
+      const otherRadius = obj.radius;
       const delta = obj.pos.sub(this.pos);
       const distSq = delta.lenSq();
       const minDist = myRadius + otherRadius;
@@ -213,7 +215,7 @@ export abstract class RigidBody<
     if (!this.constraint) return;
     const delta = this.pos.sub(this.constraint.pos);
     const distSq = delta.lenSq();
-    const maxDist = this.constraint.radius - this.scale.x / 2;
+    const maxDist = this.constraint.radius - this.radius;
     const maxDistSq = maxDist * maxDist;
 
     if (distSq > maxDistSq) {
@@ -288,7 +290,7 @@ export abstract class RigidBody<
 
     const pos = this.prevPos.lerp(this.pos, tickInterp);
 
-    let size = this.scale.x / 2;
+    let { radius } = this;
     let { height } = pathInfo;
 
     if (this.inWater) {
@@ -296,22 +298,22 @@ export abstract class RigidBody<
       const speed = this.velocity.length();
       const speedInfluence = 1 + speed * WATER_ANIMATION_SPEED_INFLUENCE;
       const interp = (anim / WATER_ANIMATION_TIME) * speedInfluence;
-      size = lerp(size, 0, interp);
+      radius = lerp(radius, 0, interp);
       height = lerp(height, 0, interp);
     }
 
-    if (size <= pathInfo.outline) return [];
+    if (radius <= pathInfo.outline) return [];
 
     const shadowPath = new Path2D();
-    shadowPath.arc(pos.x, pos.y, size, 0, Math.PI * 2);
+    shadowPath.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
     const outlinePath = new Path2D();
-    outlinePath.arc(pos.x, pos.y, size, 0, Math.PI);
-    outlinePath.arc(pos.x, pos.y - height, size, Math.PI, 0);
+    outlinePath.arc(pos.x, pos.y, radius, 0, Math.PI);
+    outlinePath.arc(pos.x, pos.y - height, radius, Math.PI, 0);
     const fillPath = new Path2D();
     fillPath.arc(
       pos.x,
       pos.y - height,
-      size - pathInfo.outline,
+      radius - pathInfo.outline,
       0,
       Math.PI * 2,
     );
@@ -331,7 +333,7 @@ export abstract class RigidBody<
           ctx.strokeStyle = "#f00";
           ctx.lineWidth = 0.5;
           ctx.beginPath();
-          ctx.arc(this.pos.x, this.pos.y, this.scale.x / 2, 0, Math.PI * 2);
+          ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
           ctx.stroke();
         }),
       );

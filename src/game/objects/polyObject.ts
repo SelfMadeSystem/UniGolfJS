@@ -4,6 +4,8 @@ import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
 import type { RenderInfo, RenderPass } from "@/render/drawable";
 import { Segment } from "@/utils/line";
 import type { RigidBody } from "./rigidBody";
+import { Vec2Schema } from "@/utils/data";
+import { AABB } from "@/utils/aabb";
 
 export type CollisionInfo = {
   hit: Vector2;
@@ -14,6 +16,7 @@ export type CollisionInfo = {
 };
 
 export const PolyObjectSchema = LevelObjectSchema.extend({
+  scale: Vec2Schema.default(new Vector2(40, 40)),
   shape: z
     .enum([
       "rectangle",
@@ -65,6 +68,14 @@ export abstract class PolyObject<
 
   get isSolid(): boolean {
     return true;
+  }
+
+  get scale(): Vector2 {
+    return this.data.scale;
+  }
+
+  override getAABB(): AABB {
+    return AABB.fromCenterSize(this.pos, this.scale);
   }
 
   getPoints(): Vector2[] {
@@ -267,24 +278,12 @@ export abstract class PolyObject<
    */
   intersectsRigidBody(rigidBody: RigidBody): boolean {
     if (!this.getAABB().intersects(rigidBody.getAABB())) return false;
-    const pointsToCheck = [
+    const collision = this.getCollision(
       rigidBody.pos,
-      rigidBody.pos.add(new Vector2(rigidBody.scale.x / 2, 0)),
-      rigidBody.pos.add(new Vector2(-rigidBody.scale.x / 2, 0)),
-      rigidBody.pos.add(new Vector2(0, rigidBody.scale.y / 2)),
-      rigidBody.pos.add(new Vector2(0, -rigidBody.scale.y / 2)),
-    ];
-    if (pointsToCheck.some((point) => this.isPointInside(point))) {
-      return true;
-    }
-    const segments = this.getSegments();
-    for (const segment of segments) {
-      const closestPoint = segment.closestPointTo(rigidBody.pos);
-      if (closestPoint.dist(rigidBody.pos) <= rigidBody.scale.x / 2) {
-        return true;
-      }
-    }
-    return false;
+      rigidBody.radius,
+      new Vector2(0, 0),
+    );
+    return collision !== null;
   }
 
   /**
@@ -293,12 +292,27 @@ export abstract class PolyObject<
    * @returns True if the RigidBody is fully contained, false otherwise.
    */
   containsRigidBody(rigidBody: RigidBody): boolean {
-    const corners = [
-      rigidBody.pos.add(new Vector2(rigidBody.scale.x / 2, rigidBody.scale.y / 2)),
-      rigidBody.pos.add(new Vector2(-rigidBody.scale.x / 2, rigidBody.scale.y / 2)),
-      rigidBody.pos.add(new Vector2(rigidBody.scale.x / 2, -rigidBody.scale.y / 2)),
-      rigidBody.pos.add(new Vector2(-rigidBody.scale.x / 2, -rigidBody.scale.y / 2)),
-    ];
-    return corners.every((corner) => this.isPointInside(corner));
+    // Check if the circle's AABB is fully contained within the PolyObject's AABB
+    const circleAABB = rigidBody.getAABB();
+    if (!this.getAABB().containsAABB(circleAABB)) {
+      return false;
+    }
+
+    // Check if the circle's edge intersects any of the PolyObject's edges
+    const segments = this.getSegments();
+    for (const segment of segments) {
+      const collision = this.circleSegmentCollision(
+        rigidBody.pos,
+        rigidBody.radius,
+        new Vector2(0, 0), // No velocity, just checking for intersection
+        segment,
+      );
+      if (collision) {
+        return false;
+      }
+    }
+
+    // If no intersections and AABB is contained, the circle is fully contained
+    return true;
   }
 }
