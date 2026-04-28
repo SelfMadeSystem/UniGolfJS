@@ -17,6 +17,7 @@ export function defaultLevel(): Level {
       new Wall({
         position: new Vector2(0, -height / 2 + wallThickness / 2),
         scale: new Vector2(width, wallThickness),
+        shape: "triangle",
         ...defaultLevelConfig,
       }),
       new Wall({

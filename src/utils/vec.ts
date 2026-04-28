@@ -27,6 +27,10 @@ export class Vector2 {
     this.y = args[1] ?? args[0];
   }
 
+  get yx(): Vector2 {
+    return new Vector2(this.y, this.x);
+  }
+
   static fromAngle(angle: number, magnitude: number = 1): Vector2 {
     return new Vector2(
       Math.cos(angle) * magnitude,

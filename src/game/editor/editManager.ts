@@ -10,8 +10,9 @@ import { AABB } from "@/utils/aabb";
 import { LAYERS } from "../levelConfig";
 import type { EditScene } from "@/scenes/editScene";
 import { Vector2 } from "@/utils/vec";
+import { HandlesManager } from "./handles";
 
-const RESIZE_HANDLE_SIZE_PX = 14;
+// handle rendering/hit-testing delegated to EditorHandles
 
 export class EditManager implements Drawable {
   public selectedObjects: Set<LevelObject> = new Set();
@@ -19,8 +20,14 @@ export class EditManager implements Drawable {
   /** world coordinates */
   public startPointer: Vector2 | null = null;
   public interactionMode: "move" | "resize" | null = null;
+  public handles: HandlesManager | null = null;
 
   constructor(public scene: EditScene) {}
+
+  initHandles(): HandlesManager {
+    if (!this.handles) this.handles = new HandlesManager(this.scene);
+    return this.handles;
+  }
 
   public selectObject(obj: LevelObject, multiSelect = false) {
     if (!multiSelect && !this.selectedObjects.has(obj)) {
@@ -55,13 +62,45 @@ export class EditManager implements Drawable {
     return aabb;
   }
 
-  private getResizeHandleAABB(selectionAABB: AABB): AABB {
-    const handleSize = RESIZE_HANDLE_SIZE_PX / this.scene.cameraZoom;
-    const halfHandle = handleSize / 2;
-    return new AABB(
-      selectionAABB.br.sub(new Vector2(halfHandle, halfHandle)),
-      selectionAABB.br.add(new Vector2(halfHandle, halfHandle)),
-    );
+  // rotate / resize handle geometry and hit-testing moved to EditorHandles
+
+  private rotateSelectionCCW(): void {
+    if (this.selectedObjects.size === 0) return;
+    const aabb = this.getSelectedAABB();
+    if (!aabb) return;
+    if (this.selectedObjects.size === 1) {
+      // single object: rotate shape (AABB stays same)
+      const obj = [...this.selectedObjects][0]!;
+      obj.editorRotateShapeCCW();
+      return;
+    }
+    const center = aabb.center;
+    for (const obj of this.selectedObjects) {
+      const rel = obj.pos.sub(center);
+      const relRot = new Vector2(rel.y, -rel.x); // CCW 90
+      obj.pos = center.add(relRot);
+      obj.editorRotateCCW();
+      obj.set("position", obj.pos);
+    }
+  }
+
+  private rotateSelectionCW(): void {
+    if (this.selectedObjects.size === 0) return;
+    const aabb = this.getSelectedAABB();
+    if (!aabb) return;
+    if (this.selectedObjects.size === 1) {
+      const obj = [...this.selectedObjects][0]!;
+      obj.editorRotateShapeCW();
+      return;
+    }
+    const center = aabb.center;
+    for (const obj of this.selectedObjects) {
+      const rel = obj.pos.sub(center);
+      const relRot = new Vector2(-rel.y, rel.x); // CW 90
+      obj.pos = center.add(relRot);
+      obj.editorRotateCW();
+      obj.set("position", obj.pos);
+    }
   }
 
   private getSnappedPoint(point: Vector2): Vector2 {
@@ -89,10 +128,7 @@ export class EditManager implements Drawable {
     }
   }
 
-  private isOnResizeHandle(pointerPos: Vector2, selectedAABB: AABB): boolean {
-    const handleAABB = this.getResizeHandleAABB(selectedAABB);
-    return handleAABB.containsPoint(pointerPos);
-  }
+  // delegated to EditorHandles
 
   render(info: RenderInfo): RenderPass[] {
     const passes: RenderPass[] = [];
@@ -112,25 +148,6 @@ export class EditManager implements Drawable {
               aabb.br.x - aabb.tl.x,
               aabb.br.y - aabb.tl.y,
             );
-
-            const handleAABB = this.getResizeHandleAABB(aabb);
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(
-              handleAABB.tl.x,
-              handleAABB.tl.y,
-              handleAABB.br.x - handleAABB.tl.x,
-              handleAABB.br.y - handleAABB.tl.y,
-            );
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 1;
-            ctx.setLineDash([]);
-            ctx.strokeRect(
-              handleAABB.tl.x,
-              handleAABB.tl.y,
-              handleAABB.br.x - handleAABB.tl.x,
-              handleAABB.br.y - handleAABB.tl.y,
-            );
-
             ctx.restore();
 
             if (this.selectedObjects.size <= 1) return;
@@ -143,6 +160,9 @@ export class EditManager implements Drawable {
           }),
         ],
       );
+      // draw handles via the handles helper
+      const handles = this.handles ?? this.initHandles();
+      passes.push(...handles.render(aabb, info));
     }
 
     if (
@@ -164,10 +184,14 @@ export class EditManager implements Drawable {
   updateHighlight(info: PointerInfo) {
     const pointerPos = this.scene.screenToWorld(info.pos);
     const selectedAABB = this.getSelectedAABB();
-    if (selectedAABB && this.isOnResizeHandle(pointerPos, selectedAABB)) {
-      this.highlightedObject = null;
-      document.body.style.cursor = "nwse-resize";
-      return;
+    if (selectedAABB) {
+      const handles = this.handles ?? this.initHandles();
+      const hit = handles.hitTest(pointerPos, selectedAABB);
+      if (hit) {
+        this.highlightedObject = null;
+        document.body.style.cursor = hit.cursor();
+        return;
+      }
     }
 
     const obj = this.scene.getObjectAtPointer(info);
@@ -246,10 +270,25 @@ export class EditManager implements Drawable {
     const pointerPos = this.scene.screenToWorld(info.pos);
 
     const selectedAABB = this.getSelectedAABB();
-    if (selectedAABB && this.isOnResizeHandle(pointerPos, selectedAABB)) {
-      this.startPointer = pointerPos;
-      this.interactionMode = "resize";
-      return;
+    if (selectedAABB) {
+      const handles = this.handles ?? this.initHandles();
+      const hit = handles.hitTest(pointerPos, selectedAABB);
+      if (hit) {
+        const act = hit.action();
+        if (act === "resize") {
+          this.startPointer = pointerPos;
+          this.interactionMode = "resize";
+          return;
+        }
+        if (act === "rotateCCW") {
+          this.rotateSelectionCCW();
+          return;
+        }
+        if (act === "rotateCW") {
+          this.rotateSelectionCW();
+          return;
+        }
+      }
     }
 
     const obj = this.scene.getObjectAtPointer(info);

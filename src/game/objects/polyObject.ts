@@ -29,6 +29,20 @@ export const PolyObjectSchema = LevelObjectSchema.extend({
   rotation: z.enum(["0", "90", "180", "270"]).default("0"),
 });
 
+const CCW_ROT_TABLE = {
+  "0": "90",
+  "90": "180",
+  "180": "270",
+  "270": "0",
+} as const;
+
+const CW_ROT_TABLE = {
+  "0": "270",
+  "90": "0",
+  "180": "90",
+  "270": "180",
+} as const;
+
 const baseQuarterCirclePoints = Array.from({ length: 16 }, (_, i) => {
   const angle = (i / 15) * (Math.PI / 2);
   return new Vector2(Math.cos(angle), Math.sin(angle)).sub([0.5, 0.5]);
@@ -319,5 +333,29 @@ export abstract class PolyObject<
   override editorScale(scale: Vector2): void {
     // @ts-expect-error abstract classes don't work well with generic schemas
     this.set("scale", this.scale.mult(scale));
+  }
+
+  override editorRotateCW(): void {
+    this.editorRotateShapeCW();
+    // @ts-expect-error abstract classes don't work well with generic schemas
+    this.set("scale", this.scale.yx);
+  }
+
+  override editorRotateCCW(): void {
+    this.editorRotateShapeCCW();
+    // @ts-expect-error abstract classes don't work well with generic schemas
+    this.set("scale", this.scale.yx);
+  }
+
+  override editorRotateShapeCCW(): void {
+    const newRotation = CCW_ROT_TABLE[this.data.rotation];
+    // @ts-expect-error abstract classes don't work well with generic schemas
+    this.set("rotation", newRotation);
+  }
+
+  override editorRotateShapeCW(): void {
+    const newRotation = CW_ROT_TABLE[this.data.rotation];
+    // @ts-expect-error abstract classes don't work well with generic schemas
+    this.set("rotation", newRotation);
   }
 }

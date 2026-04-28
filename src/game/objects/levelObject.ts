@@ -180,4 +180,23 @@ export abstract class LevelObject<
    * Scales the object relative to its center by the given scale factor.
    */
   abstract editorScale(scale: Vector2): void;
+
+  /**
+   * Rotates the object around its center clockwise by 90 degrees.
+   */
+  editorRotateCW(): void {}
+  /**
+   * Rotates the object around its center counterclockwise by 90 degrees.
+   */
+  editorRotateCCW(): void {}
+
+  /**
+   * Rotates the object's shape counterclockwise by 90 degrees. The object's AABB should be the same after this operation.
+   */
+  editorRotateShapeCCW(): void {}
+
+  /**
+   * Rotates the object's shape clockwise by 90 degrees. The object's AABB should be the same after this operation.
+   */
+  editorRotateShapeCW(): void {}
 }
