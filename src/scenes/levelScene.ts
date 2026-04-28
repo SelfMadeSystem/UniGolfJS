@@ -35,7 +35,7 @@ export abstract class LevelScene extends Scene {
     }
   }
 
-  constructor(level: Level) {
+  constructor(public level: Level) {
     super();
 
     const { config, objects } = level;
@@ -113,6 +113,16 @@ export abstract class LevelScene extends Scene {
 
   addObject(obj: GameObject<any>): void {
     this.objects.push(obj);
+  }
+
+  moveObjectToTop(obj: GameObject<any>): void {
+    this.removeObject(obj);
+    this.addObject(obj);
+  }
+
+  moveObjectToBottom(obj: GameObject<any>): void {
+    this.removeObject(obj);
+    this.objects.unshift(obj);
   }
 
   resetAllObjects(): void {

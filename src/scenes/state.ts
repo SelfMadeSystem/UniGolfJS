@@ -1,10 +1,10 @@
 import { Scene } from "@/scenes/scene";
 import { atom } from "nanostores";
 import { LevelScene } from "./levelScene";
-import { PlayScene } from "./playScene";
 import { defaultLevel } from "@/game/defaultLevel";
+import { EditScene } from "./editScene";
 
-export const $scene = atom<Scene>(new PlayScene(defaultLevel()));
+export const $scene = atom<Scene>(new EditScene(defaultLevel()));
 
 export function getLevelScene(): LevelScene | null {
   const scene = $scene.get();

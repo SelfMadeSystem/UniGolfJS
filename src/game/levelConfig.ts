@@ -53,6 +53,7 @@ export enum LAYERS {
   WALL_FILL,
   INDICATORS,
   LIGHTS,
+  EDITOR,
   DEBUG,
 }
 

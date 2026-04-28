@@ -1,10 +1,8 @@
-import { MenuScene } from "@/scenes/menuScene";
+import { PlayScene } from "@/scenes/playScene";
 import { $scene, getLevelScene } from "@/scenes/state";
 import { motion } from "motion/react";
-import { EditMenu } from "./EditMenu";
-import { EditScene } from "@/scenes/editScene";
 
-export function PlayMenu() {
+export function EditMenu() {
   return (
     <motion.div
       className="absolute top-0 left-0 flex items-center justify-center"
@@ -15,21 +13,13 @@ export function PlayMenu() {
       <button
         className="px-4 py-2 bg-gray-800 text-white rounded cursor-pointer"
         onClick={() => {
-          $scene.set(new MenuScene());
-        }}
-      >
-        Back to Menu
-      </button>
-      <button
-        className="px-4 py-2 bg-gray-800 text-white rounded cursor-pointer"
-        onClick={() => {
           const levelScene = getLevelScene();
           if (levelScene) {
-            $scene.set(new EditScene(levelScene.level));
+            $scene.set(new PlayScene(levelScene.level));
           }
         }}
       >
-        Edit Level
+        Play Level
       </button>
     </motion.div>
   );

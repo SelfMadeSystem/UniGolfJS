@@ -114,6 +114,20 @@ export class AABB {
     );
   }
 
+  expandToInclude(point: Vector2): AABB {
+    return new AABB(
+      new Vector2(Math.min(this.tl.x, point.x), Math.min(this.tl.y, point.y)),
+      new Vector2(Math.max(this.br.x, point.x), Math.max(this.br.y, point.y)),
+    );
+  }
+
+  expandToIncludeAABB(other: AABB): AABB {
+    return new AABB(
+      new Vector2(Math.min(this.tl.x, other.tl.x), Math.min(this.tl.y, other.tl.y)),
+      new Vector2(Math.max(this.br.x, other.br.x), Math.max(this.br.y, other.br.y)),
+    );
+  }
+
   lineIntersects(start: Vector2, end: Vector2): boolean {
     const lineAABB = new AABB(start, end);
     if (!this.intersects(lineAABB)) {
