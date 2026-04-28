@@ -17,7 +17,7 @@ export class EditManager implements Drawable {
   constructor(public scene: EditScene) {}
 
   public selectObject(obj: LevelObject, multiSelect = false) {
-    if (!multiSelect) {
+    if (!multiSelect && !this.selectedObjects.has(obj)) {
       this.deselectAll();
     }
     this.selectedObjects.add(obj);

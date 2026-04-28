@@ -11,12 +11,7 @@ export function CanvasComponent() {
     let theRenderer: Renderer;
 
     if (!renderer) {
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        console.error("Failed to get canvas context");
-        return;
-      }
-      const newRenderer = new Renderer(ctx);
+      const newRenderer = new Renderer(canvas);
       newRenderer.start();
       theRenderer = newRenderer;
       setRenderer(newRenderer);

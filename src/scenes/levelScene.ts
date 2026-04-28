@@ -8,9 +8,10 @@ import {
 import { Scene } from "./scene";
 import type { GameObject } from "@/game/objects/gameObject";
 import { LAYERS, WALL_CONFIG, type Level } from "@/game/levelConfig";
-import type { PointerInfo } from "@/render/renderer";
+import { $renderer, type PointerInfo } from "@/render/renderer";
 import { LevelObject } from "@/game/objects/levelObject";
 import { Vector2 } from "@/utils/vec";
+import { AABB } from "@/utils/aabb";
 
 const WATER_FILL_COLOR = "#40A0FF"; // TODO: put this somewhere more sensible
 
@@ -67,15 +68,35 @@ export abstract class LevelScene extends Scene {
     this.objects = objects;
   }
 
+  public getVisibleAABB(): AABB {
+    const renderer = $renderer.get();
+    if (!renderer) {
+      throw new Error("Renderer not initialized");
+    }
+    const canvas = renderer.canvas;
+    const topLeft = this.getPointerPositionInWorld(
+      new Vector2(-canvas.clientWidth / 2, -canvas.clientHeight / 2),
+    );
+    const bottomRight = this.getPointerPositionInWorld(
+      new Vector2(canvas.clientWidth / 2, canvas.clientHeight / 2),
+    );
+    return new AABB(topLeft, bottomRight);
+  }
+
   override tick(): void {
     this.tickPointers = [];
   }
 
   override render(info: RenderInfo, ctx: CanvasRenderingContext2D): void {
     ctx.save();
-    ctx.translate(-this.cameraPos.x, -this.cameraPos.y);
     ctx.scale(this.cameraZoom, this.cameraZoom);
-    renderDrawables([...this.objects, ...this.drawables], info, ctx, this.passes);
+    ctx.translate(-this.cameraPos.x, -this.cameraPos.y);
+    renderDrawables(
+      [...this.objects, ...this.drawables],
+      info,
+      ctx,
+      this.passes,
+    );
     ctx.restore();
   }
 
@@ -91,6 +112,9 @@ export abstract class LevelScene extends Scene {
     this.lastPointer = info;
   }
 
+  /**
+   * Converts a pointer position (relative to the center of the canvas) to a world position, taking into account camera position and zoom
+   */
   getPointerPositionInWorld(pos: Vector2): Vector2 {
     return pos.div(this.cameraZoom).add(this.cameraPos);
   }

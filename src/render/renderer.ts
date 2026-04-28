@@ -1,6 +1,7 @@
 import { $scene } from "@/scenes/state";
 import type { RenderInfo } from "./drawable";
 import { Vector2 } from "@/utils/vec";
+import { atom } from "nanostores";
 
 export type PointerInfo = {
   pos: Vector2;
@@ -14,8 +15,10 @@ export type PointerInfo = {
   eventType: "pointerdown" | "pointermove" | "pointerup";
 };
 
+export const $renderer = atom<Renderer | null>(null);
+
 export class Renderer {
-  private ctx: CanvasRenderingContext2D;
+  public readonly ctx: CanvasRenderingContext2D;
   private lastTime: number = 0;
   private requestId: number | null = null;
   private readonly tickInterval: number = 1000 / 30;
@@ -24,8 +27,15 @@ export class Renderer {
   private readonly stopCbs: (() => void)[] = [];
   public lastRenderInfo: RenderInfo | null = null;
 
-  constructor(ctx: CanvasRenderingContext2D) {
-    this.ctx = ctx;
+  constructor(public readonly canvas: HTMLCanvasElement) {
+    this.ctx = canvas.getContext("2d")!;
+    if (!this.ctx) {
+      throw new Error("Failed to get 2D context");
+    }
+    if ($renderer.get()) {
+      console.warn("Multiple renderers created, this may cause problems");
+    }
+    $renderer.set(this);
   }
 
   start() {
