@@ -3,8 +3,8 @@ import { LAYERS } from "../levelConfig";
 import type { PathInfo } from "./levelObject";
 import type { RigidBody } from "./rigidBody";
 import { CircleObject, CircleObjectSchema } from "./circleObject";
-import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
+import type { Vector2 } from "@/utils/vec";
 
 export const HoleSchema = CircleObjectSchema.extend({
   radius: z.number().positive().default(20),
@@ -47,5 +47,13 @@ export class Hole extends CircleObject<typeof HoleSchema> {
       pos: this.pos,
       radius: this.radius,
     });
+  }
+
+  override editorScale(scale: Vector2): void {
+    this.set(
+      "radius",
+      ((this.radius + HOLE_OUTLINE_WIDTH) * (scale.x + scale.y)) / 2 -
+        HOLE_OUTLINE_WIDTH,
+    );
   }
 }
