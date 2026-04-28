@@ -4,6 +4,7 @@ import { EditMenu } from "@/ui/EditMenu";
 import { EditManager } from "@/game/editor/editManager";
 import { EditorGrid } from "@/game/editor/editorGrid";
 import type { PointerInfo } from "@/render/pointerEvents";
+import { $selectedPlaceable } from "@/game/editor/state";
 
 export class EditScene extends LevelScene {
   public editManager: EditManager = new EditManager(this);
@@ -14,6 +15,7 @@ export class EditScene extends LevelScene {
     this.resetAllObjects();
     this.drawables.push(this.editManager);
     this.drawables.push(this.editorGrid);
+    $selectedPlaceable.set(null);
   }
 
   override get ui() {
