@@ -19,7 +19,8 @@ export class EditManager implements Drawable {
   public highlightedObject: LevelObject | null = null;
   /** world coordinates */
   public startPointer: Vector2 | null = null;
-  public interactionMode: "move" | "resize" | null = null;
+  public interactionMode: "move" | "resize" | "select" | null = null;
+  public selectionPointer: Vector2 | null = null;
   public handles: HandlesManager | null = null;
 
   constructor(public scene: EditScene) {}
@@ -128,6 +129,28 @@ export class EditManager implements Drawable {
     }
   }
 
+  private getSelectionRegionAABB(): AABB | null {
+    if (!this.startPointer || !this.selectionPointer) return null;
+    return new AABB(this.startPointer, this.selectionPointer);
+  }
+
+  private applySelectionRegion(addToSelection: boolean): void {
+    const region = this.getSelectionRegionAABB();
+    if (!region) return;
+
+    if (!addToSelection) {
+      this.deselectAll();
+    }
+
+    for (const obj of this.scene.objects) {
+      if (!(obj instanceof LevelObject)) continue;
+      const aabb = obj.getAABB();
+      if (region.containsAABB(aabb)) {
+        this.selectObject(obj, true);
+      }
+    }
+  }
+
   // delegated to EditorHandles
 
   render(info: RenderInfo): RenderPass[] {
@@ -163,6 +186,32 @@ export class EditManager implements Drawable {
       // draw handles via the handles helper
       const handles = this.handles ?? this.initHandles();
       passes.push(...handles.render(aabb, info));
+    }
+
+    const selectionRegion = this.getSelectionRegionAABB();
+    if (selectionRegion && this.interactionMode === "select") {
+      passes.push(
+        pass(LAYERS.EDITOR, (ctx) => {
+          ctx.save();
+          ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 4]);
+          ctx.fillRect(
+            selectionRegion.tl.x,
+            selectionRegion.tl.y,
+            selectionRegion.br.x - selectionRegion.tl.x,
+            selectionRegion.br.y - selectionRegion.tl.y,
+          );
+          ctx.strokeRect(
+            selectionRegion.tl.x,
+            selectionRegion.tl.y,
+            selectionRegion.br.x - selectionRegion.tl.x,
+            selectionRegion.br.y - selectionRegion.tl.y,
+          );
+          ctx.restore();
+        }),
+      );
     }
 
     if (
@@ -205,6 +254,12 @@ export class EditManager implements Drawable {
   }
 
   pointermove(info: PointerInfo): void {
+    if (this.interactionMode === "select") {
+      this.selectionPointer = this.scene.screenToWorld(info.pos);
+      this.updateHighlight(info);
+      return;
+    }
+
     if (!this.startPointer) {
       this.updateHighlight(info);
       return;
@@ -235,6 +290,16 @@ export class EditManager implements Drawable {
   }
 
   pointerup(info: PointerInfo): void {
+    if (this.interactionMode === "select") {
+      this.selectionPointer = this.scene.screenToWorld(info.pos);
+      this.applySelectionRegion(info.shift);
+      this.startPointer = null;
+      this.selectionPointer = null;
+      this.interactionMode = null;
+      this.updateHighlight(info);
+      return;
+    }
+
     if (this.interactionMode === "resize") {
       const currentAABB = this.getSelectedAABB();
       if (currentAABB) {
@@ -262,6 +327,7 @@ export class EditManager implements Drawable {
     }
 
     this.startPointer = null;
+    this.selectionPointer = null;
     this.interactionMode = null;
     this.updateHighlight(info);
   }
@@ -293,9 +359,8 @@ export class EditManager implements Drawable {
 
     const obj = this.scene.getObjectAtPointer(info);
     if (!(obj instanceof LevelObject)) {
-      this.deselectAll();
-      this.startPointer = null;
-      this.interactionMode = null;
+      this.startPointer = pointerPos;
+      this.interactionMode = "select";
       return;
     }
 
