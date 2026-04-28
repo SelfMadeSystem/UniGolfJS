@@ -36,6 +36,8 @@ export abstract class LevelObject<
   
   abstract getAABB(): AABB;
 
+  abstract getPath(): Path2D;
+
   abstract isPointInside(point: Vector2): boolean;
 
   renderPaths({

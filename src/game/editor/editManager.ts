@@ -49,19 +49,10 @@ export class EditManager implements Drawable {
     return aabb;
   }
 
-  public getSelectedAABBs(): AABB[] {
-    const aabbs: AABB[] = [];
-    for (const obj of this.selectedObjects) {
-      aabbs.push(obj.getAABB());
-    }
-    return aabbs;
-  }
-
   render(info: RenderInfo): RenderPass[] {
     const passes: RenderPass[] = [];
     const aabb = this.getSelectedAABB();
     if (aabb) {
-      const aabbs = this.getSelectedAABBs();
       passes.push(
         ...[
           pass(LAYERS.EDITOR, (ctx) => {
@@ -78,16 +69,12 @@ export class EditManager implements Drawable {
             );
             ctx.restore();
 
-            if (aabbs.length <= 1) return;
+            if (this.selectedObjects.size <= 1) return;
             ctx.strokeStyle = "#FFFFFF";
             ctx.lineWidth = 1;
-            for (const aabb of aabbs) {
-              ctx.strokeRect(
-                aabb.tl.x,
-                aabb.tl.y,
-                aabb.br.x - aabb.tl.x,
-                aabb.br.y - aabb.tl.y,
-              );
+            for (const obj of this.selectedObjects) {
+              const path = obj.getPath();
+              ctx.stroke(path);
             }
           }),
         ],
@@ -98,16 +85,11 @@ export class EditManager implements Drawable {
       this.highlightedObject &&
       !this.selectedObjects.has(this.highlightedObject)
     ) {
-      const aabb = this.highlightedObject.getAABB();
+      const path = this.highlightedObject.getPath();
       passes.push(
         pass(LAYERS.EDITOR, (ctx) => {
           ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-          ctx.fillRect(
-            aabb.tl.x,
-            aabb.tl.y,
-            aabb.br.x - aabb.tl.x,
-            aabb.br.y - aabb.tl.y,
-          );
+          ctx.fill(path);
         }),
       );
     }

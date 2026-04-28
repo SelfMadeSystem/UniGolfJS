@@ -32,6 +32,12 @@ export abstract class CircleObject<
     return AABB.fromCenterSize(this.pos, [this.radius * 2, this.radius * 2]);
   }
 
+  override getPath(): Path2D {
+    const path = new Path2D();
+    path.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
+    return path;
+  }
+
   override isPointInside(point: Vector2): boolean {
     return this.pos.sub(point).length() <= this.data.radius;
   }

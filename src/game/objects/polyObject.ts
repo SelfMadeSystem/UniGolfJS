@@ -96,7 +96,7 @@ export abstract class PolyObject<
     return segments;
   }
 
-  getPath(): Path2D {
+  override getPath(): Path2D {
     const path = new Path2D();
     const points = this.getPoints();
     if (points.length > 0) {

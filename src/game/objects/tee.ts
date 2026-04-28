@@ -30,6 +30,12 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     return AABB.fromCenterSize(this.pos, TEE_SIZE);
   }
 
+  override getPath(): Path2D {
+    const path = new Path2D();
+    this.getAABB().pathRect(path);
+    return path;
+  }
+
   override isPointInside(point: Vector2): boolean {
     return this.getAABB().containsPoint(point);
   }

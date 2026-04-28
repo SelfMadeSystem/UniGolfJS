@@ -163,6 +163,10 @@ export class AABB {
     ctx.strokeRect(this.left, this.top, this.width, this.height);
   }
 
+  pathRect(path: CanvasPath) {
+    path.rect(this.left, this.top, this.width, this.height);
+  }
+
   toString(): string {
     return `AABB(tl: ${this.tl.toString()}, br: ${this.br.toString()})`;
   }

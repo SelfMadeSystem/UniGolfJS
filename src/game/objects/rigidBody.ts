@@ -61,6 +61,12 @@ export abstract class RigidBody<
     return AABB.fromCenterSize(this.pos, [this.radius * 2, this.radius * 2]);
   }
 
+  override getPath(): Path2D {
+    const path = new Path2D();
+    path.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
+    return path;
+  }
+
   setConstraint(constraint: Constraint | null): void {
     this.constraint = constraint;
   }
