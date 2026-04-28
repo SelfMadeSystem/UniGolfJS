@@ -5,16 +5,14 @@ import {
   type RenderPass,
 } from "@/render/drawable";
 import { LevelObject } from "../objects/levelObject";
-import type { PointerInfo } from "@/render/renderer";
 import { AABB } from "@/utils/aabb";
 import { LAYERS } from "../levelConfig";
 import type { EditScene } from "@/scenes/editScene";
 import { Vector2 } from "@/utils/vec";
 import { HandlesManager } from "./handles";
+import type { PointerEventHandler, PointerInfo } from "@/render/pointerEvents";
 
-// handle rendering/hit-testing delegated to EditorHandles
-
-export class EditManager implements Drawable {
+export class EditManager implements Drawable, PointerEventHandler {
   public selectedObjects: Set<LevelObject> = new Set();
   public highlightedObject: LevelObject | null = null;
   /** world coordinates */

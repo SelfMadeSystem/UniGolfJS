@@ -1,9 +1,9 @@
 import type { Level } from "@/game/levelConfig";
 import { LevelScene } from "./levelScene";
 import { EditMenu } from "@/ui/EditMenu";
-import type { PointerInfo } from "@/render/renderer";
 import { EditManager } from "@/game/editor/editManager";
 import { EditorGrid } from "@/game/editor/editorGrid";
+import type { PointerInfo } from "@/render/pointerEvents";
 
 export class EditScene extends LevelScene {
   public editManager: EditManager = new EditManager(this);

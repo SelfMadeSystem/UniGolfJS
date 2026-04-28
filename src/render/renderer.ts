@@ -2,18 +2,7 @@ import { $scene } from "@/scenes/state";
 import type { RenderInfo } from "./drawable";
 import { Vector2 } from "@/utils/vec";
 import { atom } from "nanostores";
-
-export type PointerInfo = {
-  pos: Vector2;
-  leftButton: boolean;
-  rightButton: boolean;
-  middleButton: boolean;
-  shift: boolean;
-  ctrl: boolean;
-  alt: boolean;
-  event: PointerEvent;
-  eventType: "pointerdown" | "pointermove" | "pointerup";
-};
+import type { PointerInfo } from "./pointerEvents";
 
 export const $renderer = atom<Renderer | null>(null);
 

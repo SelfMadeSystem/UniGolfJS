@@ -8,10 +8,11 @@ import {
 import { Scene } from "./scene";
 import type { GameObject } from "@/game/objects/gameObject";
 import { LAYERS, WALL_CONFIG, type Level } from "@/game/levelConfig";
-import { $renderer, type PointerInfo } from "@/render/renderer";
+import { $renderer } from "@/render/renderer";
 import { LevelObject } from "@/game/objects/levelObject";
 import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
+import type { PointerInfo } from "@/render/pointerEvents";
 
 const WATER_FILL_COLOR = "#40A0FF"; // TODO: put this somewhere more sensible
 

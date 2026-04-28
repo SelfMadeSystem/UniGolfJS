@@ -1,7 +1,7 @@
 import type { RenderInfo } from "@/render/drawable";
-import type { PointerInfo } from "@/render/renderer";
+import type { PointerEventHandler, PointerInfo } from "@/render/pointerEvents";
 
-export abstract class Scene {
+export abstract class Scene implements PointerEventHandler {
   readonly key = Math.random();
 
   get ui(): React.FC {
