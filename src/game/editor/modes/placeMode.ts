@@ -84,7 +84,7 @@ export class PlaceMode implements InteractionMode {
       scale: currentAABB.size,
       ...scene.level.config,
     });
-    scene.addObject(newObj);
+    scene.addObjectToLevel(newObj);
 
     this.editManager.deselectAll();
     this.editManager.selectObject(newObj, false);
@@ -132,7 +132,7 @@ export class PlaceMode implements InteractionMode {
       position: pointerPos,
       ...scene.level.config,
     });
-    scene.addObject(newObj);
+    scene.addObjectToLevel(newObj);
 
     this.editManager.deselectAll();
     this.editManager.selectObject(newObj, false);

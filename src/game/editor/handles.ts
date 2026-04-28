@@ -5,12 +5,12 @@ import { LAYERS } from "../levelConfig";
 import type { EditScene } from "@/scenes/editScene";
 import { icons as mdiIcons } from "@iconify-json/mdi";
 
-export type HandleAction = "resize" | "rotateCW" | "rotateCCW";
+export type HandleAction = "resize" | "rotateCW" | "rotateCCW" | "delete";
 
 export abstract class EditorHandle {
   constructor(public scene: EditScene) {}
   abstract contains(pointerPos: Vector2, selectionAABB: AABB): boolean;
-  abstract render(selectionAABB: AABB, info: RenderInfo): RenderPass[];
+  abstract render(selectionAABB: AABB, info: RenderInfo): Iterable<RenderPass>;
   abstract cursor(): string;
   abstract action(): HandleAction;
 }
@@ -74,31 +74,29 @@ class ResizeHandle extends EditorHandle {
     return this.getAABB(selectionAABB).containsPoint(pointerPos);
   }
 
-  render(selectionAABB: AABB, info: RenderInfo) {
+  *render(selectionAABB: AABB, info: RenderInfo) {
     const aabb = this.getAABB(selectionAABB);
-    return [
-      pass(LAYERS.EDITOR, (ctx) => {
-        ctx.save();
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(
-          aabb.tl.x,
-          aabb.tl.y,
-          aabb.br.x - aabb.tl.x,
-          aabb.br.y - aabb.tl.y,
-        );
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 1;
-        ctx.setLineDash([]);
-        ctx.strokeRect(
-          aabb.tl.x,
-          aabb.tl.y,
-          aabb.br.x - aabb.tl.x,
-          aabb.br.y - aabb.tl.y,
-        );
-        drawIcon(ctx, "arrow-top-left-bottom-right", aabb, "#111111");
-        ctx.restore();
-      }),
-    ];
+    yield pass(LAYERS.EDITOR, (ctx) => {
+      ctx.save();
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(
+        aabb.tl.x,
+        aabb.tl.y,
+        aabb.br.x - aabb.tl.x,
+        aabb.br.y - aabb.tl.y,
+      );
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([]);
+      ctx.strokeRect(
+        aabb.tl.x,
+        aabb.tl.y,
+        aabb.br.x - aabb.tl.x,
+        aabb.br.y - aabb.tl.y,
+      );
+      drawIcon(ctx, "arrow-top-left-bottom-right", aabb, "#111111");
+      ctx.restore();
+    });
   }
 
   cursor() {
@@ -134,35 +132,33 @@ class RotateHandle extends EditorHandle {
     return this.getAABB(selectionAABB).containsPoint(pointerPos);
   }
 
-  render(selectionAABB: AABB, info: RenderInfo) {
+  *render(selectionAABB: AABB, info: RenderInfo) {
     const aabb = this.getAABB(selectionAABB);
-    return [
-      pass(LAYERS.EDITOR, (ctx) => {
-        ctx.save();
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(
-          aabb.tl.x,
-          aabb.tl.y,
-          aabb.br.x - aabb.tl.x,
-          aabb.br.y - aabb.tl.y,
-        );
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(
-          aabb.tl.x,
-          aabb.tl.y,
-          aabb.br.x - aabb.tl.x,
-          aabb.br.y - aabb.tl.y,
-        );
-        drawIcon(
-          ctx,
-          this.corner === "tr" ? "rotate-left" : "rotate-right",
-          aabb,
-          "#111111",
-        );
-        ctx.restore();
-      }),
-    ];
+    yield pass(LAYERS.EDITOR, (ctx) => {
+      ctx.save();
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(
+        aabb.tl.x,
+        aabb.tl.y,
+        aabb.br.x - aabb.tl.x,
+        aabb.br.y - aabb.tl.y,
+      );
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(
+        aabb.tl.x,
+        aabb.tl.y,
+        aabb.br.x - aabb.tl.x,
+        aabb.br.y - aabb.tl.y,
+      );
+      drawIcon(
+        ctx,
+        this.corner === "tr" ? "rotate-left" : "rotate-right",
+        aabb,
+        "#111111",
+      );
+      ctx.restore();
+    });
   }
 
   cursor() {
@@ -174,29 +170,80 @@ class RotateHandle extends EditorHandle {
   }
 }
 
+class DeleteHandle extends EditorHandle {
+  static readonly SIZE_PX = 14;
+
+  private getAABB(selectionAABB: AABB) {
+    const handleSize = DeleteHandle.SIZE_PX / this.scene.cameraZoom;
+    const half = handleSize / 2;
+    return new AABB(
+      selectionAABB.tl.sub(new Vector2(half, half)),
+      selectionAABB.tl.add(new Vector2(half, half)),
+    );
+  }
+
+  contains(pointerPos: Vector2, selectionAABB: AABB) {
+    return this.getAABB(selectionAABB).containsPoint(pointerPos);
+  }
+
+  *render(selectionAABB: AABB, info: RenderInfo) {
+    const aabb = this.getAABB(selectionAABB);
+    yield pass(LAYERS.EDITOR, (ctx) => {
+      ctx.save();
+      ctx.fillStyle = "#FF5555";
+      ctx.fillRect(
+        aabb.tl.x,
+        aabb.tl.y,
+        aabb.br.x - aabb.tl.x,
+        aabb.br.y - aabb.tl.y,
+      );
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(
+        aabb.tl.x,
+        aabb.tl.y,
+        aabb.br.x - aabb.tl.x,
+        aabb.br.y - aabb.tl.y,
+      );
+      drawIcon(ctx, "close", aabb, "#111111");
+      ctx.restore();
+    });
+  }
+
+  cursor() {
+    return "pointer";
+  }
+
+  action(): HandleAction {
+    return "delete";
+  }
+}
+
 export class HandlesManager {
   private resize: ResizeHandle;
   private rotateTR: RotateHandle;
   private rotateBL: RotateHandle;
+  private delete: DeleteHandle;
 
   constructor(public scene: EditScene) {
     this.resize = new ResizeHandle(scene);
     this.rotateTR = new RotateHandle(scene, "tr");
     this.rotateBL = new RotateHandle(scene, "bl");
+    this.delete = new DeleteHandle(scene);
   }
 
   hitTest(pointerPos: Vector2, selectionAABB: AABB): EditorHandle | null {
     if (this.resize.contains(pointerPos, selectionAABB)) return this.resize;
     if (this.rotateTR.contains(pointerPos, selectionAABB)) return this.rotateTR;
     if (this.rotateBL.contains(pointerPos, selectionAABB)) return this.rotateBL;
+    if (this.delete.contains(pointerPos, selectionAABB)) return this.delete;
     return null;
   }
 
-  render(selectionAABB: AABB, info: RenderInfo): RenderPass[] {
-    return [
-      ...this.resize.render(selectionAABB, info),
-      ...this.rotateTR.render(selectionAABB, info),
-      ...this.rotateBL.render(selectionAABB, info),
-    ];
+  *render(selectionAABB: AABB, info: RenderInfo): Iterable<RenderPass> {
+    yield* this.resize.render(selectionAABB, info);
+    yield* this.rotateTR.render(selectionAABB, info);
+    yield* this.rotateBL.render(selectionAABB, info);
+    yield* this.delete.render(selectionAABB, info);
   }
 }

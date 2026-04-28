@@ -90,10 +90,14 @@ export abstract class GameObject<
   abstract render(info: RenderInfo): Iterable<RenderPass>;
   tick(): void {}
 
-  delete(): void {
+  delete(fromLevel = false): void {
     const scene = getLevelScene();
     if (!scene) return;
-    scene.removeObject(this);
+    if (fromLevel) {
+      scene.removeObjectFromLevel(this);
+    } else {
+      scene.removeObject(this);
+    }
   }
 
   reset(): void {

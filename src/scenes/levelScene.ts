@@ -66,7 +66,7 @@ export abstract class LevelScene extends Scene {
       }),
     ];
 
-    this.objects = objects;
+    this.objects = [...objects];
   }
 
   public getVisibleAABB(): AABB {
@@ -140,8 +140,21 @@ export abstract class LevelScene extends Scene {
     }
   }
 
+  removeObjectFromLevel(obj: GameObject<any>): void {
+    this.removeObject(obj);
+    const levelIndex = this.level.objects.indexOf(obj);
+    if (levelIndex !== -1) {
+      this.level.objects.splice(levelIndex, 1);
+    }
+  }
+
   addObject(obj: GameObject<any>): void {
     this.objects.push(obj);
+  }
+
+  addObjectToLevel(obj: GameObject<any>): void {
+    this.addObject(obj);
+    this.level.objects.push(obj);
   }
 
   moveObjectToTop(obj: GameObject<any>): void {

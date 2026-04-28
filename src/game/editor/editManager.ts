@@ -253,19 +253,28 @@ export class EditManager implements Drawable, PointerEventHandler {
       const hit = handles.hitTest(pointerPos, selectedAABB);
       if (hit) {
         const act = hit.action();
-        if (act === "resize") {
-          this.startPointer = pointerPos;
-          this.setMode("resize");
-          this.currentMode!.pointerdown(info);
-          return;
-        }
-        if (act === "rotateCCW") {
-          this.rotateSelectionCCW();
-          return;
-        }
-        if (act === "rotateCW") {
-          this.rotateSelectionCW();
-          return;
+        switch (act) {
+          case "delete":
+            for (const obj of this.selectedObjects) {
+              obj.delete(true);
+            }
+            this.selectedObjects.clear();
+            this.highlightedObject = null;
+            return;
+          case "rotateCCW":
+            this.rotateSelectionCCW();
+            return;
+          case "rotateCW":
+            this.rotateSelectionCW();
+            return;
+          case "resize":
+            this.startPointer = pointerPos;
+            this.setMode("resize");
+            this.currentMode!.pointerdown(info);
+            return;
+          default:
+            console.warn("Unknown handle action:", act);
+            return;
         }
       }
     }
