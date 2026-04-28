@@ -142,7 +142,7 @@ export class EditManager implements Drawable {
       this.deselectAll();
     }
 
-    for (const obj of this.scene.objects) {
+    for (const obj of [...this.scene.objects]) {
       if (!(obj instanceof LevelObject)) continue;
       const aabb = obj.getAABB();
       if (region.containsAABB(aabb)) {
