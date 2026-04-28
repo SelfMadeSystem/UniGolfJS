@@ -8,6 +8,8 @@ export function CanvasComponent() {
   useEffect(() => {
     if (!canvas) return;
 
+    let theRenderer: Renderer;
+
     if (!renderer) {
       const ctx = canvas.getContext("2d");
       if (!ctx) {
@@ -16,12 +18,22 @@ export function CanvasComponent() {
       }
       const newRenderer = new Renderer(ctx);
       newRenderer.start();
+      theRenderer = newRenderer;
       setRenderer(newRenderer);
+    } else {
+      theRenderer = renderer;
     }
 
     const handleResize = () => {
       canvas.width = canvas.clientWidth * window.devicePixelRatio;
       canvas.height = canvas.clientHeight * window.devicePixelRatio;
+      theRenderer.render({
+        tick: 0,
+        tickInterp: 0,
+        tickWithInterp: 0,
+        ...theRenderer.lastRenderInfo,
+        delta: 0,
+      });
     };
 
     handleResize();

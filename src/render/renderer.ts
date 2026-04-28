@@ -22,6 +22,7 @@ export class Renderer {
   private tickAccumulator: number = 0;
   private tickCount: number = 0;
   private readonly stopCbs: (() => void)[] = [];
+  public lastRenderInfo: RenderInfo | null = null;
 
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
@@ -48,12 +49,8 @@ export class Renderer {
         tickWithInterp: this.tickCount + tickInterp,
       };
 
-      this.ctx.save();
-      this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
       this.render(renderInfo);
-
-      this.ctx.restore();
+      this.lastRenderInfo = renderInfo;
 
       this.requestId = requestAnimationFrame(loop);
     };
@@ -88,9 +85,15 @@ export class Renderer {
   }
 
   render(info: RenderInfo) {
-    const scene = $scene.get();
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.ctx.save();
+    this.ctx.translate(this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+    this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+    const scene = $scene.get();
     scene.render(info, this.ctx);
+
+    this.ctx.restore();
   }
 
   tick() {
@@ -98,9 +101,14 @@ export class Renderer {
     scene.tick();
   }
 
+  /**
+   * Gets the pointer position relative to the center of the canvas
+   */
   getPointerPos(event: PointerEvent): Vector2 {
     const rect = this.ctx.canvas.getBoundingClientRect();
-    return new Vector2(event.clientX - rect.left, event.clientY - rect.top);
+    const x = event.clientX - rect.left - rect.width / 2;
+    const y = event.clientY - rect.top - rect.height / 2;
+    return new Vector2(x, y);
   }
 
   getPointerInfo(event: PointerEvent): PointerInfo {

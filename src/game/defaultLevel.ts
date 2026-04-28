@@ -7,37 +7,39 @@ import { Hole } from "./objects/hole";
 const width = 400;
 const height = 600;
 const wallThickness = 20;
+const holeInset = 100;
+const teeInset = 100;
 
 export function defaultLevel(): Level {
   return {
     config: defaultLevelConfig,
     objects: [
       new Wall({
-        position: new Vector2(width / 2, wallThickness / 2),
+        position: new Vector2(0, -height / 2 + wallThickness / 2),
         scale: new Vector2(width, wallThickness),
         ...defaultLevelConfig,
       }),
       new Wall({
-        position: new Vector2(width / 2, height - wallThickness / 2),
+        position: new Vector2(0, height / 2 - wallThickness / 2),
         scale: new Vector2(width, wallThickness),
         ...defaultLevelConfig,
       }),
       new Wall({
-        position: new Vector2(wallThickness / 2, height / 2),
+        position: new Vector2(-width / 2 + wallThickness / 2, 0),
         scale: new Vector2(wallThickness, height),
         ...defaultLevelConfig,
       }),
       new Wall({
-        position: new Vector2(width - wallThickness / 2, height / 2),
+        position: new Vector2(width / 2 - wallThickness / 2, 0),
         scale: new Vector2(wallThickness, height),
-        ...defaultLevelConfig,
-      }),
-      new Tee({
-        position: new Vector2(width / 2, height - 100),
         ...defaultLevelConfig,
       }),
       new Hole({
-        position: new Vector2(width / 2, 100),
+        position: new Vector2(0, -height / 2 + holeInset),
+        ...defaultLevelConfig,
+      }),
+      new Tee({
+        position: new Vector2(0, height / 2 - teeInset),
         ...defaultLevelConfig,
       }),
     ],
