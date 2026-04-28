@@ -347,6 +347,13 @@ export abstract class RigidBody<
     return paths;
   }
 
+  override set<K extends Extract<keyof z.core.output<SchemaType>, string>>(key: K, value: z.core.output<SchemaType>[K]): void {
+    super.set(key, value);
+    if (key === "position") {
+      this.prevPos = value as Vector2;
+    }
+  }
+
   override reset(): void {
     super.reset();
     this.velocity = this.data.velocity;

@@ -1,5 +1,5 @@
 import type { Placeable } from "@/game/editor/placeables";
-import { $selectedPlaceable } from "@/game/editor/state";
+import { $selectedPlaceable, setSelectedPlaceable } from "@/game/editor/state";
 import { Icon } from "@iconify/react";
 import { useStore } from "@nanostores/react";
 
@@ -13,7 +13,7 @@ function PlaceableComponent({ placeable }: { placeable: Placeable }) {
         isSelected ? "bg-blue-500 text-white" : "hover:bg-gray-700/50"
       }`}
       onClick={() => {
-        $selectedPlaceable.set(isSelected ? null : placeable);
+        setSelectedPlaceable(isSelected ? null : placeable);
       }}
       title={placeable.name}
     >
