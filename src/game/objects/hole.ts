@@ -4,6 +4,7 @@ import type { PathInfo } from "./levelObject";
 import type { RigidBody } from "./rigidBody";
 import { CircleObject, CircleObjectSchema } from "./circleObject";
 import { Vector2 } from "@/utils/vec";
+import { AABB } from "@/utils/aabb";
 
 export const HoleSchema = CircleObjectSchema.extend({
   radius: z.number().positive().default(20),
@@ -18,6 +19,11 @@ export class Hole extends CircleObject<typeof HoleSchema> {
     super(options);
   }
 
+  override getAABB(): AABB {
+    const totalRadius = this.radius + HOLE_OUTLINE_WIDTH;
+    return AABB.fromCenterSize(this.pos, [totalRadius * 2, totalRadius * 2]);
+  }
+
   override getPathInfo(): PathInfo {
     return {
       shadowLayer: 0,
@@ -29,13 +35,6 @@ export class Hole extends CircleObject<typeof HoleSchema> {
       height: 0,
       outline: HOLE_OUTLINE_WIDTH,
     };
-  }
-
-  override editorSnapToGrid(gridSize: number): void {
-    super.editorSnapToGrid(gridSize);
-    this.pos = this.pos.add(
-      new Vector2(HOLE_OUTLINE_WIDTH, HOLE_OUTLINE_WIDTH),
-    );
   }
 
   override intersectsRigidBody(rigidBody: RigidBody): boolean {
