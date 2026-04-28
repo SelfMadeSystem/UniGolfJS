@@ -9,10 +9,13 @@ import type { PointerInfo } from "@/render/renderer";
 import { AABB } from "@/utils/aabb";
 import { LAYERS } from "../levelConfig";
 import type { EditScene } from "@/scenes/editScene";
+import { Vector2 } from "@/utils/vec";
 
 export class EditManager implements Drawable {
   public selectedObjects: Set<LevelObject> = new Set();
   public highlightedObject: LevelObject | null = null;
+  /** world coordinates */
+  public startPointer: Vector2 | null = null;
 
   constructor(public scene: EditScene) {}
 
@@ -97,20 +100,43 @@ export class EditManager implements Drawable {
     return passes;
   }
 
-  pointermove(info: PointerInfo): void {
+  updateHighlight(info: PointerInfo) {
     const obj = this.scene.getObjectAtPointer(info);
-    if (!(obj instanceof LevelObject)) {
+    if (obj instanceof LevelObject) {
+      this.highlightedObject = obj;
+      document.body.style.cursor = "pointer";
+    } else {
       this.highlightedObject = null;
       document.body.style.cursor = "default";
-      return;
     }
-    this.highlightedObject = obj;
-    document.body.style.cursor = "pointer";
   }
 
-  pointerup(info: PointerInfo): void {}
+  pointermove(info: PointerInfo): void {
+    this.updateHighlight(info);
+
+    if (this.startPointer) {
+      const pointerPos = this.scene.screenToWorld(info.pos);
+      const delta = pointerPos.sub(this.startPointer);
+      for (const obj of this.selectedObjects) {
+        obj.pos = obj.pos.add(delta);
+      }
+      this.startPointer = pointerPos;
+    }
+  }
+
+  pointerup(info: PointerInfo): void {
+    this.startPointer = null;
+
+    for (const obj of this.selectedObjects) {
+      obj.editorSnapToGrid(this.scene.editorGrid.gridSize);
+      obj.set("position", obj.pos);
+    }
+  }
 
   pointerdown(info: PointerInfo): void {
+    const pointerPos = this.scene.screenToWorld(info.pos);
+    this.startPointer = pointerPos;
+
     const obj = this.scene.getObjectAtPointer(info);
     if (!(obj instanceof LevelObject)) {
       this.deselectAll();

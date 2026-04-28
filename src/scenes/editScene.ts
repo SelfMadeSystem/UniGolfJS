@@ -7,7 +7,7 @@ import { EditorGrid } from "@/game/editor/editorGrid";
 
 export class EditScene extends LevelScene {
   public editManager: EditManager = new EditManager(this);
-  public editorGrid: EditorGrid = new EditorGrid(50, this);
+  public editorGrid: EditorGrid = new EditorGrid(25, this);
 
   constructor(level: Level) {
     super(level);

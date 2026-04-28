@@ -8,10 +8,10 @@ import { getLevelScene } from "@/scenes/state";
 import { AABB } from "@/utils/aabb";
 
 const TeeSchema = LevelObjectSchema.extend({
-  radius: z.number().positive().default(7.5),
+  radius: z.number().positive().default(9),
 });
 
-const TEE_SIZE = new Vector2(60, 40);
+const TEE_SIZE = new Vector2(75, 50);
 
 const MAX_DRIVER_DISTANCE = 150;
 const DRIVER_POWER_MULTIPLIER = 0.3;
@@ -67,7 +67,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
         }
         case "pointermove": {
           if (this.shot || !pointer.leftButton) return;
-          this.driverPos = scene.getPointerPositionInWorld(pointer.pos);
+          this.driverPos = scene.screenToWorld(pointer.pos);
           break;
         }
         case "pointerup": {
@@ -143,5 +143,9 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     }
     this.driverPos = null;
     this.shot = true;
+  }
+
+  override editorScale(scale: Vector2): void {
+    // no op for the tee
   }
 }

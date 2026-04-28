@@ -3,7 +3,7 @@ import { GameObject, GameObjectSchema } from "./gameObject";
 import { LAYERS, levelConfigSchema } from "../levelConfig";
 import { type RenderPass, pass } from "@/render/drawable";
 import { generatePathsFromPoints } from "@/utils/pathUtils";
-import type { Vector2 } from "@/utils/vec";
+import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
 
 export const LevelObjectSchema = GameObjectSchema.extend(
@@ -33,7 +33,7 @@ export abstract class LevelObject<
   constructor(options: z.input<SchemaType>) {
     super(options);
   }
-  
+
   abstract getAABB(): AABB;
 
   abstract getPath(): Path2D;
@@ -162,4 +162,22 @@ export abstract class LevelObject<
     }
     return paths;
   }
+
+  /**
+   * Snaps the top-left corner of the object's AABB to the grid.
+   */
+  editorSnapToGrid(gridSize: number): void {
+    const aabb = this.getAABB();
+    const snappedTL = new Vector2(
+      Math.round(aabb.tl.x / gridSize) * gridSize,
+      Math.round(aabb.tl.y / gridSize) * gridSize,
+    );
+    const delta = snappedTL.sub(aabb.tl);
+    this.pos = this.pos.add(delta);
+  }
+
+  /**
+   * Scales the object relative to its center by the given scale factor.
+   */
+  abstract editorScale(scale: Vector2): void;
 }

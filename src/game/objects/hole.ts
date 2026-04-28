@@ -3,10 +3,13 @@ import { LAYERS } from "../levelConfig";
 import type { PathInfo } from "./levelObject";
 import type { RigidBody } from "./rigidBody";
 import { CircleObject, CircleObjectSchema } from "./circleObject";
+import { Vector2 } from "@/utils/vec";
 
 export const HoleSchema = CircleObjectSchema.extend({
-  radius: z.number().positive().default(15),
+  radius: z.number().positive().default(20),
 });
+
+const HOLE_OUTLINE_WIDTH = 5;
 
 export class Hole extends CircleObject<typeof HoleSchema> {
   static override schema = HoleSchema;
@@ -24,8 +27,15 @@ export class Hole extends CircleObject<typeof HoleSchema> {
       outlineColor: this.data.teeColor,
       fillColor: "#000000",
       height: 0,
-      outline: 4,
+      outline: HOLE_OUTLINE_WIDTH,
     };
+  }
+
+  override editorSnapToGrid(gridSize: number): void {
+    super.editorSnapToGrid(gridSize);
+    this.pos = this.pos.add(
+      new Vector2(HOLE_OUTLINE_WIDTH, HOLE_OUTLINE_WIDTH),
+    );
   }
 
   override intersectsRigidBody(rigidBody: RigidBody): boolean {
@@ -36,7 +46,7 @@ export class Hole extends CircleObject<typeof HoleSchema> {
   override onIntersects(rigidBody: RigidBody): void {
     rigidBody.setConstraint({
       pos: this.pos,
-      radius: this.radius / 2,
+      radius: this.radius,
     });
   }
 }

@@ -315,4 +315,11 @@ export abstract class PolyObject<
     // If no intersections and AABB is contained, the circle is fully contained
     return true;
   }
+
+  override editorScale(scale: Vector2): void {
+    this.data.scale = new Vector2(
+      this.data.scale.x * scale.x,
+      this.data.scale.y * scale.y,
+    );
+  }
 }

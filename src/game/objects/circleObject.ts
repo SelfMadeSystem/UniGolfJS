@@ -105,7 +105,7 @@ export abstract class CircleObject<
   }
 
   intersectsRigidBody(rigidBody: RigidBody): boolean {
-    const radius = (this.data.radius + rigidBody.radius) / 2;
+    const radius = this.data.radius + rigidBody.radius;
     return this.pos.distSq(rigidBody.pos) <= radius * radius;
   }
 
@@ -114,4 +114,8 @@ export abstract class CircleObject<
    * @param rigidBody The RigidBody intersecting with this PolyObject.
    */
   onIntersects(rigidBody: RigidBody): void {}
+
+  override editorScale(scale: Vector2): void {
+    this.data.radius *= (scale.x + scale.y) / 2;
+  }
 }

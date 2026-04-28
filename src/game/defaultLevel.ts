@@ -6,7 +6,7 @@ import { Hole } from "./objects/hole";
 
 const width = 400;
 const height = 600;
-const wallThickness = 20;
+const wallThickness = 25;
 const holeInset = 100;
 const teeInset = 100;
 

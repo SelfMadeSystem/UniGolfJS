@@ -74,10 +74,10 @@ export abstract class LevelScene extends Scene {
       throw new Error("Renderer not initialized");
     }
     const canvas = renderer.canvas;
-    const topLeft = this.getPointerPositionInWorld(
+    const topLeft = this.screenToWorld(
       new Vector2(-canvas.clientWidth / 2, -canvas.clientHeight / 2),
     );
-    const bottomRight = this.getPointerPositionInWorld(
+    const bottomRight = this.screenToWorld(
       new Vector2(canvas.clientWidth / 2, canvas.clientHeight / 2),
     );
     return new AABB(topLeft, bottomRight);
@@ -115,13 +115,17 @@ export abstract class LevelScene extends Scene {
   /**
    * Converts a pointer position (relative to the center of the canvas) to a world position, taking into account camera position and zoom
    */
-  getPointerPositionInWorld(pos: Vector2): Vector2 {
+  screenToWorld(pos: Vector2): Vector2 {
     return pos.div(this.cameraZoom).add(this.cameraPos);
+  }
+
+  worldToScreen(pos: Vector2): Vector2 {
+    return pos.sub(this.cameraPos).mult(this.cameraZoom);
   }
 
   getObjectAtPointer(pointer: PointerInfo | null): GameObject<any> | null {
     if (!pointer) return null;
-    const worldPos = this.getPointerPositionInWorld(pointer.pos);
+    const worldPos = this.screenToWorld(pointer.pos);
     for (const obj of this.objects.toReversed()) {
       if (obj instanceof LevelObject && obj.isPointInside(worldPos)) return obj;
     }
