@@ -125,6 +125,8 @@ export class Renderer {
   }
 
   handlePointerDown(event: PointerEvent) {
+    // only trigger if the pointer is on the canvas
+    if (event.target !== this.ctx.canvas) return;
     const scene = $scene.get();
     scene.pointerdown(this.getPointerInfo(event));
   }
