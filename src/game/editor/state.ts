@@ -5,8 +5,6 @@ import { EditScene } from "@/scenes/editScene";
 
 export const $selectedPlaceable = atom<Placeable>(placeables[0]!);
 
-console.log($selectedPlaceable);
-
 export function setSelectedPlaceable(placeable: Placeable) {
   $selectedPlaceable.set(placeable);
   const scene = $scene.get();

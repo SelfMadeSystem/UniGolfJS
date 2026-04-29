@@ -23,21 +23,9 @@ export abstract class LevelScene extends Scene {
   public cameraZoom: number = 1;
   private cameraTarget: Vector2 | null = null;
   private cameraLerpAmount: number = 0.15;
-  private _lastPointer: PointerInfo | null = null;
   public tickPointers: PointerInfo[] = [];
   public clipPath: Path2D = new Path2D();
   public readonly passes: RenderPass[];
-
-  get lastPointer(): PointerInfo | null {
-    return this._lastPointer;
-  }
-
-  set lastPointer(info: PointerInfo | null) {
-    this._lastPointer = info;
-    if (info) {
-      this.tickPointers.push(info);
-    }
-  }
 
   constructor(public level: Level) {
     super();
@@ -88,7 +76,7 @@ export abstract class LevelScene extends Scene {
   }
 
   override tick(): void {
-    this.tickPointers = [];
+    this.tickPointers.length = 0;
   }
 
   override render(info: RenderInfo, ctx: CanvasRenderingContext2D): void {
@@ -107,15 +95,15 @@ export abstract class LevelScene extends Scene {
   }
 
   override pointermove(info: PointerInfo): void {
-    this.lastPointer = info;
+    this.tickPointers.push(info);
   }
 
   override pointerup(info: PointerInfo): void {
-    this.lastPointer = info;
+    this.tickPointers.push(info);
   }
 
   override pointerdown(info: PointerInfo): void {
-    this.lastPointer = info;
+    this.tickPointers.push(info);
   }
 
   /**

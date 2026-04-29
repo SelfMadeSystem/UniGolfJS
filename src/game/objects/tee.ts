@@ -76,7 +76,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
           break;
         }
         case "pointermove": {
-          if (this.shot || !pointer.leftButton) return;
+          if (this.shot || !pointer.leftButton) break;
           this.driverPos = scene.screenToWorld(pointer.pos);
           break;
         }

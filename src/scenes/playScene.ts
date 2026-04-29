@@ -15,12 +15,6 @@ export class PlayScene extends LevelScene {
     RigidBody.beginFrame();
     for (const obj of this.objects) {
       obj.tick();
-      obj.set("debug", false);
-    }
-
-    const obj = this.getObjectAtPointer(this.lastPointer);
-    if (obj) {
-      obj.set("debug", true);
     }
 
     super.tick();
