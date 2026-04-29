@@ -67,6 +67,7 @@ export abstract class LevelScene extends Scene {
     ];
 
     this.objects = [...objects];
+    this.resetAllObjects(true);
   }
 
   public getVisibleAABB(): AABB {
@@ -167,9 +168,9 @@ export abstract class LevelScene extends Scene {
     this.objects.unshift(obj);
   }
 
-  resetAllObjects(): void {
+  resetAllObjects(scene = false): void {
     for (const obj of this.objects) {
-      obj.reset();
+      obj.reset(scene);
     }
   }
 }

@@ -100,7 +100,11 @@ export abstract class GameObject<
     }
   }
 
-  reset(): void {
+  /**
+   * Resets the object to its initial state.
+   * If `scene` is true, also resets any scene-level state related to this object.
+   */
+  reset(scene = false): void {
     this.pos = this.data.position;
   }
 }

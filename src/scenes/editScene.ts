@@ -12,7 +12,6 @@ export class EditScene extends LevelScene {
 
   constructor(level: Level) {
     super(level);
-    this.resetAllObjects();
     this.drawables.push(this.editManager);
     this.drawables.push(this.editorGrid);
     $selectedPlaceable.set(null);

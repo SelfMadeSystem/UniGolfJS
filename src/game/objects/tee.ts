@@ -3,12 +3,13 @@ import { Vector2 } from "@/utils/vec";
 import { LevelObject, LevelObjectSchema } from "./levelObject";
 import z from "zod";
 import { LAYERS } from "../levelConfig";
-import { Ball } from "./ball";
 import { getLevelScene } from "@/scenes/state";
 import { AABB } from "@/utils/aabb";
+import { PlayerBall } from "./playerBall";
 
 const TeeSchema = LevelObjectSchema.extend({
   radius: z.number().positive().default(9),
+  active: z.boolean().default(false),
 });
 
 const TEE_SIZE = new Vector2(75, 50);
@@ -18,14 +19,16 @@ const DRIVER_POWER_MULTIPLIER = 0.3;
 
 export class Tee extends LevelObject<typeof TeeSchema> {
   static override schema = TeeSchema;
-  public ball: Ball | null = null;
+  public ball: PlayerBall | null = null;
   public driverPos: Vector2 | null = null;
   public shot = true;
 
   public doesntScale = true;
+  public active: boolean;
 
   constructor(options: z.input<typeof TeeSchema>) {
     super(options);
+    this.active = this.get("active");
   }
 
   override getAABB(): AABB {
@@ -43,6 +46,8 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   }
 
   override tick(): void {
+    if (!this.active) return;
+
     const scene = getLevelScene();
     if (!scene) return;
 
@@ -57,12 +62,15 @@ export class Tee extends LevelObject<typeof TeeSchema> {
           }
           scene.resetAllObjects();
           this.shot = false;
-          const newBall = new Ball({
-            ...this.data,
-            position: this.pos,
-            velocity: new Vector2(0, 0),
-            radius: this.data.radius,
-          });
+          const newBall = new PlayerBall(
+            {
+              ...this.data,
+              position: this.pos,
+              velocity: new Vector2(0, 0),
+              radius: this.data.radius,
+            },
+            this,
+          );
           scene.addObject(newBall);
           this.ball = newBall;
           break;
@@ -137,7 +145,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     ];
   }
 
-  override reset(): void {
+  override reset(scene = false): void {
     super.reset();
     if (this.ball) {
       this.ball.delete();
@@ -145,6 +153,10 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     }
     this.driverPos = null;
     this.shot = true;
+
+    if (scene) {
+      this.active = this.get("active");
+    }
   }
 
   override editorScale(scale: Vector2): void {

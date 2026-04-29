@@ -40,6 +40,7 @@ export function defaultLevel(): Level {
       }),
       new Tee({
         position: new Vector2(0, height / 2 - teeInset),
+        active: true,
         ...defaultLevelConfig,
       }),
     ],
