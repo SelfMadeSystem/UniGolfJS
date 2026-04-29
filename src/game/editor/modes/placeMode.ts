@@ -134,7 +134,12 @@ export class PlaceMode implements InteractionMode {
     });
     scene.addObjectToLevel(newObj);
 
+    // Select the new object
     this.editManager.deselectAll();
     this.editManager.selectObject(newObj, false);
+
+    // Snap to grid
+    newObj.editorSnapToGrid(scene.editorGrid.gridSize);
+    newObj.set("position", newObj.pos);
   }
 }

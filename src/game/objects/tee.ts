@@ -22,6 +22,8 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   public driverPos: Vector2 | null = null;
   public shot = true;
 
+  public doesntScale = true;
+
   constructor(options: z.input<typeof TeeSchema>) {
     super(options);
   }

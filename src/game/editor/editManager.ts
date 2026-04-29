@@ -25,6 +25,8 @@ export class EditManager implements Drawable, PointerEventHandler {
   public selectionPointer: Vector2 | null = null;
   public handles: HandlesManager | null = null;
 
+  public inPlaceMode = false;
+
   public currentMode: InteractionMode;
   public selectMode: SelectMode;
   public moveMode: MoveMode;
@@ -83,6 +85,16 @@ export class EditManager implements Drawable, PointerEventHandler {
         break;
     }
     this.currentMode?.onEnter?.();
+  }
+
+  public enablePlaceMode() {
+    this.inPlaceMode = true;
+    this.setMode("place");
+  }
+
+  public disablePlaceMode() {
+    this.inPlaceMode = false;
+    this.setMode("select");
   }
 
   // ===== AABB Utilities =====
@@ -236,11 +248,11 @@ export class EditManager implements Drawable, PointerEventHandler {
 
   // ===== Event Handlers =====
   pointermove(info: PointerInfo): void {
-    this.currentMode!.pointermove(info);
+    this.currentMode.pointermove(info);
   }
 
   pointerup(info: PointerInfo): void {
-    this.currentMode!.pointerup(info);
+    this.currentMode.pointerup(info);
   }
 
   pointerdown(info: PointerInfo): void {
@@ -270,7 +282,7 @@ export class EditManager implements Drawable, PointerEventHandler {
           case "resize":
             this.startPointer = pointerPos;
             this.setMode("resize");
-            this.currentMode!.pointerdown(info);
+            this.currentMode.pointerdown(info);
             return;
           default:
             console.warn("Unknown handle action:", act);
@@ -279,7 +291,8 @@ export class EditManager implements Drawable, PointerEventHandler {
       }
     }
 
-    if (this.currentMode === this.placeMode) {
+    if (this.inPlaceMode) {
+      this.currentMode = this.placeMode;
       this.startPointer = pointerPos;
       this.selectionPointer = pointerPos;
       this.currentMode.pointerdown(info);
@@ -308,6 +321,6 @@ export class EditManager implements Drawable, PointerEventHandler {
       this.setMode("select");
     }
 
-    this.currentMode!.pointerdown(info);
+    this.currentMode.pointerdown(info);
   }
 }

@@ -11,8 +11,8 @@ export function setSelectedPlaceable(placeable: Placeable | null) {
   if (!(scene instanceof EditScene)) return;
   
   if (placeable) {
-    scene.editManager.setMode("place");
+    scene.editManager.enablePlaceMode();
   } else {
-    scene.editManager.setMode("select");
+    scene.editManager.disablePlaceMode();
   }
 }

@@ -16,11 +16,36 @@ export class ResizeMode implements InteractionMode {
     const sourceAABB = this.editManager.getSelectedAABB();
     if (!sourceAABB) return;
 
+    if (
+      this.editManager.selectedObjects.size === 1 &&
+      "doesntScale" in this.editManager.selectedObjects.values().next().value!
+    )
+      return;
+
+    const hasScale =
+      this.editManager.selectedObjects.size > 1 ||
+      "scale" in
+        this.editManager.selectedObjects.values().next().value!.getData();
+
     const minSize = 1;
-    const targetBR = new Vector2(
-      Math.max(pointerPos.x, sourceAABB.tl.x + minSize),
-      Math.max(pointerPos.y, sourceAABB.tl.y + minSize),
-    );
+    let targetBR: Vector2;
+
+    if (hasScale)
+      targetBR = new Vector2(
+        Math.max(pointerPos.x, sourceAABB.tl.x + minSize),
+        Math.max(pointerPos.y, sourceAABB.tl.y + minSize),
+      );
+    else {
+      const maxDelta = Math.max(
+        pointerPos.x - sourceAABB.tl.x,
+        pointerPos.y - sourceAABB.tl.y,
+        minSize,
+      );
+      targetBR = new Vector2(
+        sourceAABB.tl.x + maxDelta,
+        sourceAABB.tl.y + maxDelta,
+      );
+    }
     const targetAABB = new AABB(sourceAABB.tl, targetBR);
     this.editManager.transformSelectionAABB(sourceAABB, targetAABB);
   }
