@@ -36,6 +36,9 @@ export class PlayerBall extends Ball {
       this.tee.active = false;
       this.pos = tee.pos;
       this.velocity = new Vector2(0, 0);
+      this.tee.ball = null;
+      this.tee = tee;
+      tee.ball = this;
       break;
     }
   }
