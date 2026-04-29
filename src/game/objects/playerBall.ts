@@ -32,14 +32,22 @@ export class PlayerBall extends Ball {
     for (const tee of tees) {
       if (!tee.isPointInside(this.pos)) continue;
 
-      tee.active = true;
-      this.tee.active = false;
-      this.pos = tee.pos;
-      this.velocity = new Vector2(0, 0);
-      this.tee.ball = null;
-      this.tee = tee;
-      tee.ball = this;
+      this.setActiveTee(tee);
       break;
     }
+  }
+
+  setActiveTee(tee: Tee): void {
+    const scene = getLevelScene();
+
+    tee.active = true;
+    this.tee.active = false;
+    this.pos = tee.pos;
+    this.velocity = new Vector2(0, 0);
+    this.tee.ball = null;
+    this.tee = tee;
+    tee.ball = this;
+
+    scene?.moveCameraTo(tee.pos);
   }
 }

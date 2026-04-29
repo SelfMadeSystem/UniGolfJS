@@ -21,6 +21,8 @@ export abstract class LevelScene extends Scene {
   public drawables: Drawable[] = [];
   public cameraPos: Vector2 = new Vector2(0, 0);
   public cameraZoom: number = 1;
+  private cameraTarget: Vector2 | null = null;
+  private cameraLerpAmount: number = 0.15;
   private _lastPointer: PointerInfo | null = null;
   public tickPointers: PointerInfo[] = [];
   public clipPath: Path2D = new Path2D();
@@ -90,6 +92,8 @@ export abstract class LevelScene extends Scene {
   }
 
   override render(info: RenderInfo, ctx: CanvasRenderingContext2D): void {
+    this.updateCameraMovement(info.delta);
+
     ctx.save();
     ctx.scale(this.cameraZoom, this.cameraZoom);
     ctx.translate(-this.cameraPos.x, -this.cameraPos.y);
@@ -123,6 +127,39 @@ export abstract class LevelScene extends Scene {
 
   worldToScreen(pos: Vector2): Vector2 {
     return pos.sub(this.cameraPos).mult(this.cameraZoom);
+  }
+
+  private updateCameraMovement(delta: number): void {
+    if (!this.cameraTarget) return;
+
+    const distanceSq = this.cameraPos.distSq(this.cameraTarget);
+
+    if (distanceSq < 0.0001) {
+      this.cameraPos = this.cameraTarget;
+      this.cameraTarget = null;
+      return;
+    }
+
+    const baseFrameMs = 1000 / 60;
+    const progress =
+      1 - Math.pow(1 - this.cameraLerpAmount, delta / baseFrameMs);
+    this.cameraPos = this.cameraPos.lerp(this.cameraTarget, progress);
+  }
+
+  /**
+   * Smoothly moves the camera toward a world position.
+   */
+  moveCameraTo(pos: Vector2, lerpAmount: number = 0.15): void {
+    this.cameraTarget = pos.clone();
+    this.cameraLerpAmount = lerpAmount;
+  }
+
+  /**
+   * Immediately places the camera at a world position and cancels any smooth movement.
+   */
+  snapCameraTo(pos: Vector2): void {
+    this.cameraPos = pos.clone();
+    this.cameraTarget = null;
   }
 
   getObjectAtPointer(pointer: PointerInfo | null): GameObject<any> | null {
