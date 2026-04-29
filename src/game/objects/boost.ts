@@ -32,43 +32,37 @@ export class Boost extends PolyObject<typeof BoostSchema> {
     }
   }
 
-  override render(info: RenderInfo): Iterable<RenderPass> {
-    return [
-      ...super.render(info),
-      pass(LAYERS.OBJECTS_3, (ctx) => {
-        const { tickWithInterp } = info;
-        const path = this.getPath();
-        const gradient = ctx.createRadialGradient(
-          this.pos.x,
-          this.pos.y,
-          0,
-          this.pos.x,
-          this.pos.y,
-          this.scale.x * Math.SQRT2,
-        );
+  override *render(info: RenderInfo): Iterable<RenderPass> {
+    yield* super.render(info);
+    yield pass(LAYERS.OBJECTS_3, (ctx) => {
+      const { tickWithInterp } = info;
+      const path = this.getPath();
+      const gradient = ctx.createRadialGradient(
+        this.pos.x,
+        this.pos.y,
+        0,
+        this.pos.x,
+        this.pos.y,
+        this.scale.x * Math.SQRT2,
+      );
 
-        const t = tickWithInterp / 15;
+      const t = tickWithInterp / 15;
 
-        const c1 = blendColors(
-          C1 + "00",
-          C2,
-          this.boostTime / BOOST_EFFECT_TIME,
-        );
+      const c1 = blendColors(C1 + "00", C2, this.boostTime / BOOST_EFFECT_TIME);
 
-        gradient.addColorStop(
-          0,
-          blendColors(c1, C2, Math.abs(((t + 1) % 2) - 1)),
-        );
-        gradient.addColorStop(
-          t % 1,
-          blendColors(c1, C2, Math.sign((t % 2) - 1) * 0.5 + 0.5),
-        );
-        gradient.addColorStop(1, blendColors(c1, C2, Math.abs((t % 2) - 1)));
+      gradient.addColorStop(
+        0,
+        blendColors(c1, C2, Math.abs(((t + 1) % 2) - 1)),
+      );
+      gradient.addColorStop(
+        t % 1,
+        blendColors(c1, C2, Math.sign((t % 2) - 1) * 0.5 + 0.5),
+      );
+      gradient.addColorStop(1, blendColors(c1, C2, Math.abs((t % 2) - 1)));
 
-        ctx.fillStyle = gradient;
-        ctx.fill(path);
-      }),
-    ];
+      ctx.fillStyle = gradient;
+      ctx.fill(path);
+    });
   }
 
   override getPathInfo(): PathInfo {
@@ -85,7 +79,14 @@ export class Boost extends PolyObject<typeof BoostSchema> {
   }
 
   override onIntersects(rigidBody: RigidBody): void {
+    if (rigidBody.velocity.length() === 0) return;
+
     rigidBody.velocity = rigidBody.velocity.setLength(SPEED);
     this.boostTime = BOOST_EFFECT_TIME;
+  }
+
+  override reset(): void {
+    super.reset();
+    this.boostTime = 0;
   }
 }

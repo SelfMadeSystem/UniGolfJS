@@ -70,7 +70,10 @@ export abstract class LevelObject<
       }),
       pass(fillLayer, (ctx) => {
         ctx.fillStyle = fillColor;
+        ctx.strokeStyle = fillColor;
+        ctx.lineWidth = 0.25;
         ctx.fill(fillPath);
+        ctx.stroke(fillPath);
       }),
     ];
     if (height > 0 && heightLayer !== undefined && outlineColor) {
