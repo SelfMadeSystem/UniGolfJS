@@ -113,6 +113,8 @@ export abstract class RigidBody<
       }
     }
 
+    if (this.inWater) return;
+
     const collision = RigidBody.getEarliestWallCollision(
       scene,
       this.pos,
@@ -296,10 +298,7 @@ export abstract class RigidBody<
 
     const scene = getLevelScene();
 
-    const pos = this.prevPos.lerp(
-      this.pos,
-      scene?.playing ? tickInterp : 1,
-    );
+    const pos = this.prevPos.lerp(this.pos, scene?.playing ? tickInterp : 1);
 
     let { radius } = this;
     let { height } = pathInfo;

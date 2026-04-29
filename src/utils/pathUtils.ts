@@ -58,7 +58,7 @@ export function offsetLineSegment(
 ): { start: Vector2; end: Vector2 } {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
-  const length = Math.sqrt(dx * dx + dy * dy);
+  const length = Math.hypot(dx, dy);
 
   if (length === 0) return { start, end }; // Degenerate line segment
 
@@ -69,26 +69,6 @@ export function offsetLineSegment(
     start: new Vector2(start.x + offsetX, start.y + offsetY),
     end: new Vector2(end.x + offsetX, end.y + offsetY),
   };
-}
-
-/**
- * Returns the intersection point of two line segments offset by a specified distance, or null if they don't intersect.
- */
-export function offsetLineSegmentIntersection(
-  a1: Vector2,
-  a2: Vector2,
-  b1: Vector2,
-  b2: Vector2,
-  distance: number,
-): Vector2 | null {
-  const offsetA = offsetLineSegment(a1, a2, distance);
-  const offsetB = offsetLineSegment(b1, b2, distance);
-  return lineLineIntersection(
-    offsetA.start,
-    offsetA.end,
-    offsetB.start,
-    offsetB.end,
-  );
 }
 
 /**
@@ -128,6 +108,7 @@ export function generatePathsFromPoints(
   fillPath: Path2D;
   waterWallPath: Path2D;
 } {
+  const outlineOr0 = Math.abs(outline);
   points = generateCounterClockwisePoints(points);
   const shadowPath = new Path2D();
   const heightPath = new Path2D();
@@ -148,10 +129,10 @@ export function generatePathsFromPoints(
     if (y > bottom) bottom = y;
   }
 
-  left -= outline;
-  right += outline;
-  top -= outline;
-  bottom += outline;
+  left -= outlineOr0;
+  right += outlineOr0;
+  top -= outlineOr0;
+  bottom += outlineOr0;
 
   const newPoints: Vector2[] = [];
 
@@ -212,15 +193,24 @@ export function generatePathsFromPoints(
 
     const op = i === 0 ? "moveTo" : "lineTo";
 
-    shadowPath[op](...a.a);
-    fillPath[op](curr.x, curr.y - height);
+    if (outline > 0) {
+      shadowPath[op](...a.a);
+      fillPath[op](curr.x, curr.y - height);
 
-    if (b) {
-      shadowPath.lineTo(...b.a);
+      if (b) {
+        shadowPath.lineTo(...b.a);
+      }
+
+      newPoints.push(a);
+      if (b) newPoints.push(b);
+    } else {
+      shadowPath[op](...curr.a);
+      fillPath[op](a.x, a.y - height);
+      if (b) {
+        fillPath.lineTo(b.x, b.y - height);
+      }
+      newPoints.push(curr);
     }
-
-    newPoints.push(a);
-    if (b) newPoints.push(b);
   }
 
   shadowPath.closePath();

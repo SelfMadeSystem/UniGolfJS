@@ -6,6 +6,7 @@ import { Boost } from "../objects/boost";
 import { Ball } from "../objects/ball";
 import { Tee } from "../objects/tee";
 import { Hole } from "../objects/hole";
+import { BreakableWall } from "../objects/breakableWall";
 
 export type Placeable = {
   id: string;
@@ -54,6 +55,16 @@ export const placeables: Placeable[] = [
     name: "Boost",
     icon: "ph:rocket-light",
     clazz: Boost,
+  }),
+  ...polys({
+    id: "breakable-wall-red",
+    name: "Breakable Wall (Red)",
+    icon: "ph:wall-light",
+    clazz: BreakableWall,
+    props: {
+      wallColor: "#f00",
+      wallOutlineColor: "#800000",
+    }
   }),
   {
     id: "ball",
