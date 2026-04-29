@@ -16,6 +16,9 @@ import { SelectMode } from "./modes/selectMode";
 import { MoveMode } from "./modes/moveMode";
 import { ResizeMode } from "./modes/resizeMode";
 import { PlaceMode } from "./modes/placeMode";
+import { PanMode } from "./modes/panMode";
+
+export type Tool = "select" | "place" | "pan";
 
 export class EditManager implements Drawable, PointerEventHandler {
   public selectedObjects: Set<LevelObject> = new Set();
@@ -25,19 +28,21 @@ export class EditManager implements Drawable, PointerEventHandler {
   public selectionPointer: Vector2 | null = null;
   public handles: HandlesManager | null = null;
 
-  public inPlaceMode = false;
+  public selectedTool: Tool = "select";
 
   public currentMode: InteractionMode;
   public selectMode: SelectMode;
   public moveMode: MoveMode;
   public resizeMode: ResizeMode;
   public placeMode: PlaceMode;
+  public panMode: PanMode;
 
   constructor(public scene: EditScene) {
     this.selectMode = new SelectMode(this);
     this.moveMode = new MoveMode(this);
     this.resizeMode = new ResizeMode(this);
     this.placeMode = new PlaceMode(this);
+    this.panMode = new PanMode(this);
     this.currentMode = this.selectMode;
   }
 
@@ -68,7 +73,7 @@ export class EditManager implements Drawable, PointerEventHandler {
   }
 
   // ===== Mode Management =====
-  public setMode(mode: "select" | "move" | "resize" | "place"): void {
+  public setMode(mode: "select" | "move" | "resize" | "place" | "pan"): void {
     this.currentMode?.onExit?.();
     switch (mode) {
       case "select":
@@ -83,18 +88,11 @@ export class EditManager implements Drawable, PointerEventHandler {
       case "place":
         this.currentMode = this.placeMode;
         break;
+      case "pan":
+        this.currentMode = this.panMode;
+        break;
     }
     this.currentMode?.onEnter?.();
-  }
-
-  public enablePlaceMode() {
-    this.inPlaceMode = true;
-    this.setMode("place");
-  }
-
-  public disablePlaceMode() {
-    this.inPlaceMode = false;
-    this.setMode("select");
   }
 
   // ===== AABB Utilities =====
@@ -291,10 +289,17 @@ export class EditManager implements Drawable, PointerEventHandler {
       }
     }
 
-    if (this.inPlaceMode) {
+    if (this.selectedTool === "place") {
       this.currentMode = this.placeMode;
       this.startPointer = pointerPos;
       this.selectionPointer = pointerPos;
+      this.currentMode.pointerdown(info);
+      return;
+    }
+
+    if (this.selectedTool === "pan") {
+      this.currentMode = this.panMode;
+      this.startPointer = pointerPos;
       this.currentMode.pointerdown(info);
       return;
     }

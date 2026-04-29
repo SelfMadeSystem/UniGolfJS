@@ -1,18 +1,17 @@
 import { atom } from "nanostores";
-import type { Placeable } from "./placeables";
+import { placeables, type Placeable } from "./placeables";
 import { $scene } from "@/scenes/state";
 import { EditScene } from "@/scenes/editScene";
 
-export const $selectedPlaceable = atom<Placeable | null>(null);
+export const $selectedPlaceable = atom<Placeable>(placeables[0]!);
 
-export function setSelectedPlaceable(placeable: Placeable | null) {
+console.log($selectedPlaceable);
+
+export function setSelectedPlaceable(placeable: Placeable) {
   $selectedPlaceable.set(placeable);
   const scene = $scene.get();
   if (!(scene instanceof EditScene)) return;
   
-  if (placeable) {
-    scene.editManager.enablePlaceMode();
-  } else {
-    scene.editManager.disablePlaceMode();
-  }
+  scene.editManager.setMode("place");
+  scene.editManager.selectedTool = "place";
 }

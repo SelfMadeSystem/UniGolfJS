@@ -3,7 +3,13 @@ import { $selectedPlaceable, setSelectedPlaceable } from "@/game/editor/state";
 import { Icon } from "@iconify/react";
 import { useStore } from "@nanostores/react";
 
-function PlaceableComponent({ placeable }: { placeable: Placeable }) {
+function PlaceableComponent({
+  placeable,
+  onSelect,
+}: {
+  placeable: Placeable;
+  onSelect: () => void;
+}) {
   const selectedPlaceable = useStore($selectedPlaceable);
   const isSelected = selectedPlaceable === placeable;
 
@@ -13,7 +19,8 @@ function PlaceableComponent({ placeable }: { placeable: Placeable }) {
         isSelected ? "bg-blue-500 text-white" : "hover:bg-gray-700/50"
       }`}
       onClick={() => {
-        setSelectedPlaceable(isSelected ? null : placeable);
+        setSelectedPlaceable(placeable);
+        onSelect();
       }}
       title={placeable.name}
     >
@@ -22,14 +29,27 @@ function PlaceableComponent({ placeable }: { placeable: Placeable }) {
   );
 }
 
-export function PlaceMenu({ placeables }: { placeables: Placeable[] }) {
+export function PlaceMenu({
+  placeables,
+  onClose,
+}: {
+  placeables: Placeable[];
+  onClose: () => void;
+}) {
   return (
-    <div className="pointer-events-auto p-4 bg-black/50 w-sm rounded shadow">
-      <h2 className="text-lg font-bold mb-2">Placeables</h2>
-      <div className="flex flex-row flex-wrap gap-2">
-        {placeables.map((placeable) => (
-          <PlaceableComponent key={placeable.id} placeable={placeable} />
-        ))}
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="pointer-events-auto p-4 bg-black/80 w-64 rounded shadow absolute right-4 top-16">
+        <h2 className="text-lg font-bold mb-2">Placeables</h2>
+        <div className="flex flex-row flex-wrap gap-2">
+          {placeables.map((placeable) => (
+            <PlaceableComponent
+              key={placeable.id}
+              placeable={placeable}
+              onSelect={onClose}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
