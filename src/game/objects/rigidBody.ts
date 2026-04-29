@@ -12,7 +12,7 @@ import { CircleObject } from "./circleObject";
 import { lerp } from "@/utils/mathUtils";
 
 export const RigidBodySchema = LevelObjectSchema.extend({
-  radius: z.number().positive().default(15),
+  radius: z.number().positive().default(12.5),
   mass: z.number().positive().default(1),
   velocity: Vec2Schema.default(new Vector2(0, 0)),
 });
