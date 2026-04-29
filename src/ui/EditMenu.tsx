@@ -13,13 +13,11 @@ import type { Tool } from "@/game/editor/editManager";
 export function EditMenu() {
   const [showPlaceMenu, setShowPlaceMenu] = useState(false);
   const selectedPlaceable = useStore($selectedPlaceable);
-  const [selectedTool, setSelectedTool] = useState<Tool>(
-    () => {
-      const ls = getLevelScene();
-      if (ls instanceof EditScene) return ls.editManager.selectedTool;
-      return "select";
-    },
-  );
+  const [selectedTool, setSelectedTool] = useState<Tool>(() => {
+    const ls = getLevelScene();
+    if (ls instanceof EditScene) return ls.editManager.selectedTool;
+    return "select";
+  });
 
   const setTool = (tool: Tool) => {
     const levelScene = getLevelScene();
@@ -29,11 +27,6 @@ export function EditMenu() {
     em.setMode(tool);
     setSelectedTool(tool);
   };
-
-  useEffect(() => {
-    if (!selectedPlaceable) return;
-    setSelectedTool("place");
-  }, [selectedPlaceable]);
 
   return (
     <motion.div
@@ -99,7 +92,10 @@ export function EditMenu() {
           <button
             title="Open place menu"
             className="cursor-pointer px-2 py-2 bg-gray-800 text-white rounded"
-            onClick={() => setShowPlaceMenu((s) => !s)}
+            onClick={() => {
+              setShowPlaceMenu((s) => !s);
+              setTool("place");
+            }}
           >
             <Icon icon="mdi:chevron-down" width={18} height={18} />
           </button>
