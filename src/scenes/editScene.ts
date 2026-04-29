@@ -33,4 +33,19 @@ export class EditScene extends LevelScene {
   override pointerdown(info: PointerInfo): void {
     this.editManager.pointerdown(info);
   }
+
+  override pointerwheel(info: PointerInfo): void {
+    if (!(info.event instanceof WheelEvent)) return;
+
+    const scale = Math.exp(-info.event.deltaY * 0.001);
+    const worldBefore = this.screenToWorld(info.pos);
+
+    const newZoom = Math.max(0.1, Math.min(10, this.cameraZoom * scale));
+    this.cameraZoom = newZoom;
+
+    this.cameraPos = worldBefore.sub(info.pos.div(newZoom));
+
+    info.event.preventDefault();
+    info.event.stopPropagation();
+  }
 }

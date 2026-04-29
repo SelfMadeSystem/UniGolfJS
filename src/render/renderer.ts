@@ -73,22 +73,18 @@ export class Renderer {
     const pointerUpHandler = (e: PointerEvent) => this.handlePointerUp(e);
     const wheelHandler = (e: WheelEvent) => {
       if (e.target !== this.ctx.canvas) return;
-      const level = getLevelScene();
-      if (!level) return;
-
-      // zoom factor tuned for a pleasant feel
-      const scale = Math.exp(-e.deltaY * 0.001);
-      const pointer = this.getPointerPos(e as unknown as PointerEvent);
-      const worldBefore = level.screenToWorld(pointer);
-
-      const newZoom = Math.max(0.1, Math.min(10, level.cameraZoom * scale));
-      level.cameraZoom = newZoom;
-
-      // keep the world point under the pointer fixed
-      level.cameraPos = worldBefore.sub(pointer.div(newZoom));
-
-      e.preventDefault();
-      e.stopPropagation();
+      const scene = $scene.get();
+      scene.pointerwheel?.({
+        pos: this.getPointerPos(e),
+        leftButton: false,
+        rightButton: false,
+        middleButton: false,
+        shift: e.shiftKey,
+        ctrl: e.ctrlKey,
+        alt: e.altKey,
+        event: e,
+        eventType: "pointerwheel",
+      });
     };
 
     window.addEventListener("pointerdown", pointerDownHandler);
@@ -297,7 +293,7 @@ export class Renderer {
   /**
    * Gets the pointer position relative to the center of the canvas
    */
-  getPointerPos(event: PointerEvent): Vector2 {
+  getPointerPos(event: { clientX: number; clientY: number }): Vector2 {
     const rect = this.ctx.canvas.getBoundingClientRect();
     const x = event.clientX - rect.left - rect.width / 2;
     const y = event.clientY - rect.top - rect.height / 2;

@@ -38,7 +38,7 @@ export function PlaceMenu({
 }) {
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="pointer-events-auto absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="pointer-events-auto p-4 bg-black/80 w-64 rounded shadow absolute right-4 top-16">
         <h2 className="text-lg font-bold mb-2">Placeables</h2>
         <div className="flex flex-row flex-wrap gap-2">
