@@ -306,12 +306,48 @@ export class EditManager implements Drawable, PointerEventHandler {
             this.highlightedObject = null;
             return;
           case "copy": {
+            const originals: LevelObject[] = [...this.selectedObjectsInternal];
             const duplicates: LevelObject[] = [];
-            for (const obj of this.selectedObjectsInternal) {
+
+            // create duplicates and keep mapping of oldId -> newObj
+            for (const obj of originals) {
               const dup = obj.duplicate();
               this.scene.addObjectToLevel(dup);
               duplicates.push(dup);
             }
+
+            const idMap = new Map<string, string>();
+            for (let i = 0; i < originals.length; i++) {
+              idMap.set(originals[i]!.id, duplicates[i]!.id);
+            }
+
+            // helper to recursively replace any id references in data
+            function replaceIdsInPlace(value: any) {
+              if (value === null || value === undefined) return value;
+              if (typeof value === "string") {
+                return idMap.get(value) ?? value;
+              }
+              if (Array.isArray(value)) {
+                for (let i = 0; i < value.length; i++) {
+                  value[i] = replaceIdsInPlace(value[i]);
+                }
+                return value;
+              }
+              if (typeof value === "object") {
+                for (const k of Object.keys(value)) {
+                  value[k] = replaceIdsInPlace(value[k]);
+                }
+                return value;
+              }
+              return value;
+            }
+
+            // patch duplicated objects' data to point internal refs to new ids
+            for (const dup of duplicates) {
+              const data = dup.getData();
+              replaceIdsInPlace(data);
+            }
+
             this.clearSelection();
             for (const d of duplicates) {
               this.selectedObjectsInternal.add(d);
