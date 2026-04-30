@@ -23,8 +23,6 @@ export type PointerInfo = {
     | "touchstart"
     | "touchmove"
     | "touchend";
-  // touch points when available (for multitouch gestures)
-  touches?: TouchPoint[];
 };
 
 export interface PointerEventHandler {
