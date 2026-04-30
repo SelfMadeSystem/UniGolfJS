@@ -5,7 +5,12 @@ import { LAYERS } from "../levelConfig";
 import type { EditScene } from "@/scenes/editScene";
 import { icons as mdiIcons } from "@iconify-json/mdi";
 
-export type HandleAction = "resize" | "rotateCW" | "rotateCCW" | "delete";
+export type HandleAction =
+  | "resize"
+  | "rotateCW"
+  | "rotateCCW"
+  | "delete"
+  | "copy";
 
 export abstract class EditorHandle {
   constructor(public scene: EditScene) {}
@@ -177,6 +182,54 @@ class RotateHandle extends EditorHandle {
   }
 }
 
+class CopyHandle extends EditorHandle {
+  static readonly SIZE_PX = 14;
+
+  private getAABB(selectionAABB: AABB) {
+    const handleSize = CopyHandle.SIZE_PX / this.scene.cameraZoom;
+    return new AABB(
+      selectionAABB.bl,
+      selectionAABB.bl.add(new Vector2(-handleSize, handleSize)),
+    );
+  }
+
+  contains(pointerPos: Vector2, selectionAABB: AABB) {
+    return this.getAABB(selectionAABB).containsPoint(pointerPos);
+  }
+
+  *render(selectionAABB: AABB, info: RenderInfo) {
+    const aabb = this.getAABB(selectionAABB);
+    yield pass(LAYERS.EDITOR, (ctx) => {
+      ctx.save();
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(
+        aabb.tl.x,
+        aabb.tl.y,
+        aabb.br.x - aabb.tl.x,
+        aabb.br.y - aabb.tl.y,
+      );
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(
+        aabb.tl.x,
+        aabb.tl.y,
+        aabb.br.x - aabb.tl.x,
+        aabb.br.y - aabb.tl.y,
+      );
+      drawIcon(ctx, "content-copy" as IconName, aabb, "#111111");
+      ctx.restore();
+    });
+  }
+
+  cursor() {
+    return "pointer";
+  }
+
+  action(): HandleAction {
+    return "copy";
+  }
+}
+
 class DeleteHandle extends EditorHandle {
   static readonly SIZE_PX = 14;
 
@@ -228,20 +281,20 @@ class DeleteHandle extends EditorHandle {
 export class HandlesManager {
   private resize: ResizeHandle;
   private rotateTR: RotateHandle;
-  private rotateBL: RotateHandle;
+  private copy: CopyHandle;
   private delete: DeleteHandle;
 
   constructor(public scene: EditScene) {
     this.resize = new ResizeHandle(scene);
     this.rotateTR = new RotateHandle(scene, "tr");
-    this.rotateBL = new RotateHandle(scene, "bl");
+    this.copy = new CopyHandle(scene);
     this.delete = new DeleteHandle(scene);
   }
 
   hitTest(pointerPos: Vector2, selectionAABB: AABB): EditorHandle | null {
     if (this.resize.contains(pointerPos, selectionAABB)) return this.resize;
     if (this.rotateTR.contains(pointerPos, selectionAABB)) return this.rotateTR;
-    if (this.rotateBL.contains(pointerPos, selectionAABB)) return this.rotateBL;
+    if (this.copy.contains(pointerPos, selectionAABB)) return this.copy;
     if (this.delete.contains(pointerPos, selectionAABB)) return this.delete;
     return null;
   }
@@ -249,7 +302,7 @@ export class HandlesManager {
   *render(selectionAABB: AABB, info: RenderInfo): Iterable<RenderPass> {
     yield* this.resize.render(selectionAABB, info);
     yield* this.rotateTR.render(selectionAABB, info);
-    yield* this.rotateBL.render(selectionAABB, info);
+    yield* this.copy.render(selectionAABB, info);
     yield* this.delete.render(selectionAABB, info);
   }
 }

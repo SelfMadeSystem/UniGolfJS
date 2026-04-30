@@ -6,6 +6,8 @@ import { generatePathsFromPoints } from "@/utils/pathUtils";
 import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
 import { getLevelScene } from "@/scenes/state";
+import { deserializeLevelObject, serializeLevelObject } from "../levelObjectRegistry";
+import { nanoid } from "nanoid";
 
 export const LevelObjectSchema = GameObjectSchema.extend({});
 
@@ -191,6 +193,15 @@ export abstract class LevelObject<
     } else {
       scene.removeObject(this);
     }
+  }
+
+  /**
+   * Duplicates the object, giving it a new ID. The duplicate is not added to any scene or level by default.
+   */
+  duplicate(): LevelObject {
+    const newObj = deserializeLevelObject(serializeLevelObject(this));
+    newObj.data.id = nanoid();
+    return newObj;
   }
 
   /**

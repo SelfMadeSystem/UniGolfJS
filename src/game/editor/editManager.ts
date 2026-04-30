@@ -157,10 +157,7 @@ export class EditManager implements Drawable, PointerEventHandler {
         ogSize.x === 0 ? 1 : newSize.x / ogSize.x,
         ogSize.y === 0 ? 1 : newSize.y / ogSize.y,
       );
-      obj.set(
-        "position",
-        (obj.pos = targetAABB.tl.add(relPos.mult(newScale))),
-      );
+      obj.set("position", (obj.pos = targetAABB.tl.add(relPos.mult(newScale))));
       return;
     }
 
@@ -308,6 +305,25 @@ export class EditManager implements Drawable, PointerEventHandler {
             this.clearSelection();
             this.highlightedObject = null;
             return;
+          case "copy": {
+            const duplicates: LevelObject[] = [];
+            for (const obj of this.selectedObjectsInternal) {
+              const dup = obj.duplicate();
+              this.scene.addObjectToLevel(dup);
+              duplicates.push(dup);
+            }
+            this.clearSelection();
+            for (const d of duplicates) {
+              this.selectedObjectsInternal.add(d);
+              this.scene.moveObjectToTop(d);
+            }
+            this.syncSelectedObjects();
+            this.highlightedObject = null;
+            this.startPointer = pointerPos;
+            this.setMode("move");
+            this.currentMode.pointerdown(info);
+            return;
+          }
           case "rotateCCW":
             this.rotateSelectionCCW();
             return;
