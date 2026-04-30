@@ -6,6 +6,9 @@ import type { LevelObject } from "../objects/levelObject";
 
 export const $selectedPlaceable = atom<Placeable>(defaultPlaceable);
 export const $selectedObjects = atom<LevelObject[]>([]);
+export const $copiedObjectProperties = atom<Record<string, unknown> | null>(
+  null,
+);
 
 export function setSelectedPlaceable(placeable: Placeable) {
   $selectedPlaceable.set(placeable);
@@ -18,4 +21,10 @@ export function setSelectedPlaceable(placeable: Placeable) {
 
 export function syncSelectedObjects(objects: Iterable<LevelObject>) {
   $selectedObjects.set([...objects]);
+}
+
+export function setCopiedObjectProperties(
+  properties: Record<string, unknown> | null,
+) {
+  $copiedObjectProperties.set(properties);
 }
