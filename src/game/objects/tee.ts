@@ -104,51 +104,60 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     }
   }
 
-  override render(info: RenderInfo): Iterable<RenderPass> {
-    return [
-      pass(LAYERS.TEE, (ctx) => {
-        const { teeColor } = this.data;
-        ctx.fillStyle = teeColor;
-        this.getAABB().fillRect(ctx);
-      }),
-      pass(LAYERS.INDICATORS, (ctx) => {
-        if (!this.driverPos || !this.ball) return;
-        ctx.strokeStyle = "#444";
-        ctx.fillStyle = "#bbb";
-        ctx.lineWidth = 1;
-        ctx.save();
-        ctx.translate(...this.driverPos.a);
-        const angle = Math.atan2(
-          this.driverPos.y - this.ball.pos.y,
-          this.driverPos.x - this.ball.pos.x,
-        );
-        ctx.rotate(angle);
+  override *render(info: RenderInfo): Iterable<RenderPass> {
+    yield pass(LAYERS.TEE, (ctx) => {
+      const { teeColor } = this.data;
+      ctx.fillStyle = teeColor;
+      this.getAABB().fillRect(ctx);
+    });
 
-        // Driver indicator
-        ctx.fillRect(-5, -20, 10, 40);
-        ctx.strokeRect(-5, -20, 10, 40);
-
-        ctx.restore();
-        ctx.save();
-        ctx.translate(...this.ball.pos.a);
-        ctx.rotate(angle);
-
-        // Arrow pointing in direction of the shot
-        const arrowLength = Math.min(
-          this.ball.pos.sub(this.driverPos).length(),
-          MAX_DRIVER_DISTANCE,
-        );
+    const scene = getLevelScene();
+    if (scene && scene.activeTee === this && !this.ball) {
+      yield pass(LAYERS.TEE, (ctx) => {
+        ctx.fillStyle = `rgba(0, 0, 0, ${Math.sin(info.tickWithInterp * 0.1) * 0.1 + 0.2})`;
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(-arrowLength, 0);
-        ctx.lineTo(-arrowLength + 10, -5);
-        ctx.moveTo(-arrowLength, 0);
-        ctx.lineTo(-arrowLength + 10, 5);
-        ctx.stroke();
+        ctx.arc(this.pos.x, this.pos.y, this.data.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
 
-        ctx.restore();
-      }),
-    ];
+    yield pass(LAYERS.INDICATORS, (ctx) => {
+      if (!this.driverPos || !this.ball) return;
+      ctx.strokeStyle = "#444";
+      ctx.fillStyle = "#bbb";
+      ctx.lineWidth = 1;
+      ctx.save();
+      ctx.translate(...this.driverPos.a);
+      const angle = Math.atan2(
+        this.driverPos.y - this.ball.pos.y,
+        this.driverPos.x - this.ball.pos.x,
+      );
+      ctx.rotate(angle);
+
+      // Driver indicator
+      ctx.fillRect(-5, -20, 10, 40);
+      ctx.strokeRect(-5, -20, 10, 40);
+
+      ctx.restore();
+      ctx.save();
+      ctx.translate(...this.ball.pos.a);
+      ctx.rotate(angle);
+
+      // Arrow pointing in direction of the shot
+      const arrowLength = Math.min(
+        this.ball.pos.sub(this.driverPos).length(),
+        MAX_DRIVER_DISTANCE,
+      );
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-arrowLength, 0);
+      ctx.lineTo(-arrowLength + 10, -5);
+      ctx.moveTo(-arrowLength, 0);
+      ctx.lineTo(-arrowLength + 10, 5);
+      ctx.stroke();
+
+      ctx.restore();
+    });
   }
 
   override reset(sceneReset = false, scene?: LevelScene): void {
