@@ -66,7 +66,6 @@ export class Tee extends LevelObject<typeof TeeSchema> {
           this.shot = false;
           const newBall = new PlayerBall(
             {
-              ...this.data,
               position: this.pos,
               velocity: new Vector2(0, 0),
               radius: this.data.radius,

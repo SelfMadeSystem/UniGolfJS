@@ -13,11 +13,12 @@ import { LevelObject } from "@/game/objects/levelObject";
 import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
 import type { PointerInfo } from "@/render/pointerEvents";
+import { GameObjectCollection } from "@/game/gameObjectCollection";
 
 const WATER_FILL_COLOR = "#40A0FF"; // TODO: put this somewhere more sensible
 
 export abstract class LevelScene extends Scene {
-  public objects: GameObject<any>[] = [];
+  public objects: GameObjectCollection = new GameObjectCollection();
   public drawables: Drawable[] = [];
   public cameraPos: Vector2 = new Vector2(0, 0);
   public cameraZoom: number = 1;
@@ -30,7 +31,7 @@ export abstract class LevelScene extends Scene {
   constructor(public level: Level) {
     super();
 
-    const { config, objects } = level;
+    const { objects } = level;
 
     this.passes = [
       pass(LAYERS.WATER_WALL_PRE, (ctx) => {
@@ -54,7 +55,7 @@ export abstract class LevelScene extends Scene {
       }),
     ];
 
-    this.objects = [...objects];
+    this.objects = new GameObjectCollection(objects);
     this.resetAllObjects(true);
   }
 
@@ -83,6 +84,7 @@ export abstract class LevelScene extends Scene {
     ctx.save();
     ctx.scale(this.cameraZoom, this.cameraZoom);
     ctx.translate(-this.cameraPos.x, -this.cameraPos.y);
+    // TODO: only render objects that are within the camera's view
     renderDrawables(
       [...this.objects, ...this.drawables],
       info,
@@ -158,10 +160,7 @@ export abstract class LevelScene extends Scene {
   }
 
   removeObject(obj: GameObject<any>): void {
-    const index = this.objects.indexOf(obj);
-    if (index !== -1) {
-      this.objects.splice(index, 1);
-    }
+    this.objects.remove(obj);
   }
 
   removeObjectFromLevel(obj: GameObject<any>): void {
@@ -173,7 +172,7 @@ export abstract class LevelScene extends Scene {
   }
 
   addObject(obj: GameObject<any>): void {
-    this.objects.push(obj);
+    this.objects.add(obj);
   }
 
   addObjectToLevel(obj: GameObject<any>): void {
@@ -188,7 +187,7 @@ export abstract class LevelScene extends Scene {
 
   moveObjectToBottom(obj: GameObject<any>): void {
     this.removeObject(obj);
-    this.objects.unshift(obj);
+    this.objects.prepend(obj);
   }
 
   resetAllObjects(scene = false): void {

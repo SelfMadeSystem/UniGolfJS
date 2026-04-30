@@ -5,6 +5,8 @@ import z from "zod";
 import { getLevelScene } from "@/scenes/state";
 
 export const GameObjectSchema = z.object({
+  /** IDs should be unique */
+  id: z.string().default(() => crypto.randomUUID()),
   /** The center position of the object. */
   position: Vec2Schema.default(new Vector2(0, 0)),
   debug: z.boolean().default(false),
@@ -35,6 +37,10 @@ export abstract class GameObject<
 
   get schema(): SchemaType {
     return (this.constructor as typeof GameObject).schema as SchemaType;
+  }
+
+  get id(): string {
+    return this.data.id;
   }
 
   public pos: Vector2;
