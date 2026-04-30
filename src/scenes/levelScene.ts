@@ -14,6 +14,7 @@ import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
 import type { PointerInfo } from "@/render/pointerEvents";
 import { GameObjectCollection } from "@/game/gameObjectCollection";
+import type { Tee } from "@/game/objects/tee";
 
 const WATER_FILL_COLOR = "#40A0FF"; // TODO: put this somewhere more sensible
 
@@ -28,6 +29,7 @@ export abstract class LevelScene extends Scene {
   private cameraZoomLerpAmount: number = 0.15;
   public tickPointers: PointerInfo[] = [];
   public clipPath: Path2D = new Path2D();
+  public activeTee: Tee | null = null;
   public readonly passes: RenderPass[];
 
   constructor(public level: Level) {
@@ -227,9 +229,9 @@ export abstract class LevelScene extends Scene {
     this.objects.prepend(obj);
   }
 
-  resetAllObjects(scene = false): void {
+  resetAllObjects(sceneReset = false): void {
     for (const obj of this.objects) {
-      obj.reset(scene);
+      obj.reset(sceneReset, this);
     }
   }
 }

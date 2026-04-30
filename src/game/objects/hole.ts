@@ -56,29 +56,24 @@ export class Hole extends CircleObject<typeof HoleSchema> {
       radius: this.radius,
     });
 
-    if (this.data.nextTee) {
-      const scene = getLevelScene();
-      if (!scene) return;
-      // TODO: make a better way to manage active tees
-      for (const obj of scene.objects) {
-        if (obj instanceof Tee) {
-          obj.active = false;
-          break;
-        }
-      }
-      const nextTee = scene.objects.getById(this.data.nextTee);
-      if (!nextTee || !(nextTee instanceof Tee)) {
-        console.warn(
-          `Hole ${this.id} has invalid nextTee id ${this.data.nextTee}`,
-        );
-        return;
-      }
-      nextTee.active = true;
+    if (!this.data.nextTee) return;
 
-      setTimeout(() => {
-        nextTee.focusCamera();
-      }, this.data.nextTeeDelay * 1000);
+    const scene = getLevelScene();
+    if (!scene) return;
+
+    const nextTee = scene.objects.getById(this.data.nextTee);
+    if (!nextTee || !(nextTee instanceof Tee)) {
+      console.warn(
+        `Hole ${this.id} has invalid nextTee id ${this.data.nextTee}`,
+      );
+      return;
     }
+
+    nextTee.activate();
+
+    setTimeout(() => {
+      nextTee.focusCamera();
+    }, this.data.nextTeeDelay * 1000);
   }
 
   override editorScale(scale: Vector2): void {

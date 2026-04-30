@@ -13,6 +13,7 @@ import {
   Vec2Schema,
 } from "@/utils/data";
 import { registerLevelObject } from "../levelObjectRegistry";
+import type { LevelScene } from "@/scenes/levelScene";
 
 const TeeSchema = LevelObjectSchema.extend({
   teeColor: rgbSchema.default("#f79d60"),
@@ -32,13 +33,10 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   public ball: PlayerBall | null = null;
   public driverPos: Vector2 | null = null;
   public shot = true;
-
   public doesntScale = true;
-  public active: boolean;
 
   constructor(options: z.input<typeof TeeSchema>) {
     super(options);
-    this.active = this.get("active");
   }
 
   override getAABB(): AABB {
@@ -56,10 +54,9 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   }
 
   override tick(): void {
-    if (!this.active) return;
-
     const scene = getLevelScene();
     if (!scene) return;
+    if (scene.activeTee !== this) return;
 
     const pointers = scene.tickPointers;
     if (!pointers.length) return;
@@ -154,7 +151,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     ];
   }
 
-  override reset(scene = false): void {
+  override reset(sceneReset = false, scene?: LevelScene): void {
     super.reset();
     if (this.ball) {
       this.ball.delete();
@@ -163,16 +160,26 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     this.driverPos = null;
     this.shot = true;
 
-    if (scene) {
-      this.active = this.get("active");
+    if (sceneReset && this.get("active")) {
+      this.activate(scene);
+      this.focusCamera(true, scene);
     }
   }
 
-  focusCamera() {
-    const scene = getLevelScene();
+  focusCamera(forceCamera = false, scene = getLevelScene()): void {
     if (!scene) return;
-    scene.moveCameraTo(this.pos.add(this.data.cameraOffset));
-    scene.zoomCameraTo(this.data.cameraZoom);
+    if (forceCamera) {
+      scene.snapCameraTo(this.pos.add(this.data.cameraOffset));
+      scene.snapCameraZoomTo(this.data.cameraZoom);
+    } else {
+      scene.moveCameraTo(this.pos.add(this.data.cameraOffset));
+      scene.zoomCameraTo(this.data.cameraZoom);
+    }
+  }
+
+  activate(scene = getLevelScene()): void {
+    if (!scene) return;
+    scene.activeTee = this;
   }
 
   override editorScale(scale: Vector2): void {

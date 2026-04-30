@@ -3,6 +3,7 @@ import type { Drawable, RenderInfo, RenderPass } from "@/render/drawable";
 import { Vector2 } from "@/utils/vec";
 import z from "zod";
 import { getLevelScene } from "@/scenes/state";
+import type { LevelScene } from "@/scenes/levelScene";
 
 export const GameObjectSchema = z.object({
   /** IDs should be unique */
@@ -114,9 +115,9 @@ export abstract class GameObject<
 
   /**
    * Resets the object to its initial state.
-   * If `scene` is true, also resets any scene-level state related to this object.
+   * If `sceneReset` is true, also resets any scene-level state related to this object.
    */
-  reset(scene = false): void {
+  reset(sceneReset = false, scene?: LevelScene): void {
     this.pos = this.data.position;
   }
 }

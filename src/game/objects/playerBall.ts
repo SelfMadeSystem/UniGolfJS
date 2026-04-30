@@ -38,13 +38,12 @@ export class PlayerBall extends Ball {
   }
 
   setActiveTee(tee: Tee): void {
-    tee.active = true;
-    this.tee.active = false;
     this.pos = tee.pos;
     this.velocity = new Vector2(0, 0);
     this.tee.ball = null;
     this.tee = tee;
     tee.ball = this;
+    tee.activate();
     tee.focusCamera();
   }
 }
