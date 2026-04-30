@@ -8,6 +8,7 @@ import {
   shapeSchema,
   rotationSchema,
   positiveNumberSchema,
+  stringSchema,
 } from "@/utils/data";
 import {
   registerSchemaComponent,
@@ -121,6 +122,17 @@ function BooleanField({ value, onChange }: FieldComponentProps<boolean>) {
   );
 }
 
+function StringField({ value, onChange }: FieldComponentProps<string>) {
+  return (
+    <input
+      className="bg-gray-800 text-white px-2 rounded w-full"
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
+}
+
 registerSchemaComponent(Vec2Schema, Vec2Field);
 registerSchemaComponent(rgbSchema, ColorField);
 registerSchemaComponent(rgbaSchema, ColorField);
@@ -129,3 +141,4 @@ registerSchemaComponent(rotationSchema, RotationField);
 registerSchemaComponent(numberSchema, NumberField);
 registerSchemaComponent(positiveNumberSchema, PositiveNumberField);
 registerSchemaComponent(booleanSchema, BooleanField);
+registerSchemaComponent(stringSchema, StringField);

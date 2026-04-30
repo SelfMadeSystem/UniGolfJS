@@ -5,12 +5,16 @@ import type { RigidBody } from "./rigidBody";
 import { CircleObject, CircleObjectSchema } from "./circleObject";
 import { AABB } from "@/utils/aabb";
 import type { Vector2 } from "@/utils/vec";
-import { positiveNumberSchema, rgbSchema } from "@/utils/data";
+import { positiveNumberSchema, rgbSchema, stringSchema } from "@/utils/data";
 import { registerLevelObject } from "../levelObjectRegistry";
+import { getLevelScene } from "@/scenes/state";
+import { Tee } from "./tee";
 
 export const HoleSchema = CircleObjectSchema.extend({
   teeColor: rgbSchema.default("#f79d60"),
   radius: positiveNumberSchema.default(20),
+  // TODO: make this a fancy ahh selection of tees
+  nextTee: stringSchema.optional(),
 });
 
 const HOLE_OUTLINE_WIDTH = 5;
@@ -50,6 +54,27 @@ export class Hole extends CircleObject<typeof HoleSchema> {
       pos: this.pos,
       radius: this.radius,
     });
+
+    if (this.data.nextTee) {
+      const scene = getLevelScene();
+      if (!scene) return;
+      // TODO: make a better way to manage active tees
+      for (const obj of scene.objects) {
+        if (obj instanceof Tee) {
+          obj.active = false;
+          break;
+        }
+      }
+      const nextTee = scene.objects.getById(this.data.nextTee);
+      if (!nextTee || !(nextTee instanceof Tee)) {
+        console.warn(
+          `Hole ${this.id} has invalid nextTee id ${this.data.nextTee}`,
+        );
+        return;
+      }
+      nextTee.active = true;
+      scene.moveCameraTo(nextTee.pos);
+    }
   }
 
   override editorScale(scale: Vector2): void {

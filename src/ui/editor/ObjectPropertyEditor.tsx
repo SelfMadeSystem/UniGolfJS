@@ -129,8 +129,38 @@ function PropertyField({
     [object, fieldKey],
   );
 
+  const copyId = useCallback(async () => {
+    const text = String(value ?? "");
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    document.execCommand("copy");
+    textArea.remove();
+  }, [value]);
+
   if (fieldKey === "id") {
-    return <div className="text-gray-500 italic">ID: {value as string}</div>;
+    return (
+      <button
+        type="button"
+        className="cursor-pointer rounded px-1 py-0.5 text-left italic text-gray-500 transition hover:bg-gray-800 hover:text-gray-300"
+        onClick={() => {
+          void copyId();
+        }}
+        title="Click to copy ID"
+      >
+        ID: {value as string}
+      </button>
+    );
   }
 
   if (!FieldComp) {

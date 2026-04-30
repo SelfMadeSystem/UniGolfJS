@@ -42,3 +42,4 @@ export const rotationSchema = z.union([
 export const numberSchema = z.number();
 export const positiveNumberSchema = z.number().positive();
 export const booleanSchema = z.boolean();
+export const stringSchema = z.string();
