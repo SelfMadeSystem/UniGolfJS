@@ -76,11 +76,10 @@ export class Hole extends CircleObject<typeof HoleSchema> {
   }
 
   override editorScale(scale: Vector2): void {
-    this.set(
-      "radius",
+    const newRadius =
       ((this.radius + HOLE_OUTLINE_WIDTH) * (scale.x + scale.y)) / 2 -
-        HOLE_OUTLINE_WIDTH,
-    );
+      HOLE_OUTLINE_WIDTH;
+    this.set("radius", Math.max(newRadius, 1));
   }
 }
 registerLevelObject("hole", Hole);

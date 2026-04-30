@@ -147,6 +147,23 @@ export class EditManager implements Drawable, PointerEventHandler {
       sourceSize.y === 0 ? 1 : targetSize.y / sourceSize.y,
     );
 
+    if (this.selectedObjectsInternal.size === 1) {
+      const obj = [...this.selectedObjectsInternal][0]!;
+      const relPos = obj.pos.sub(sourceAABB.tl);
+      const ogSize = obj.getAABB().size;
+      obj.editorScale(scale);
+      const newSize = obj.getAABB().size;
+      const newScale = new Vector2(
+        ogSize.x === 0 ? 1 : newSize.x / ogSize.x,
+        ogSize.y === 0 ? 1 : newSize.y / ogSize.y,
+      );
+      obj.set(
+        "position",
+        (obj.pos = targetAABB.tl.add(relPos.mult(newScale))),
+      );
+      return;
+    }
+
     for (const obj of this.selectedObjectsInternal) {
       const relPos = obj.pos.sub(sourceAABB.tl);
       obj.set("position", (obj.pos = targetAABB.tl.add(relPos.mult(scale))));
