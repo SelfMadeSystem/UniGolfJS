@@ -22,17 +22,17 @@ export const PolyObjectSchema = LevelObjectSchema.extend({
 });
 
 const CCW_ROT_TABLE = {
-  "0": "90",
-  "90": "180",
-  "180": "270",
-  "270": "0",
+  "0": 90,
+  "90": 180,
+  "180": 270,
+  "270": 0,
 } as const;
 
 const CW_ROT_TABLE = {
-  "0": "270",
-  "90": "0",
-  "180": "90",
-  "270": "180",
+  "0": 270,
+  "90": 0,
+  "180": 90,
+  "270": 180,
 } as const;
 
 const baseQuarterCirclePoints = Array.from({ length: 16 }, (_, i) => {

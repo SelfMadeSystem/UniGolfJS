@@ -150,6 +150,8 @@ export class Vector2 {
         return this.cw180();
       case 270:
         return this.ccw90();
+      default:
+        throw new Error("Rotation must be 0, 90, 180, or 270. Got " + amount);
     }
   }
 
