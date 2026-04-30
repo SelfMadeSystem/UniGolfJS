@@ -7,6 +7,7 @@ import { getLevelScene } from "@/scenes/state";
 import { AABB } from "@/utils/aabb";
 import { PlayerBall } from "./playerBall";
 import { booleanSchema, positiveNumberSchema, rgbSchema } from "@/utils/data";
+import { registerLevelObject } from "../levelObjectRegistry";
 
 const TeeSchema = LevelObjectSchema.extend({
   teeColor: rgbSchema.default("#f79d60"),
@@ -164,3 +165,4 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     // no op for the tee
   }
 }
+registerLevelObject("tee", Tee);

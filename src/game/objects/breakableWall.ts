@@ -6,6 +6,7 @@ import type { Vector2 } from "@/utils/vec";
 import type { RigidBody } from "./rigidBody";
 import type { RenderInfo, RenderPass } from "@/render/drawable";
 import { rgbSchema } from "@/utils/data";
+import { registerLevelObject } from "../levelObjectRegistry";
 
 export const WallSchema = PolyObjectSchema.extend({
   wallColor: rgbSchema.default("#388164"),
@@ -64,3 +65,4 @@ export class BreakableWall extends PolyObject<typeof WallSchema> {
     this.broken = false;
   }
 }
+registerLevelObject("breakableWall", BreakableWall);

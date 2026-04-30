@@ -5,6 +5,7 @@ import type { PathInfo } from "./levelObject";
 import type { RigidBody } from "./rigidBody";
 import { blendColors } from "@/utils/colorUtils";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
+import { registerLevelObject } from "../levelObjectRegistry";
 
 export const BoostSchema = PolyObjectSchema.extend({});
 const SPEED = 60;
@@ -90,3 +91,4 @@ export class Boost extends PolyObject<typeof BoostSchema> {
     this.boostTime = 0;
   }
 }
+registerLevelObject("boost", Boost);

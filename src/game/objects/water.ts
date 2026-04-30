@@ -6,6 +6,7 @@ import type { RigidBody } from "./rigidBody";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 import { getLevelScene } from "@/scenes/state";
 import { rgbSchema } from "@/utils/data";
+import { registerLevelObject } from "../levelObjectRegistry";
 
 export const WaterSchema = PolyObjectSchema.extend({
   wallShadowColor: rgbSchema.default("#76b97e"),
@@ -60,3 +61,4 @@ export class Water extends PolyObject<typeof WaterSchema> {
     rigidBody.inWater = true;
   }
 }
+registerLevelObject("water", Water);

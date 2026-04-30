@@ -79,7 +79,6 @@ export class PlaceMode implements InteractionMode {
 
     // @ts-expect-error can't be arsed to type this properly. can't initialize abstract classes but this'll never be an abstract class so whatever
     const newObj = new placeable.clazz({
-      ...scene.level.config,
       ...placeable.props,
       position: currentAABB.center,
       scale: currentAABB.size,
@@ -128,7 +127,6 @@ export class PlaceMode implements InteractionMode {
     // Place a new object
     // @ts-expect-error can't be arsed to type this properly. can't initialize abstract classes but this'll never be an abstract class so whatever
     const newObj = new placeable.clazz({
-      ...scene.level.config,
       ...placeable.props,
       position: pointerPos,
     });

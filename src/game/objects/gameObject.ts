@@ -99,17 +99,17 @@ export abstract class GameObject<
     return this.data;
   }
 
+  serialize(): z.input<SchemaType> {
+    return this.schema.encode(this.data);
+  }
+
   abstract render(info: RenderInfo): Iterable<RenderPass>;
   tick(): void {}
 
   delete(fromLevel = false): void {
     const scene = getLevelScene();
     if (!scene) return;
-    if (fromLevel) {
-      scene.removeObjectFromLevel(this);
-    } else {
-      scene.removeObject(this);
-    }
+    scene.removeObject(this);
   }
 
   /**

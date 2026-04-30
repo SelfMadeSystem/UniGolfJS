@@ -3,6 +3,7 @@ import { RigidBody, RigidBodySchema } from "./rigidBody";
 import type z from "zod";
 import { LAYERS } from "../levelConfig";
 import type { PathInfo } from "./levelObject";
+import { registerLevelObject } from "../levelObjectRegistry";
 
 export const BallSchema = RigidBodySchema.extend({
   color: rgbSchema.default("#fff"),
@@ -27,3 +28,4 @@ export class Ball extends RigidBody<typeof BallSchema> {
     };
   }
 }
+registerLevelObject("ball", Ball);

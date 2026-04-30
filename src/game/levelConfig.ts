@@ -1,29 +1,9 @@
-import { rgbSchema } from "@/utils/data";
 import z from "zod";
 import { GameObject } from "./objects/gameObject";
+import { deserializeLevelObject, serializedLevelObject, serializeLevelObject } from "./levelObjectRegistry";
+import { LevelObject } from "./objects/levelObject";
 
-export const levelConfigSchema = z.object({
-  wallColor: rgbSchema,
-  wallOutlineColor: rgbSchema,
-  wallShadowColor: rgbSchema,
-  waterWallColor: rgbSchema,
-  floorColor: rgbSchema,
-  floorAccentColor: rgbSchema,
-  teeColor: rgbSchema,
-});
-export type LevelConfig = z.infer<typeof levelConfigSchema>;
-
-export const defaultLevelConfig: LevelConfig = {
-  wallColor: "#388164",
-  wallOutlineColor: "#29694f",
-  wallShadowColor: "#76b97e",
-  waterWallColor: "#779977",
-  floorColor: "#cce2dd",
-  floorAccentColor: "#d9e6e2",
-  teeColor: "#f79d60",
-};
-
-// Globals
+// TODO: put these in a more sensible place
 export const WALL_CONFIG = {
   outline: 2,
   shadow: 4,
@@ -31,6 +11,7 @@ export const WALL_CONFIG = {
   waterWallHeight: 8,
 } as const;
 
+// TODO: put these in a more sensible place
 export enum LAYERS {
   FLOOR,
   WALL_SHADOW,
@@ -58,8 +39,23 @@ export enum LAYERS {
 }
 
 export const levelSchema = z.object({
-  config: levelConfigSchema,
-  // TODO: make this game object's schemas rather than straight up instances
-  objects: z.array(z.instanceof(GameObject as typeof GameObject<any>)),
+  objects: z.array(z.instanceof(LevelObject as typeof LevelObject<any>)),
 });
 export type Level = z.infer<typeof levelSchema>;
+
+export const serializedLevelSchema = z.object({
+  objects: z.array(serializedLevelObject),
+});
+export type SerializedLevel = z.infer<typeof serializedLevelSchema>;
+
+export function serializeLevel(level: Level): SerializedLevel {
+  return {
+    objects: level.objects.map((obj) => serializeLevelObject(obj)),
+  };
+}
+
+export function deserializeLevel(serialized: SerializedLevel): Level {
+  return {
+    objects: serialized.objects.map((obj) => deserializeLevelObject(obj)),
+  };
+}

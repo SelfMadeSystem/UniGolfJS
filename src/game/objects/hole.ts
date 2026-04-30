@@ -6,6 +6,7 @@ import { CircleObject, CircleObjectSchema } from "./circleObject";
 import { AABB } from "@/utils/aabb";
 import type { Vector2 } from "@/utils/vec";
 import { positiveNumberSchema, rgbSchema } from "@/utils/data";
+import { registerLevelObject } from "../levelObjectRegistry";
 
 export const HoleSchema = CircleObjectSchema.extend({
   teeColor: rgbSchema.default("#f79d60"),
@@ -59,3 +60,4 @@ export class Hole extends CircleObject<typeof HoleSchema> {
     );
   }
 }
+registerLevelObject("hole", Hole);

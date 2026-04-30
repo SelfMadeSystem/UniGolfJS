@@ -5,6 +5,7 @@ import { type RenderPass, pass } from "@/render/drawable";
 import { generatePathsFromPoints } from "@/utils/pathUtils";
 import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
+import { getLevelScene } from "@/scenes/state";
 
 export const LevelObjectSchema = GameObjectSchema.extend({});
 
@@ -181,6 +182,16 @@ export abstract class LevelObject<
    * Scales the object relative to its center by the given scale factor.
    */
   abstract editorScale(scale: Vector2): void;
+
+  override delete(fromLevel = false): void {
+    const scene = getLevelScene();
+    if (!scene) return;
+    if (fromLevel) {
+      scene.removeObjectFromLevel(this);
+    } else {
+      scene.removeObject(this);
+    }
+  }
 
   /**
    * Rotates the object around its center clockwise by 90 degrees.

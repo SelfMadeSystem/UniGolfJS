@@ -3,6 +3,7 @@ import { LAYERS, WALL_CONFIG } from "../levelConfig";
 import { PolyObject, PolyObjectSchema } from "./polyObject";
 import type { PathInfo } from "./levelObject";
 import { rgbSchema } from "@/utils/data";
+import { registerLevelObject } from "../levelObjectRegistry";
 
 export const WallSchema = PolyObjectSchema.extend({
   wallColor: rgbSchema.default("#388164"),
@@ -35,3 +36,4 @@ export class Wall extends PolyObject<typeof WallSchema> {
     };
   }
 }
+registerLevelObject("wall", Wall);

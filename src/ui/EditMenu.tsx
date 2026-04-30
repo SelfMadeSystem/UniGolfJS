@@ -10,6 +10,7 @@ import { $selectedPlaceable } from "@/game/editor/state";
 import { EditScene } from "@/scenes/editScene";
 import type { Tool } from "@/game/editor/editManager";
 import { SelectionStatus } from "./editor/SelectionStatus.tsx";
+import { LevelControls } from "./editor/LevelControls";
 
 export function EditMenu() {
   const [showPlaceMenu, setShowPlaceMenu] = useState(false);
@@ -36,18 +37,8 @@ export function EditMenu() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <div className="absolute top-0 left-0">
-        <button
-          className="pointer-events-auto px-4 py-2 bg-gray-800 text-white rounded cursor-pointer"
-          onClick={() => {
-            const levelScene = getLevelScene();
-            if (levelScene) {
-              $scene.set(new PlayScene(levelScene.level));
-            }
-          }}
-        >
-          Play Level
-        </button>
+      <div className="absolute top-0 left-0 pointer-events-auto">
+        <LevelControls />
       </div>
       <div className="absolute top-0 right-0 flex gap-2 p-2">
         <div className="pointer-events-auto">
