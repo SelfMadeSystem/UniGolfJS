@@ -44,7 +44,7 @@ export class Boost extends PolyObject<typeof BoostSchema> {
         0,
         this.pos.x,
         this.pos.y,
-        this.scale.x * Math.SQRT2,
+        Math.hypot(this.scale.x, this.scale.y),
       );
 
       const t = tickWithInterp / 15;
