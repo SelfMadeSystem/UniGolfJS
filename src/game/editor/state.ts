@@ -1,10 +1,10 @@
 import { atom } from "nanostores";
-import { placeables, type Placeable } from "./placeables";
+import { defaultPlaceable, type Placeable } from "./placeables";
 import { $scene } from "@/scenes/state";
 import { EditScene } from "@/scenes/editScene";
 import type { LevelObject } from "../objects/levelObject";
 
-export const $selectedPlaceable = atom<Placeable>(placeables[0]!);
+export const $selectedPlaceable = atom<Placeable>(defaultPlaceable);
 export const $selectedObjects = atom<LevelObject[]>([]);
 
 export function setSelectedPlaceable(placeable: Placeable) {

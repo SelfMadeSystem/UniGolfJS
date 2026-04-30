@@ -2,7 +2,7 @@ import { PlayScene } from "@/scenes/playScene";
 import { $scene, getLevelScene } from "@/scenes/state";
 import { motion } from "motion/react";
 import { PlaceMenu } from "./editor/PlaceMenu";
-import { placeables } from "@/game/editor/placeables";
+import { placeableGroups } from "@/game/editor/placeables";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { useStore } from "@nanostores/react";
@@ -105,7 +105,7 @@ export function EditMenu() {
 
       {showPlaceMenu && (
         <PlaceMenu
-          placeables={placeables}
+          placeableGroups={placeableGroups}
           onClose={() => setShowPlaceMenu(false)}
         />
       )}

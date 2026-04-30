@@ -5,7 +5,7 @@ import { EditManager } from "@/game/editor/editManager";
 import { EditorGrid } from "@/game/editor/editorGrid";
 import type { PointerInfo } from "@/render/pointerEvents";
 import { $selectedPlaceable } from "@/game/editor/state";
-import { placeables } from "@/game/editor/placeables";
+import { defaultPlaceable } from "@/game/editor/placeables";
 
 export class EditScene extends LevelScene {
   public editManager: EditManager = new EditManager(this);
@@ -15,7 +15,7 @@ export class EditScene extends LevelScene {
     super(level);
     this.drawables.push(this.editManager);
     this.drawables.push(this.editorGrid);
-    $selectedPlaceable.set(placeables[0]!);
+    $selectedPlaceable.set(defaultPlaceable);
   }
 
   override get ui() {
