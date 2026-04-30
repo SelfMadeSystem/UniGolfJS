@@ -15,6 +15,7 @@ export const HoleSchema = CircleObjectSchema.extend({
   radius: positiveNumberSchema.default(20),
   // TODO: make this a fancy ahh selection of tees
   nextTee: stringSchema.optional(),
+  nextTeeDelay: positiveNumberSchema.default(0.5),
 });
 
 const HOLE_OUTLINE_WIDTH = 5;
@@ -73,7 +74,10 @@ export class Hole extends CircleObject<typeof HoleSchema> {
         return;
       }
       nextTee.active = true;
-      nextTee.focusCamera();
+
+      setTimeout(() => {
+        nextTee.focusCamera();
+      }, this.data.nextTeeDelay * 1000);
     }
   }
 
