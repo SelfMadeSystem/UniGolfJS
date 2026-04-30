@@ -2,6 +2,6 @@
 
 @layer base {
   body {
-    @apply bg-[#85c486] text-gray-100;
+    @apply bg-[#85c486] text-gray-100 touch-none;
   }
 }

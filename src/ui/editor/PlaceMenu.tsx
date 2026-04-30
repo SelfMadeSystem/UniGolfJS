@@ -93,7 +93,13 @@ export function PlaceMenu({
         className="pointer-events-auto absolute inset-0 bg-black/50"
         onClick={onClose}
       />
-      <div className="pointer-events-auto p-4 bg-black/80 rounded shadow absolute right-4 top-16">
+      <div className="pointer-events-auto p-4 bg-black/80 rounded shadow absolute inset-4 overflow-auto">
+        <button
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
+          onClick={onClose}
+        >
+          <Icon icon="mdi:close" width={24} height={24} />
+        </button>
         <h2 className="text-lg font-bold mb-3">Placeables</h2>
         <div className="flex flex-row flex-wrap gap-4">
           {placeableGroups.map((group) => (

@@ -64,7 +64,6 @@ export class Renderer {
     const pointerDownHandler = (e: PointerEvent) => this.handlePointerDown(e);
     const pointerMoveHandler = (e: PointerEvent) => this.handlePointerMove(e);
     const pointerUpHandler = (e: PointerEvent) => this.handlePointerUp(e);
-    const cancelTouch = (e: TouchEvent) => e.preventDefault(); // to prevent shenanigans
     const wheelHandler = (e: WheelEvent) => {
       if (e.target !== this.ctx.canvas) return;
       const scene = $scene.get();
@@ -84,9 +83,6 @@ export class Renderer {
     window.addEventListener("pointerdown", pointerDownHandler);
     window.addEventListener("pointermove", pointerMoveHandler);
     window.addEventListener("pointerup", pointerUpHandler);
-    window.addEventListener("touchmove", cancelTouch, {
-      passive: false,
-    });
     // wheel on canvas for zoom towards pointer
     this.ctx.canvas.addEventListener("wheel", wheelHandler, { passive: false });
 
@@ -94,7 +90,6 @@ export class Renderer {
       window.removeEventListener("pointerdown", pointerDownHandler);
       window.removeEventListener("pointermove", pointerMoveHandler);
       window.removeEventListener("pointerup", pointerUpHandler);
-      window.removeEventListener("touchmove", cancelTouch);
       this.ctx.canvas.removeEventListener(
         "wheel",
         wheelHandler as EventListener,
