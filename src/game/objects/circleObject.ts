@@ -5,9 +5,10 @@ import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 import { LAYERS } from "../levelConfig";
 import type { RigidBody } from "./rigidBody";
 import { AABB } from "@/utils/aabb";
+import { positiveNumberSchema } from "@/utils/data";
 
 export const CircleObjectSchema = LevelObjectSchema.extend({
-  radius: z.number().positive().default(10),
+  radius: positiveNumberSchema.default(10),
 });
 
 export type Constraint = {

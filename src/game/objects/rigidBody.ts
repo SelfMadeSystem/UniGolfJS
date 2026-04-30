@@ -2,7 +2,7 @@ import z from "zod";
 import { Vector2 } from "@/utils/vec";
 import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { Vec2Schema } from "@/utils/data";
+import { positiveNumberSchema, Vec2Schema } from "@/utils/data";
 import { getLevelScene } from "@/scenes/state";
 import { LevelScene } from "@/scenes/levelScene";
 import { PolyObject, type CollisionInfo } from "./polyObject";
@@ -12,8 +12,8 @@ import { CircleObject } from "./circleObject";
 import { lerp } from "@/utils/mathUtils";
 
 export const RigidBodySchema = LevelObjectSchema.extend({
-  radius: z.number().positive().default(12.5),
-  mass: z.number().positive().default(1),
+  radius: positiveNumberSchema.default(12.5),
+  mass: positiveNumberSchema.default(1),
   velocity: Vec2Schema.default(new Vector2(0, 0)),
 });
 

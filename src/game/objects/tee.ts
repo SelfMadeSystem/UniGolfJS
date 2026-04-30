@@ -6,12 +6,12 @@ import { LAYERS } from "../levelConfig";
 import { getLevelScene } from "@/scenes/state";
 import { AABB } from "@/utils/aabb";
 import { PlayerBall } from "./playerBall";
-import { rgbSchema } from "@/utils/data";
+import { booleanSchema, positiveNumberSchema, rgbSchema } from "@/utils/data";
 
 const TeeSchema = LevelObjectSchema.extend({
   teeColor: rgbSchema.default("#f79d60"),
-  radius: z.number().positive().default(9),
-  active: z.boolean().default(false),
+  radius: positiveNumberSchema.default(9),
+  active: booleanSchema.default(false),
 });
 
 const TEE_SIZE = new Vector2(75, 50);

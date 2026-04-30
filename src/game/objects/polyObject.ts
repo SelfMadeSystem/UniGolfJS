@@ -4,7 +4,7 @@ import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
 import type { RenderInfo, RenderPass } from "@/render/drawable";
 import { Segment } from "@/utils/line";
 import type { RigidBody } from "./rigidBody";
-import { Vec2Schema } from "@/utils/data";
+import { rotationSchema, shapeSchema, Vec2Schema } from "@/utils/data";
 import { AABB } from "@/utils/aabb";
 
 export type CollisionInfo = {
@@ -17,16 +17,8 @@ export type CollisionInfo = {
 
 export const PolyObjectSchema = LevelObjectSchema.extend({
   scale: Vec2Schema.default(new Vector2(40, 40)),
-  shape: z
-    .enum([
-      "rectangle",
-      "triangle",
-      "quarterCircle",
-      "inverseQuarterCircle",
-      "circle",
-    ])
-    .default("rectangle"),
-  rotation: z.enum(["0", "90", "180", "270"]).default("0"),
+  shape: shapeSchema.default("rectangle"),
+  rotation: rotationSchema.default(0),
 });
 
 const CCW_ROT_TABLE = {
@@ -95,8 +87,7 @@ export abstract class PolyObject<
   getPoints(): Vector2[] {
     const { shape, rotation } = this.data;
     const basePoints = SHAPE_POINTS[shape];
-    const rot = parseInt(rotation) as 0 | 90 | 180 | 270;
-    return basePoints.map((p) => p.rot90(rot).mult(this.scale).add(this.pos));
+    return basePoints.map((p) => p.rot90(rotation).mult(this.scale).add(this.pos));
   }
 
   getSegments(): Segment[] {
@@ -295,9 +286,7 @@ export abstract class PolyObject<
     if (this.isPointInside(rigidBody.pos)) return true;
     const segments = this.getSegments();
     for (const segment of segments) {
-      if (
-        segment.distanceToPoint(rigidBody.pos) <= rigidBody.radius
-      ) {
+      if (segment.distanceToPoint(rigidBody.pos) <= rigidBody.radius) {
         return true;
       }
     }

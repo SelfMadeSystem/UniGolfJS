@@ -21,4 +21,24 @@ export const Vec2Schema = z.codec(
 );
 
 export const rgbSchema = z.string().regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
-export const rgbaSchema = z.string().regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/);
+export const rgbaSchema = z
+  .string()
+  .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/);
+
+export const shapeSchema = z.enum([
+  "rectangle",
+  "triangle",
+  "quarterCircle",
+  "inverseQuarterCircle",
+  "circle",
+]);
+export const rotationSchema = z.union([
+  z.literal(0),
+  z.literal(90),
+  z.literal(180),
+  z.literal(270),
+]);
+
+export const numberSchema = z.number();
+export const positiveNumberSchema = z.number().positive();
+export const booleanSchema = z.boolean();

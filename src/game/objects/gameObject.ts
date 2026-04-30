@@ -1,4 +1,4 @@
-import { Vec2Schema } from "@/utils/data";
+import { booleanSchema, Vec2Schema } from "@/utils/data";
 import type { Drawable, RenderInfo, RenderPass } from "@/render/drawable";
 import { Vector2 } from "@/utils/vec";
 import z from "zod";
@@ -9,7 +9,7 @@ export const GameObjectSchema = z.object({
   id: z.string().default(() => crypto.randomUUID()),
   /** The center position of the object. */
   position: Vec2Schema.default(new Vector2(0, 0)),
-  debug: z.boolean().default(false),
+  debug: booleanSchema.default(false),
 });
 
 type GameObjectKey<SchemaType extends typeof GameObjectSchema> = Extract<
@@ -53,19 +53,22 @@ export abstract class GameObject<
   on<K extends SchemaKeys | "position">(
     key: K,
     listener: GameObjectListener<SchemaType, K>,
-  ): void;
+  ): () => void;
   on<K extends SchemaKeys>(
     key: K,
     listener: GameObjectListener<SchemaType, K>,
-  ): void {
+  ): () => void {
     if (!this.listeners.has(key)) {
       this.listeners.set(key, new Set());
     }
-    this.listeners.get(key)!.add(listener as (value: unknown) => void);
+    const listeners = this.listeners.get(key)!;
+    listeners.add(listener as (value: unknown) => void);
+    return () => listeners.delete(listener as (value: unknown) => void);
   }
 
-  onAny(listener: (key: string, value: unknown) => void): void {
+  onAny(listener: (key: string, value: unknown) => void): () => void {
     this.anyListeners.add(listener);
+    return () => this.anyListeners.delete(listener);
   }
 
   protected emit<K extends GameObjectKey<SchemaType> | "position">(
@@ -82,6 +85,9 @@ export abstract class GameObject<
 
   set<K extends SchemaKeys>(key: K, value: z.infer<SchemaType>[K]): void {
     this.data[key] = value;
+    if (key === "position") {
+      this.pos = value as unknown as Vector2;
+    }
     this.emit(key, value);
   }
 
