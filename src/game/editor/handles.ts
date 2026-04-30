@@ -63,10 +63,9 @@ class ResizeHandle extends EditorHandle {
 
   private getAABB(selectionAABB: AABB) {
     const handleSize = ResizeHandle.SIZE_PX / this.scene.cameraZoom;
-    const half = handleSize / 2;
     return new AABB(
-      selectionAABB.br.sub(new Vector2(half, half)),
-      selectionAABB.br.add(new Vector2(half, half)),
+      selectionAABB.br,
+      selectionAABB.br.add(new Vector2(handleSize)),
     );
   }
 
@@ -118,14 +117,22 @@ class RotateHandle extends EditorHandle {
   }
 
   private getAABB(selectionAABB: AABB) {
-    const handleSize = RotateHandle.SIZE_PX / this.scene.cameraZoom;
-    const half = handleSize / 2;
-    const cornerPos =
-      this.corner === "tr" ? selectionAABB.tr : selectionAABB.bl;
-    return new AABB(
-      cornerPos.sub(new Vector2(half, half)),
-      cornerPos.add(new Vector2(half, half)),
-    );
+    switch (this.corner) {
+      case "tr": {
+        const handleSize = RotateHandle.SIZE_PX / this.scene.cameraZoom;
+        return new AABB(
+          selectionAABB.tr,
+          selectionAABB.tr.add(new Vector2(handleSize, -handleSize)),
+        );
+      }
+      case "bl": {
+        const handleSize = RotateHandle.SIZE_PX / this.scene.cameraZoom;
+        return new AABB(
+          selectionAABB.bl,
+          selectionAABB.bl.add(new Vector2(-handleSize, handleSize)),
+        );
+      }
+    }
   }
 
   contains(pointerPos: Vector2, selectionAABB: AABB) {
@@ -175,10 +182,9 @@ class DeleteHandle extends EditorHandle {
 
   private getAABB(selectionAABB: AABB) {
     const handleSize = DeleteHandle.SIZE_PX / this.scene.cameraZoom;
-    const half = handleSize / 2;
     return new AABB(
-      selectionAABB.tl.sub(new Vector2(half, half)),
-      selectionAABB.tl.add(new Vector2(half, half)),
+      selectionAABB.tl.sub(new Vector2(handleSize)),
+      selectionAABB.tl,
     );
   }
 
