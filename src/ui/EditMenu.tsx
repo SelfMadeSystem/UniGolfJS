@@ -1,5 +1,4 @@
-import { PlayScene } from "@/scenes/playScene";
-import { $scene, getLevelScene } from "@/scenes/state";
+import { getLevelScene } from "@/scenes/state";
 import { motion } from "motion/react";
 import { PlaceMenu } from "./editor/PlaceMenu";
 import { placeableGroups } from "@/game/editor/placeables";
@@ -11,6 +10,7 @@ import { EditScene } from "@/scenes/editScene";
 import type { Tool } from "@/game/editor/editManager";
 import { SelectionStatus } from "./editor/SelectionStatus.tsx";
 import { LevelControls } from "./editor/LevelControls";
+import { EditorOptions } from "./editor/EditorOptions";
 
 export function EditMenu() {
   const [showPlaceMenu, setShowPlaceMenu] = useState(false);
@@ -100,6 +100,10 @@ export function EditMenu() {
           onClose={() => setShowPlaceMenu(false)}
         />
       )}
+
+      <div className="absolute bottom-4 left-4">
+        <EditorOptions />
+      </div>
 
       <div className="absolute bottom-4 right-4">
         <SelectionStatus />
