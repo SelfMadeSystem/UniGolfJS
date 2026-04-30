@@ -4,11 +4,12 @@ import { motion } from "motion/react";
 import { PlaceMenu } from "./editor/PlaceMenu";
 import { placeables } from "@/game/editor/placeables";
 import { Icon } from "@iconify/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useStore } from "@nanostores/react";
 import { $selectedPlaceable } from "@/game/editor/state";
 import { EditScene } from "@/scenes/editScene";
 import type { Tool } from "@/game/editor/editManager";
+import { SelectionStatus } from "./editor/SelectionStatus.tsx";
 
 export function EditMenu() {
   const [showPlaceMenu, setShowPlaceMenu] = useState(false);
@@ -108,6 +109,10 @@ export function EditMenu() {
           onClose={() => setShowPlaceMenu(false)}
         />
       )}
+
+      <div className="absolute bottom-4 right-4">
+        <SelectionStatus />
+      </div>
     </motion.div>
   );
 }

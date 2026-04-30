@@ -17,11 +17,12 @@ import { MoveMode } from "./modes/moveMode";
 import { ResizeMode } from "./modes/resizeMode";
 import { PlaceMode } from "./modes/placeMode";
 import { PanMode } from "./modes/panMode";
+import { syncSelectedObjects } from "./state";
 
 export type Tool = "select" | "place" | "pan";
 
 export class EditManager implements Drawable, PointerEventHandler {
-  public selectedObjects: Set<LevelObject> = new Set();
+  private selectedObjectsInternal: Set<LevelObject> = new Set();
   public highlightedObject: LevelObject | null = null;
   /** world coordinates */
   public startPointer: Vector2 | null = null;
@@ -44,6 +45,11 @@ export class EditManager implements Drawable, PointerEventHandler {
     this.placeMode = new PlaceMode(this);
     this.panMode = new PanMode(this);
     this.currentMode = this.selectMode;
+    syncSelectedObjects(this.selectedObjectsInternal);
+  }
+
+  public get selectedObjects(): Set<LevelObject> {
+    return new Set(this.selectedObjectsInternal);
   }
 
   initHandles(): HandlesManager {
@@ -51,25 +57,37 @@ export class EditManager implements Drawable, PointerEventHandler {
     return this.handles;
   }
 
+  private syncSelectedObjects(): void {
+    syncSelectedObjects(this.selectedObjectsInternal);
+  }
+
   // ===== Selection Management =====
   public selectObject(obj: LevelObject, multiSelect = false) {
-    if (!multiSelect && !this.selectedObjects.has(obj)) {
+    if (!multiSelect && !this.selectedObjectsInternal.has(obj)) {
       this.deselectAll();
     }
-    this.selectedObjects.add(obj);
+    this.selectedObjectsInternal.add(obj);
+    this.syncSelectedObjects();
     this.scene.moveObjectToTop(obj);
   }
 
   public deselectObject(obj: LevelObject) {
-    this.selectedObjects.delete(obj);
+    this.selectedObjectsInternal.delete(obj);
+    this.syncSelectedObjects();
     this.scene.moveObjectToBottom(obj);
   }
 
   public deselectAll() {
-    for (const obj of this.selectedObjects) {
+    for (const obj of this.selectedObjectsInternal) {
       this.scene.moveObjectToBottom(obj);
     }
-    this.selectedObjects.clear();
+    this.selectedObjectsInternal.clear();
+    this.syncSelectedObjects();
+  }
+
+  public clearSelection(): void {
+    this.selectedObjectsInternal.clear();
+    this.syncSelectedObjects();
   }
 
   // ===== Mode Management =====
@@ -98,7 +116,7 @@ export class EditManager implements Drawable, PointerEventHandler {
   // ===== AABB Utilities =====
   public getSelectedAABB(): AABB | null {
     let aabb: AABB | null = null;
-    for (const obj of this.selectedObjects) {
+    for (const obj of this.selectedObjectsInternal) {
       const objAABB = obj.getAABB();
       if (!aabb) {
         aabb = objAABB;
@@ -123,7 +141,7 @@ export class EditManager implements Drawable, PointerEventHandler {
   }
 
   public transformSelectionAABB(sourceAABB: AABB, targetAABB: AABB): void {
-    if (this.selectedObjects.size === 0) return;
+    if (this.selectedObjectsInternal.size === 0) return;
 
     const sourceSize = sourceAABB.size;
     const targetSize = targetAABB.size;
@@ -132,7 +150,7 @@ export class EditManager implements Drawable, PointerEventHandler {
       sourceSize.y === 0 ? 1 : targetSize.y / sourceSize.y,
     );
 
-    for (const obj of this.selectedObjects) {
+    for (const obj of this.selectedObjectsInternal) {
       const relPos = obj.pos.sub(sourceAABB.tl);
       obj.set("position", (obj.pos = targetAABB.tl.add(relPos.mult(scale))));
       obj.editorScale(scale);
@@ -141,16 +159,16 @@ export class EditManager implements Drawable, PointerEventHandler {
 
   // ===== Rotation (for handles) =====
   public rotateSelectionCCW(): void {
-    if (this.selectedObjects.size === 0) return;
+    if (this.selectedObjectsInternal.size === 0) return;
     const aabb = this.getSelectedAABB();
     if (!aabb) return;
-    if (this.selectedObjects.size === 1) {
-      const obj = [...this.selectedObjects][0]!;
+    if (this.selectedObjectsInternal.size === 1) {
+      const obj = [...this.selectedObjectsInternal][0]!;
       obj.editorRotateShapeCCW();
       return;
     }
     const center = aabb.center;
-    for (const obj of this.selectedObjects) {
+    for (const obj of this.selectedObjectsInternal) {
       const rel = obj.pos.sub(center);
       const relRot = new Vector2(rel.y, -rel.x); // CCW 90
       obj.editorRotateCCW();
@@ -159,16 +177,16 @@ export class EditManager implements Drawable, PointerEventHandler {
   }
 
   public rotateSelectionCW(): void {
-    if (this.selectedObjects.size === 0) return;
+    if (this.selectedObjectsInternal.size === 0) return;
     const aabb = this.getSelectedAABB();
     if (!aabb) return;
-    if (this.selectedObjects.size === 1) {
-      const obj = [...this.selectedObjects][0]!;
+    if (this.selectedObjectsInternal.size === 1) {
+      const obj = [...this.selectedObjectsInternal][0]!;
       obj.editorRotateShapeCW();
       return;
     }
     const center = aabb.center;
-    for (const obj of this.selectedObjects) {
+    for (const obj of this.selectedObjectsInternal) {
       const rel = obj.pos.sub(center);
       const relRot = new Vector2(-rel.y, rel.x); // CW 90
       obj.editorRotateCW();
@@ -195,10 +213,10 @@ export class EditManager implements Drawable, PointerEventHandler {
         );
         ctx.restore();
 
-        if (this.selectedObjects.size <= 1) return;
+        if (this.selectedObjectsInternal.size <= 1) return;
         ctx.strokeStyle = "#FFFFFF";
         ctx.lineWidth = 1;
-        for (const obj of this.selectedObjects) {
+        for (const obj of this.selectedObjectsInternal) {
           const path = obj.getPath();
           ctx.stroke(path);
         }
@@ -214,7 +232,7 @@ export class EditManager implements Drawable, PointerEventHandler {
 
     if (
       this.highlightedObject &&
-      !this.selectedObjects.has(this.highlightedObject)
+      !this.selectedObjectsInternal.has(this.highlightedObject)
     ) {
       const path = this.highlightedObject.getPath();
       yield pass(LAYERS.EDITOR, (ctx) => {
@@ -265,10 +283,10 @@ export class EditManager implements Drawable, PointerEventHandler {
         const act = hit.action();
         switch (act) {
           case "delete":
-            for (const obj of this.selectedObjects) {
+            for (const obj of this.selectedObjectsInternal) {
               obj.delete(true);
             }
-            this.selectedObjects.clear();
+            this.clearSelection();
             this.highlightedObject = null;
             return;
           case "rotateCCW":
@@ -308,7 +326,7 @@ export class EditManager implements Drawable, PointerEventHandler {
     const obj = this.scene.getObjectAtPointer(info);
     if (obj instanceof LevelObject) {
       if (info.shift) {
-        if (this.selectedObjects.has(obj)) {
+        if (this.selectedObjectsInternal.has(obj)) {
           this.deselectObject(obj);
         } else {
           this.selectObject(obj, true);
