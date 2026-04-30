@@ -5,8 +5,12 @@ import type { PathInfo } from "./levelObject";
 import type { RigidBody } from "./rigidBody";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 import { getLevelScene } from "@/scenes/state";
+import { rgbSchema } from "@/utils/data";
 
-export const WaterSchema = PolyObjectSchema.extend({});
+export const WaterSchema = PolyObjectSchema.extend({
+  wallShadowColor: rgbSchema.default("#76b97e"),
+  waterWallColor: rgbSchema.default("#779977"),
+});
 
 export class Water extends PolyObject<typeof WaterSchema> {
   static override schema = WaterSchema;
@@ -19,15 +23,18 @@ export class Water extends PolyObject<typeof WaterSchema> {
     super(options);
   }
 
-  override render(info: RenderInfo): Iterable<RenderPass> {
-    return [
-      ...super.render(info),
-      pass(LAYERS.WATER_WALL_CLIP_REGIONS, () => {
-        const scene = getLevelScene();
-        if (!scene) return;
-        scene.clipPath.addPath(this.getPath());
-      }),
-    ];
+  override *render(info: RenderInfo): Iterable<RenderPass> {
+    yield* super.render(info);
+    const path = this.getPath();
+    yield pass(LAYERS.WATER_WALL_CLIP_REGIONS, () => {
+      const scene = getLevelScene();
+      if (!scene) return;
+      scene.clipPath.addPath(path);
+    });
+    yield pass(LAYERS.WATER_FILL, (ctx) => {
+      ctx.fillStyle = this.data.waterWallColor;
+      ctx.fill(path);
+    });
   }
 
   override getPathInfo(): PathInfo {

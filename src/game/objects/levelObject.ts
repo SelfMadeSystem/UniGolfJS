@@ -1,14 +1,12 @@
 import type z from "zod";
 import { GameObject, GameObjectSchema } from "./gameObject";
-import { LAYERS, levelConfigSchema } from "../levelConfig";
+import { LAYERS } from "../levelConfig";
 import { type RenderPass, pass } from "@/render/drawable";
 import { generatePathsFromPoints } from "@/utils/pathUtils";
 import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
 
-export const LevelObjectSchema = GameObjectSchema.extend(
-  levelConfigSchema.shape,
-);
+export const LevelObjectSchema = GameObjectSchema.extend({});
 
 export type PathInfo = {
   shadowLayer?: number;

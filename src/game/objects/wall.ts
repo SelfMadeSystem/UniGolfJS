@@ -2,8 +2,14 @@ import z from "zod";
 import { LAYERS, WALL_CONFIG } from "../levelConfig";
 import { PolyObject, PolyObjectSchema } from "./polyObject";
 import type { PathInfo } from "./levelObject";
+import { rgbSchema } from "@/utils/data";
 
-export const WallSchema = PolyObjectSchema.extend({});
+export const WallSchema = PolyObjectSchema.extend({
+  wallColor: rgbSchema.default("#388164"),
+  wallOutlineColor: rgbSchema.default("#29694f"),
+  wallShadowColor: rgbSchema.default("#76b97e"),
+  waterWallColor: rgbSchema.default("#779977"),
+});
 
 export class Wall extends PolyObject<typeof WallSchema> {
   static override schema = WallSchema;

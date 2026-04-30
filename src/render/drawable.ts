@@ -27,10 +27,11 @@ export function renderDrawables(
   ctx: CanvasRenderingContext2D,
   passes: RenderPass[] = [],
 ) {
-  const renderPasses: RenderPass[] = [...passes];
+  const renderPasses: RenderPass[] = [];
   for (const drawable of drawables) {
     renderPasses.push(...drawable.render(info));
   }
+  renderPasses.push(...passes);
   renderPasses.sort((a, b) => a.layer - b.layer);
   for (const pass of renderPasses) {
     pass.draw(ctx);

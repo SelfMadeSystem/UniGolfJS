@@ -42,8 +42,6 @@ export abstract class LevelScene extends Scene {
         ctx.clip(this.clipPath);
       }),
       pass(LAYERS.WATER_FILL, (ctx) => {
-        ctx.fillStyle = config.waterWallColor;
-        ctx.fill(this.clipPath);
         ctx.save();
         ctx.translate(0, WALL_CONFIG.waterWallHeight);
         ctx.fillStyle = WATER_FILL_COLOR;

@@ -5,8 +5,10 @@ import type { RigidBody } from "./rigidBody";
 import { CircleObject, CircleObjectSchema } from "./circleObject";
 import { AABB } from "@/utils/aabb";
 import type { Vector2 } from "@/utils/vec";
+import { rgbSchema } from "@/utils/data";
 
 export const HoleSchema = CircleObjectSchema.extend({
+  teeColor: rgbSchema.default("#f79d60"),
   radius: z.number().positive().default(20),
 });
 
