@@ -23,7 +23,9 @@ export abstract class LevelScene extends Scene {
   public cameraPos: Vector2 = new Vector2(0, 0);
   public cameraZoom: number = 1;
   private cameraTarget: Vector2 | null = null;
+  private cameraZoomTarget: number | null = null;
   private cameraLerpAmount: number = 0.15;
+  private cameraZoomLerpAmount: number = 0.15;
   public tickPointers: PointerInfo[] = [];
   public clipPath: Path2D = new Path2D();
   public readonly passes: RenderPass[];
@@ -118,20 +120,39 @@ export abstract class LevelScene extends Scene {
   }
 
   private updateCameraMovement(delta: number): void {
-    if (!this.cameraTarget) return;
+    if (!this.cameraTarget && !this.cameraZoomTarget) return;
 
-    const distanceSq = this.cameraPos.distSq(this.cameraTarget);
+    // Update position
+    if (this.cameraTarget) {
+      const distanceSq = this.cameraPos.distSq(this.cameraTarget);
 
-    if (distanceSq < 0.0001) {
-      this.cameraPos = this.cameraTarget;
-      this.cameraTarget = null;
-      return;
+      if (distanceSq < 0.0001) {
+        this.cameraPos = this.cameraTarget;
+        this.cameraTarget = null;
+      } else {
+        const baseFrameMs = 1000 / 60;
+        const progress =
+          1 - Math.pow(1 - this.cameraLerpAmount, delta / baseFrameMs);
+        this.cameraPos = this.cameraPos.lerp(this.cameraTarget, progress);
+      }
     }
 
-    const baseFrameMs = 1000 / 60;
-    const progress =
-      1 - Math.pow(1 - this.cameraLerpAmount, delta / baseFrameMs);
-    this.cameraPos = this.cameraPos.lerp(this.cameraTarget, progress);
+    // Update zoom
+    if (this.cameraZoomTarget !== null) {
+      const difference = Math.abs(this.cameraZoom - this.cameraZoomTarget);
+
+      if (difference < 0.0001) {
+        this.cameraZoom = this.cameraZoomTarget;
+        this.cameraZoomTarget = null;
+      } else {
+        const baseFrameMs = 1000 / 60;
+        const progress =
+          1 - Math.pow(1 - this.cameraZoomLerpAmount, delta / baseFrameMs);
+        this.cameraZoom =
+          this.cameraZoom +
+          (this.cameraZoomTarget - this.cameraZoom) * progress;
+      }
+    }
   }
 
   /**
@@ -148,6 +169,22 @@ export abstract class LevelScene extends Scene {
   snapCameraTo(pos: Vector2): void {
     this.cameraPos = pos.clone();
     this.cameraTarget = null;
+  }
+
+  /**
+   * Smoothly changes the camera zoom toward a target zoom level.
+   */
+  zoomCameraTo(zoom: number, lerpAmount: number = 0.15): void {
+    this.cameraZoomTarget = zoom;
+    this.cameraZoomLerpAmount = lerpAmount;
+  }
+
+  /**
+   * Immediately sets the camera zoom and cancels any smooth zoom movement.
+   */
+  snapCameraZoomTo(zoom: number): void {
+    this.cameraZoom = zoom;
+    this.cameraZoomTarget = null;
   }
 
   getObjectAtPointer(pointer: PointerInfo | null): GameObject<any> | null {

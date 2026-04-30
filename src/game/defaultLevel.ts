@@ -4,7 +4,6 @@ import { Wall } from "./objects/wall";
 import { Tee } from "./objects/tee";
 import { Hole } from "./objects/hole";
 
-
 export const defaultLevelConfig = {
   wallColor: "#388164",
   wallOutlineColor: "#29694f",
@@ -51,6 +50,7 @@ export function defaultLevel(): Level {
       new Tee({
         position: new Vector2(0, height / 2 - teeInset),
         active: true,
+        cameraOffset: new Vector2(0, -(height / 2 - teeInset)),
         ...defaultLevelConfig,
       }),
     ],

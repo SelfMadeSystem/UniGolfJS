@@ -38,8 +38,6 @@ export class PlayerBall extends Ball {
   }
 
   setActiveTee(tee: Tee): void {
-    const scene = getLevelScene();
-
     tee.active = true;
     this.tee.active = false;
     this.pos = tee.pos;
@@ -47,7 +45,6 @@ export class PlayerBall extends Ball {
     this.tee.ball = null;
     this.tee = tee;
     tee.ball = this;
-
-    scene?.moveCameraTo(tee.pos);
+    tee.focusCamera();
   }
 }

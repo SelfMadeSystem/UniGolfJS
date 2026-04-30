@@ -6,13 +6,20 @@ import { LAYERS } from "../levelConfig";
 import { getLevelScene } from "@/scenes/state";
 import { AABB } from "@/utils/aabb";
 import { PlayerBall } from "./playerBall";
-import { booleanSchema, positiveNumberSchema, rgbSchema } from "@/utils/data";
+import {
+  booleanSchema,
+  positiveNumberSchema,
+  rgbSchema,
+  Vec2Schema,
+} from "@/utils/data";
 import { registerLevelObject } from "../levelObjectRegistry";
 
 const TeeSchema = LevelObjectSchema.extend({
   teeColor: rgbSchema.default("#f79d60"),
   radius: positiveNumberSchema.default(9),
   active: booleanSchema.default(false),
+  cameraZoom: positiveNumberSchema.default(1),
+  cameraOffset: Vec2Schema.default(new Vector2(0, 0)),
 });
 
 const TEE_SIZE = new Vector2(75, 50);
@@ -159,6 +166,13 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     if (scene) {
       this.active = this.get("active");
     }
+  }
+
+  focusCamera() {
+    const scene = getLevelScene();
+    if (!scene) return;
+    scene.moveCameraTo(this.pos.add(this.data.cameraOffset));
+    scene.zoomCameraTo(this.data.cameraZoom);
   }
 
   override editorScale(scale: Vector2): void {

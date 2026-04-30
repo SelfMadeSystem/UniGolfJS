@@ -73,7 +73,7 @@ export class Hole extends CircleObject<typeof HoleSchema> {
         return;
       }
       nextTee.active = true;
-      scene.moveCameraTo(nextTee.pos);
+      nextTee.focusCamera();
     }
   }
 
