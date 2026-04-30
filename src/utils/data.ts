@@ -43,3 +43,5 @@ export const numberSchema = z.number();
 export const positiveNumberSchema = z.number().positive();
 export const booleanSchema = z.boolean();
 export const stringSchema = z.string();
+/** Validated at runtime since it's non-trivial to enforce at compile or schema level */
+export const objectIdSchema = z.nanoid();

@@ -4,8 +4,9 @@ import type { GameObject } from "./objects/gameObject";
  * Central ownership for game objects.
  *
  * The backing structure stays simple for now: a stable ordered list plus an ID
- * index for direct lookup. Spatial partitioning can be layered in later without
- * changing the public API of the collection.
+ * index for direct lookup. Objects are also indexed by their class and superclasses
+ * for efficient type-based queries. Spatial partitioning can be layered in later
+ * without changing the public API of the collection.
  */
 // TODO: add spatial partitioning
 export class GameObjectCollection<
@@ -13,6 +14,7 @@ export class GameObjectCollection<
 > implements Iterable<T> {
   private readonly items: T[] = [];
   private readonly byId = new Map<string, T>();
+  private readonly byType = new Map<Function, Set<T>>();
 
   constructor(objects: Iterable<T> = []) {
     this.replace(objects);
@@ -33,6 +35,7 @@ export class GameObjectCollection<
 
     this.items.push(object);
     this.byId.set(object.id, object);
+    this.registerByType(object);
   }
 
   prepend(object: T): void {
@@ -42,6 +45,7 @@ export class GameObjectCollection<
 
     this.items.unshift(object);
     this.byId.set(object.id, object);
+    this.registerByType(object);
   }
 
   remove(object: T): boolean {
@@ -58,6 +62,7 @@ export class GameObjectCollection<
       this.items.splice(index, 1);
     }
 
+    this.unregisterByType(object);
     return object;
   }
 
@@ -75,6 +80,7 @@ export class GameObjectCollection<
   clear(): void {
     this.items.length = 0;
     this.byId.clear();
+    this.byType.clear();
   }
 
   toArray(): T[] {
@@ -96,5 +102,44 @@ export class GameObjectCollection<
     thisArg?: unknown,
   ): void {
     this.items.forEach(callback, thisArg);
+  }
+
+  /**
+   * Get all objects that are instances of the given type (including subclasses).
+   */
+  getByType<S extends T>(type: new (...args: any[]) => S): S[] {
+    return Array.from(this.byType.get(type) ?? []) as S[];
+  }
+
+  /**
+   * Filter objects by type. Objects match if they are instances of the given type.
+   */
+  filterByType<S extends T>(type: new (...args: any[]) => S): S[] {
+    return this.getByType(type);
+  }
+
+  private registerByType(object: T): void {
+    let proto = Object.getPrototypeOf(object);
+
+    while (proto && proto !== Object.prototype) {
+      const constructor = proto.constructor as Function;
+
+      if (!this.byType.has(constructor)) {
+        this.byType.set(constructor, new Set());
+      }
+
+      this.byType.get(constructor)!.add(object);
+      proto = Object.getPrototypeOf(proto);
+    }
+  }
+
+  private unregisterByType(object: T): void {
+    let proto = Object.getPrototypeOf(object);
+
+    while (proto && proto !== Object.prototype) {
+      const constructor = proto.constructor as Function;
+      this.byType.get(constructor)?.delete(object);
+      proto = Object.getPrototypeOf(proto);
+    }
   }
 }

@@ -4,10 +4,11 @@ import { Vector2 } from "@/utils/vec";
 import z from "zod";
 import { getLevelScene } from "@/scenes/state";
 import type { LevelScene } from "@/scenes/levelScene";
+import { nanoid } from "nanoid";
 
 export const GameObjectSchema = z.object({
   /** IDs should be unique */
-  id: z.string().default(() => crypto.randomUUID()),
+  id: z.nanoid().default(nanoid),
   /** The center position of the object. */
   position: Vec2Schema.default(new Vector2(0, 0)),
   debug: booleanSchema.default(false),

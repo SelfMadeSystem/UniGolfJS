@@ -31,6 +31,7 @@ export class EditManager implements Drawable, PointerEventHandler {
 
   public selectedTool: Tool = "select";
 
+  public overrideMode = false;
   public currentMode: InteractionMode;
   public selectMode: SelectMode;
   public moveMode: MoveMode;
@@ -92,24 +93,20 @@ export class EditManager implements Drawable, PointerEventHandler {
 
   // ===== Mode Management =====
   public setMode(mode: "select" | "move" | "resize" | "place" | "pan"): void {
+    this.setInteractionMode(
+      {
+        select: this.selectMode,
+        move: this.moveMode,
+        resize: this.resizeMode,
+        place: this.placeMode,
+        pan: this.panMode,
+      }[mode],
+    );
+  }
+
+  public setInteractionMode(mode: InteractionMode): void {
     this.currentMode?.onExit?.();
-    switch (mode) {
-      case "select":
-        this.currentMode = this.selectMode;
-        break;
-      case "move":
-        this.currentMode = this.moveMode;
-        break;
-      case "resize":
-        this.currentMode = this.resizeMode;
-        break;
-      case "place":
-        this.currentMode = this.placeMode;
-        break;
-      case "pan":
-        this.currentMode = this.panMode;
-        break;
-    }
+    this.currentMode = mode;
     this.currentMode?.onEnter?.();
   }
 
@@ -272,6 +269,11 @@ export class EditManager implements Drawable, PointerEventHandler {
   }
 
   pointerdown(info: PointerInfo): void {
+    if (this.overrideMode) {
+      this.currentMode.pointerdown(info);
+      return;
+    }
+
     const pointerPos = this.scene.screenToWorld(info.pos);
 
     // Check for handle hits first

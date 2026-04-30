@@ -5,7 +5,7 @@ import type { RigidBody } from "./rigidBody";
 import { CircleObject, CircleObjectSchema } from "./circleObject";
 import { AABB } from "@/utils/aabb";
 import type { Vector2 } from "@/utils/vec";
-import { positiveNumberSchema, rgbSchema, stringSchema } from "@/utils/data";
+import { objectIdSchema, positiveNumberSchema, rgbSchema } from "@/utils/data";
 import { registerLevelObject } from "../levelObjectRegistry";
 import { getLevelScene } from "@/scenes/state";
 import { Tee } from "./tee";
@@ -13,8 +13,7 @@ import { Tee } from "./tee";
 export const HoleSchema = CircleObjectSchema.extend({
   teeColor: rgbSchema.default("#f79d60"),
   radius: positiveNumberSchema.default(20),
-  // TODO: make this a fancy ahh selection of tees
-  nextTee: stringSchema.optional(),
+  nextTee: objectIdSchema.optional().meta({ ofType: "tee" }),
   nextTeeDelay: positiveNumberSchema.default(0.5),
 });
 
