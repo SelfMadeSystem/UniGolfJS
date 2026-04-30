@@ -15,11 +15,12 @@ import {
   registerSchemaComponent,
   type FieldComponentProps,
 } from "./schemaRegistry";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getLevelObjectClass } from "@/game/levelObjectRegistry";
 import { getLevelScene } from "@/scenes/state";
 import { EditScene } from "@/scenes/editScene";
 import { SelectObjectMode } from "@/game/editor/modes/selectObjectMode";
+import type { LevelObject } from "@/game/objects/levelObject";
 
 function Vec2Field({ value, onChange }: FieldComponentProps<Vector2>) {
   const setX = useCallback(
@@ -148,6 +149,22 @@ function ObjectIdField({
   const ObjectClass =
     typeof ofType === "string" ? getLevelObjectClass(ofType) : null;
   const [isPicking, setIsPicking] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (!isHovered) return;
+
+    const levelScene = getLevelScene();
+    if (!(levelScene instanceof EditScene)) return;
+
+    const object = levelScene.objects.getById(value);
+    if (!object) return;
+    levelScene.editManager.highlightedObject = object as LevelObject<any>;
+
+    return () => {
+      levelScene.editManager.highlightedObject = null;
+    };
+  }, [ObjectClass, isHovered, value]);
 
   const startPicker = useCallback(() => {
     const levelScene = getLevelScene();
@@ -192,6 +209,8 @@ function ObjectIdField({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       />
       <button
         type="button"
