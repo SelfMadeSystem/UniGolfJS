@@ -134,11 +134,11 @@ export abstract class PolyObject<
     return windingNumber !== 0;
   }
 
-  abstract getPathInfo(): PathInfo;
+  abstract getPathInfo(info: RenderInfo): PathInfo;
 
   override render(info: RenderInfo): Iterable<RenderPass> {
     const points = this.getPoints();
-    const pathInfo = this.getPathInfo();
+    const pathInfo = this.getPathInfo(info);
     return this.renderPoints({ points, ...pathInfo, debug: this.data.debug });
   }
 

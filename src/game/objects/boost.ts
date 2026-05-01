@@ -8,8 +8,9 @@ import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 import { registerLevelObject } from "../levelObjectRegistry";
 
 export const BoostSchema = PolyObjectSchema.extend({});
-const SPEED = 60;
-const BOOST_EFFECT_TIME = 10; // frames
+// TODO: put these in a better place
+export const SPEED = 60;
+export const BOOST_EFFECT_TIME = 10; // frames
 
 const C1 = "#66FF00";
 const C2 = "#FFFF00";

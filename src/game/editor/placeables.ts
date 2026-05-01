@@ -7,6 +7,10 @@ import { Ball } from "../objects/ball";
 import { Tee } from "../objects/tee";
 import { Hole } from "../objects/hole";
 import { BreakableWall } from "../objects/breakableWall";
+import { Slope } from "../objects/slope";
+import { BouncyWall } from "../objects/bouncyWall";
+import { ConveyorBelt } from "../objects/conveyorBelt";
+import { Portal } from "../objects/portal";
 
 type Shape =
   | "rectangle"
@@ -287,6 +291,70 @@ export const placeableGroups: PlaceableGroup[] = [
         name: "Hole",
         icon: "ph:flag-light",
         clazz: Hole,
+        noSize: true,
+      },
+    ],
+  ),
+  createPlaceableGroup(
+    {
+      id: "slope",
+      name: "Slope",
+      icon: "ph:ramp-light",
+      iconColor: "#a67857",
+      clazz: Slope,
+    },
+    createShapeVariations({
+      id: "slope",
+      name: "Slope",
+      clazz: Slope,
+      iconColor: "#a67857",
+    }),
+  ),
+  createPlaceableGroup(
+    {
+      id: "bouncy-wall",
+      name: "Bouncy Wall",
+      icon: "ph:wall-light",
+      iconColor: "#ff6b6b",
+      clazz: BouncyWall,
+    },
+    createShapeVariations({
+      id: "bouncy-wall",
+      name: "Bouncy Wall",
+      clazz: BouncyWall,
+      iconColor: "#ff6b6b",
+    }),
+  ),
+  createPlaceableGroup(
+    {
+      id: "conveyor-belt",
+      name: "Conveyor Belt",
+      icon: "ph:arrow-right-bold",
+      iconColor: "#4a90e2",
+      clazz: ConveyorBelt,
+    },
+    createShapeVariations({
+      id: "conveyor-belt",
+      name: "Conveyor Belt",
+      clazz: ConveyorBelt,
+      iconColor: "#4a90e2",
+    }),
+  ),
+  createPlaceableGroup(
+    {
+      id: "portal",
+      name: "Portal",
+      icon: "ph:spiral-light",
+      iconColor: "#a855f7",
+      clazz: Portal,
+    },
+    [
+      {
+        id: "portal",
+        name: "Portal",
+        icon: "ph:spiral-light",
+        iconColor: "#a855f7",
+        clazz: Portal,
         noSize: true,
       },
     ],

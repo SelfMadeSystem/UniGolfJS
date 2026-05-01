@@ -5,10 +5,7 @@ export class AABB {
   public readonly tl: Vector2;
   public readonly br: Vector2;
 
-  constructor(
-    a: VecLike,
-    b: VecLike,
-  ) {
+  constructor(a: VecLike, b: VecLike) {
     const vecA = new Vector2(a);
     const vecB = new Vector2(b);
     this.tl = new Vector2(Math.min(vecA.x, vecB.x), Math.min(vecA.y, vecB.y));
@@ -115,8 +112,14 @@ export class AABB {
 
   expandVec(amount: Vector2): AABB {
     return new AABB(
-      new Vector2(this.tl.x + Math.min(0, amount.x), this.tl.y + Math.min(0, amount.y)),
-      new Vector2(this.br.x + Math.max(0, amount.x), this.br.y + Math.max(0, amount.y)),
+      new Vector2(
+        this.tl.x + Math.min(0, amount.x),
+        this.tl.y + Math.min(0, amount.y),
+      ),
+      new Vector2(
+        this.br.x + Math.max(0, amount.x),
+        this.br.y + Math.max(0, amount.y),
+      ),
     );
   }
 
@@ -129,9 +132,27 @@ export class AABB {
 
   expandToIncludeAABB(other: AABB): AABB {
     return new AABB(
-      new Vector2(Math.min(this.tl.x, other.tl.x), Math.min(this.tl.y, other.tl.y)),
-      new Vector2(Math.max(this.br.x, other.br.x), Math.max(this.br.y, other.br.y)),
+      new Vector2(
+        Math.min(this.tl.x, other.tl.x),
+        Math.min(this.tl.y, other.tl.y),
+      ),
+      new Vector2(
+        Math.max(this.br.x, other.br.x),
+        Math.max(this.br.y, other.br.y),
+      ),
     );
+  }
+
+  scale(scalar: number): AABB {
+    return new AABB(this.tl.mult(scalar), this.br.mult(scalar));
+  }
+
+  scaleVec(vec: Vector2): AABB {
+    return new AABB(this.tl.mult(vec), this.br.mult(vec));
+  }
+
+  translate(vec: Vector2): AABB {
+    return new AABB(this.tl.add(vec), this.br.add(vec));
   }
 
   lineIntersects(start: Vector2, end: Vector2): boolean {
