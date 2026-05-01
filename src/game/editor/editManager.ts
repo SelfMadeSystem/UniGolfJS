@@ -18,6 +18,7 @@ import { ResizeMode } from "./modes/resizeMode";
 import { PlaceMode } from "./modes/placeMode";
 import { PanMode } from "./modes/panMode";
 import { syncSelectedObjects } from "./state";
+import { KeybindsManager } from "./keybindsManager";
 
 export type Tool = "select" | "place" | "pan";
 
@@ -38,6 +39,7 @@ export class EditManager implements Drawable, PointerEventHandler {
   public resizeMode: ResizeMode;
   public placeMode: PlaceMode;
   public panMode: PanMode;
+  private keybinds = new KeybindsManager();
 
   constructor(public scene: EditScene) {
     this.selectMode = new SelectMode(this);
@@ -47,6 +49,21 @@ export class EditManager implements Drawable, PointerEventHandler {
     this.panMode = new PanMode(this);
     this.currentMode = this.selectMode;
     syncSelectedObjects(this.selectedObjectsInternal);
+
+    // delete objects
+    this.keybinds.register({ key: "Backspace" }, () => {
+      this.deleteSelectedObjects();
+    });
+    this.keybinds.register({ key: "Delete" }, () => {
+      this.deleteSelectedObjects();
+    });
+    // duplicate objects
+    this.keybinds.register({ key: "d", ctrl: true }, () => {
+      this.duplicateSelectedObjects();
+    });
+    this.keybinds.register({ key: "d", meta: true }, () => {
+      this.duplicateSelectedObjects();
+    });
   }
 
   public get selectedObjects(): Set<LevelObject> {
@@ -108,6 +125,10 @@ export class EditManager implements Drawable, PointerEventHandler {
     this.currentMode?.onExit?.();
     this.currentMode = mode;
     this.currentMode?.onEnter?.();
+  }
+
+  public handleKeyDown(event: KeyboardEvent): boolean {
+    return this.keybinds.handle(event);
   }
 
   // ===== AABB Utilities =====
@@ -299,61 +320,10 @@ export class EditManager implements Drawable, PointerEventHandler {
         const act = hit.action();
         switch (act) {
           case "delete":
-            for (const obj of this.selectedObjectsInternal) {
-              obj.delete(true);
-            }
-            this.clearSelection();
-            this.highlightedObject = null;
+            this.deleteSelectedObjects();
             return;
           case "copy": {
-            const originals: LevelObject[] = [...this.selectedObjectsInternal];
-            const duplicates: LevelObject[] = [];
-
-            // create duplicates and keep mapping of oldId -> newObj
-            for (const obj of originals) {
-              const dup = obj.duplicate();
-              this.scene.addObjectToLevel(dup);
-              duplicates.push(dup);
-            }
-
-            const idMap = new Map<string, string>();
-            for (let i = 0; i < originals.length; i++) {
-              idMap.set(originals[i]!.id, duplicates[i]!.id);
-            }
-
-            // helper to recursively replace any id references in data
-            function replaceIdsInPlace(value: any) {
-              if (value === null || value === undefined) return value;
-              if (typeof value === "string") {
-                return idMap.get(value) ?? value;
-              }
-              if (Array.isArray(value)) {
-                for (let i = 0; i < value.length; i++) {
-                  value[i] = replaceIdsInPlace(value[i]);
-                }
-                return value;
-              }
-              if (typeof value === "object") {
-                for (const k of Object.keys(value)) {
-                  value[k] = replaceIdsInPlace(value[k]);
-                }
-                return value;
-              }
-              return value;
-            }
-
-            // patch duplicated objects' data to point internal refs to new ids
-            for (const dup of duplicates) {
-              const data = dup.getData();
-              replaceIdsInPlace(data);
-            }
-
-            this.clearSelection();
-            for (const d of duplicates) {
-              this.selectedObjectsInternal.add(d);
-              this.scene.moveObjectToTop(d);
-            }
-            this.syncSelectedObjects();
+            this.duplicateSelectedObjects();
             this.highlightedObject = null;
             this.startPointer = pointerPos;
             this.setMode("move");
@@ -416,5 +386,64 @@ export class EditManager implements Drawable, PointerEventHandler {
     }
 
     this.currentMode.pointerdown(info);
+  }
+
+  private duplicateSelectedObjects() {
+    const originals: LevelObject[] = [...this.selectedObjectsInternal];
+    const duplicates: LevelObject[] = [];
+
+    // create duplicates and keep mapping of oldId -> newObj
+    for (const obj of originals) {
+      const dup = obj.duplicate();
+      this.scene.addObjectToLevel(dup);
+      duplicates.push(dup);
+    }
+
+    const idMap = new Map<string, string>();
+    for (let i = 0; i < originals.length; i++) {
+      idMap.set(originals[i]!.id, duplicates[i]!.id);
+    }
+
+    // helper to recursively replace any id references in data
+    function replaceIdsInPlace(value: any) {
+      if (value === null || value === undefined) return value;
+      if (typeof value === "string") {
+        return idMap.get(value) ?? value;
+      }
+      if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+          value[i] = replaceIdsInPlace(value[i]);
+        }
+        return value;
+      }
+      if (typeof value === "object") {
+        for (const k of Object.keys(value)) {
+          value[k] = replaceIdsInPlace(value[k]);
+        }
+        return value;
+      }
+      return value;
+    }
+
+    // patch duplicated objects' data to point internal refs to new ids
+    for (const dup of duplicates) {
+      const data = dup.getData();
+      replaceIdsInPlace(data);
+    }
+
+    this.clearSelection();
+    for (const d of duplicates) {
+      this.selectedObjectsInternal.add(d);
+      this.scene.moveObjectToTop(d);
+    }
+    this.syncSelectedObjects();
+  }
+
+  private deleteSelectedObjects() {
+    for (const obj of this.selectedObjectsInternal) {
+      obj.delete(true);
+    }
+    this.clearSelection();
+    this.highlightedObject = null;
   }
 }

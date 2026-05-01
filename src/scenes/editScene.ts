@@ -132,4 +132,8 @@ export class EditScene extends LevelScene {
     info.event.preventDefault();
     info.event.stopPropagation();
   }
+
+  override keydown(event: KeyboardEvent): void {
+    this.editManager.handleKeyDown(event);
+  }
 }
