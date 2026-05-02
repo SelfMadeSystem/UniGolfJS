@@ -12,14 +12,6 @@ export type HandleAction =
   | "delete"
   | "copy";
 
-export abstract class EditorHandle {
-  constructor(public scene: EditScene) {}
-  abstract contains(pointerPos: Vector2, selectionAABB: AABB): boolean;
-  abstract render(selectionAABB: AABB, info: RenderInfo): Iterable<RenderPass>;
-  abstract cursor(): string;
-  abstract action(): HandleAction;
-}
-
 type IconName = keyof typeof mdiIcons.icons;
 
 const iconCache = new Map<IconName, HTMLImageElement>();
@@ -50,94 +42,33 @@ function drawIcon(
   const image = getIconImage(iconName);
   if (!image) return;
 
-  const pad = Math.max(1, Math.min(aabb.width, aabb.height) * 0.15);
   ctx.save();
   ctx.fillStyle = color;
   ctx.drawImage(
     image,
-    aabb.tl.x + pad,
-    aabb.tl.y + pad,
-    aabb.width - pad * 2,
-    aabb.height - pad * 2,
+    aabb.tl.x,
+    aabb.tl.y,
+    aabb.width,
+    aabb.height,
   );
   ctx.restore();
 }
 
-class ResizeHandle extends EditorHandle {
-  static readonly SIZE_PX = 14;
+class EditorHandle {
+  static readonly SIZE_PX = 20;
 
-  private getAABB(selectionAABB: AABB) {
-    const handleSize = ResizeHandle.SIZE_PX / this.scene.cameraZoom;
-    return new AABB(
-      selectionAABB.br,
-      selectionAABB.br.add(new Vector2(handleSize)),
-    );
-  }
-
-  contains(pointerPos: Vector2, selectionAABB: AABB) {
-    return this.getAABB(selectionAABB).containsPoint(pointerPos);
-  }
-
-  *render(selectionAABB: AABB, info: RenderInfo) {
-    const aabb = this.getAABB(selectionAABB);
-    yield pass(LAYERS.EDITOR, (ctx) => {
-      ctx.save();
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(
-        aabb.tl.x,
-        aabb.tl.y,
-        aabb.br.x - aabb.tl.x,
-        aabb.br.y - aabb.tl.y,
-      );
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1;
-      ctx.setLineDash([]);
-      ctx.strokeRect(
-        aabb.tl.x,
-        aabb.tl.y,
-        aabb.br.x - aabb.tl.x,
-        aabb.br.y - aabb.tl.y,
-      );
-      drawIcon(ctx, "arrow-top-left-bottom-right", aabb, "#111111");
-      ctx.restore();
-    });
-  }
-
-  cursor() {
-    return "nwse-resize";
-  }
-
-  action(): HandleAction {
-    return "resize";
-  }
-}
-
-class RotateHandle extends EditorHandle {
-  static readonly SIZE_PX = 14;
   constructor(
-    scene: EditScene,
-    public corner: "tr" | "bl",
-  ) {
-    super(scene);
-  }
+    private scene: EditScene,
+    private positionFn: (selectionAABB: AABB, handleSize: number) => AABB,
+    private iconName: IconName,
+    private fillColor: string,
+    private cursorStyle: string,
+    private handleAction: HandleAction,
+  ) {}
 
   private getAABB(selectionAABB: AABB) {
-    switch (this.corner) {
-      case "tr": {
-        const handleSize = RotateHandle.SIZE_PX / this.scene.cameraZoom;
-        return new AABB(
-          selectionAABB.tr,
-          selectionAABB.tr.add(new Vector2(handleSize, -handleSize)),
-        );
-      }
-      case "bl": {
-        const handleSize = RotateHandle.SIZE_PX / this.scene.cameraZoom;
-        return new AABB(
-          selectionAABB.bl,
-          selectionAABB.bl.add(new Vector2(-handleSize, handleSize)),
-        );
-      }
-    }
+    const handleSize = EditorHandle.SIZE_PX / this.scene.cameraZoom;
+    return this.positionFn(selectionAABB, handleSize);
   }
 
   contains(pointerPos: Vector2, selectionAABB: AABB) {
@@ -148,161 +79,82 @@ class RotateHandle extends EditorHandle {
     const aabb = this.getAABB(selectionAABB);
     yield pass(LAYERS.EDITOR, (ctx) => {
       ctx.save();
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(
+      ctx.fillStyle = this.fillColor;
+      ctx.beginPath();
+      ctx.roundRect(
         aabb.tl.x,
         aabb.tl.y,
         aabb.br.x - aabb.tl.x,
         aabb.br.y - aabb.tl.y,
+        4 / this.scene.cameraZoom,
       );
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(
-        aabb.tl.x,
-        aabb.tl.y,
-        aabb.br.x - aabb.tl.x,
-        aabb.br.y - aabb.tl.y,
-      );
-      drawIcon(
-        ctx,
-        this.corner === "tr" ? "rotate-left" : "rotate-right",
-        aabb,
-        "#111111",
-      );
+      ctx.fill();
+      drawIcon(ctx, this.iconName, aabb, "#111111");
       ctx.restore();
     });
   }
 
   cursor() {
-    return "pointer";
+    return this.cursorStyle;
   }
 
   action(): HandleAction {
-    return this.corner === "tr" ? "rotateCCW" : "rotateCW";
-  }
-}
-
-class CopyHandle extends EditorHandle {
-  static readonly SIZE_PX = 14;
-
-  private getAABB(selectionAABB: AABB) {
-    const handleSize = CopyHandle.SIZE_PX / this.scene.cameraZoom;
-    return new AABB(
-      selectionAABB.bl,
-      selectionAABB.bl.add(new Vector2(-handleSize, handleSize)),
-    );
-  }
-
-  contains(pointerPos: Vector2, selectionAABB: AABB) {
-    return this.getAABB(selectionAABB).containsPoint(pointerPos);
-  }
-
-  *render(selectionAABB: AABB, info: RenderInfo) {
-    const aabb = this.getAABB(selectionAABB);
-    yield pass(LAYERS.EDITOR, (ctx) => {
-      ctx.save();
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(
-        aabb.tl.x,
-        aabb.tl.y,
-        aabb.br.x - aabb.tl.x,
-        aabb.br.y - aabb.tl.y,
-      );
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(
-        aabb.tl.x,
-        aabb.tl.y,
-        aabb.br.x - aabb.tl.x,
-        aabb.br.y - aabb.tl.y,
-      );
-      drawIcon(ctx, "content-copy" as IconName, aabb, "#111111");
-      ctx.restore();
-    });
-  }
-
-  cursor() {
-    return "pointer";
-  }
-
-  action(): HandleAction {
-    return "copy";
-  }
-}
-
-class DeleteHandle extends EditorHandle {
-  static readonly SIZE_PX = 14;
-
-  private getAABB(selectionAABB: AABB) {
-    const handleSize = DeleteHandle.SIZE_PX / this.scene.cameraZoom;
-    return new AABB(
-      selectionAABB.tl.sub(new Vector2(handleSize)),
-      selectionAABB.tl,
-    );
-  }
-
-  contains(pointerPos: Vector2, selectionAABB: AABB) {
-    return this.getAABB(selectionAABB).containsPoint(pointerPos);
-  }
-
-  *render(selectionAABB: AABB, info: RenderInfo) {
-    const aabb = this.getAABB(selectionAABB);
-    yield pass(LAYERS.EDITOR, (ctx) => {
-      ctx.save();
-      ctx.fillStyle = "#FF5555";
-      ctx.fillRect(
-        aabb.tl.x,
-        aabb.tl.y,
-        aabb.br.x - aabb.tl.x,
-        aabb.br.y - aabb.tl.y,
-      );
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(
-        aabb.tl.x,
-        aabb.tl.y,
-        aabb.br.x - aabb.tl.x,
-        aabb.br.y - aabb.tl.y,
-      );
-      drawIcon(ctx, "close", aabb, "#111111");
-      ctx.restore();
-    });
-  }
-
-  cursor() {
-    return "pointer";
-  }
-
-  action(): HandleAction {
-    return "delete";
+    return this.handleAction;
   }
 }
 
 export class HandlesManager {
-  private resize: ResizeHandle;
-  private rotateTR: RotateHandle;
-  private copy: CopyHandle;
-  private delete: DeleteHandle;
+  private handles: EditorHandle[];
 
   constructor(public scene: EditScene) {
-    this.resize = new ResizeHandle(scene);
-    this.rotateTR = new RotateHandle(scene, "tr");
-    this.copy = new CopyHandle(scene);
-    this.delete = new DeleteHandle(scene);
+    this.handles = [
+      new EditorHandle(
+        scene,
+        (aabb, size) => new AABB(aabb.br, aabb.br.add(new Vector2(size))),
+        "arrow-top-left-bottom-right",
+        "#FFFFFF",
+        "nwse-resize",
+        "resize",
+      ),
+      new EditorHandle(
+        scene,
+        (aabb, size) =>
+          new AABB(aabb.tr, aabb.tr.add(new Vector2(size, -size))),
+        "rotate-left",
+        "#FFFFFF",
+        "pointer",
+        "rotateCCW",
+      ),
+      new EditorHandle(
+        scene,
+        (aabb, size) =>
+          new AABB(aabb.bl, aabb.bl.add(new Vector2(-size, size))),
+        "content-copy",
+        "#FFFFFF",
+        "pointer",
+        "copy",
+      ),
+      new EditorHandle(
+        scene,
+        (aabb, size) => new AABB(aabb.tl.sub(new Vector2(size)), aabb.tl),
+        "close",
+        "#FF5555",
+        "pointer",
+        "delete",
+      ),
+    ];
   }
 
   hitTest(pointerPos: Vector2, selectionAABB: AABB): EditorHandle | null {
-    if (this.resize.contains(pointerPos, selectionAABB)) return this.resize;
-    if (this.rotateTR.contains(pointerPos, selectionAABB)) return this.rotateTR;
-    if (this.copy.contains(pointerPos, selectionAABB)) return this.copy;
-    if (this.delete.contains(pointerPos, selectionAABB)) return this.delete;
+    for (const handle of this.handles) {
+      if (handle.contains(pointerPos, selectionAABB)) return handle;
+    }
     return null;
   }
 
   *render(selectionAABB: AABB, info: RenderInfo): Iterable<RenderPass> {
-    yield* this.resize.render(selectionAABB, info);
-    yield* this.rotateTR.render(selectionAABB, info);
-    yield* this.copy.render(selectionAABB, info);
-    yield* this.delete.render(selectionAABB, info);
+    for (const handle of this.handles) {
+      yield* handle.render(selectionAABB, info);
+    }
   }
 }
