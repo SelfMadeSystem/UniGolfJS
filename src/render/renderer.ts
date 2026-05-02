@@ -137,7 +137,7 @@ export class Renderer {
     return new Vector2(x, y);
   }
 
-  getPointerInfo(event: PointerEvent): PointerInfo {
+  getPointerInfo(event: PointerEvent): PointerInfo<PointerEvent> {
     // Get all active pointers from the PointerEvent API
     return {
       pos: this.getPointerPos(event),

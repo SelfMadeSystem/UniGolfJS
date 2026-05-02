@@ -27,7 +27,7 @@ export abstract class LevelScene extends Scene {
   private cameraZoomTarget: number | null = null;
   private cameraLerpAmount: number = 0.15;
   private cameraZoomLerpAmount: number = 0.15;
-  public tickPointers: PointerInfo[] = [];
+  public tickPointers: PointerInfo<PointerEvent>[] = [];
   public clipPath: Path2D = new Path2D();
   public activeTee: Tee | null = null;
   public readonly passes: RenderPass[];
@@ -98,15 +98,15 @@ export abstract class LevelScene extends Scene {
     ctx.restore();
   }
 
-  override pointermove(info: PointerInfo): void {
+  override pointermove(info: PointerInfo<PointerEvent>): void {
     this.tickPointers.push(info);
   }
 
-  override pointerup(info: PointerInfo): void {
+  override pointerup(info: PointerInfo<PointerEvent>): void {
     this.tickPointers.push(info);
   }
 
-  override pointerdown(info: PointerInfo): void {
+  override pointerdown(info: PointerInfo<PointerEvent>): void {
     this.tickPointers.push(info);
   }
 

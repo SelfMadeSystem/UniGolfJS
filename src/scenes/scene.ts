@@ -12,10 +12,10 @@ export abstract class Scene implements PointerEventHandler {
     return () => null;
   }
 
-  pointerdown(info: PointerInfo): void {}
-  pointermove(info: PointerInfo): void {}
-  pointerup(info: PointerInfo): void {}
-  pointerwheel?(info: PointerInfo): void {}
+  pointerdown(info: PointerInfo<PointerEvent>): void {}
+  pointermove(info: PointerInfo<PointerEvent>): void {}
+  pointerup(info: PointerInfo<PointerEvent>): void {}
+  pointerwheel?(info: PointerInfo<WheelEvent>): void {}
   keydown(event: KeyboardEvent): void {}
 
   tick(): void {}

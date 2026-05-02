@@ -5,7 +5,7 @@ export type TouchPoint = {
   pos: Vector2;
 };
 
-export type PointerInfo = {
+export type PointerInfo<E extends PointerEvent | WheelEvent = PointerEvent | WheelEvent> = {
   pos: Vector2;
   leftButton: boolean;
   rightButton: boolean;
@@ -13,8 +13,7 @@ export type PointerInfo = {
   shift: boolean;
   ctrl: boolean;
   alt: boolean;
-  // underlying DOM event (PointerEvent, TouchEvent or WheelEvent)
-  event: PointerEvent | TouchEvent | WheelEvent;
+  event: E;
   eventType:
     | "pointerdown"
     | "pointermove"
@@ -26,9 +25,9 @@ export type PointerInfo = {
 };
 
 export interface PointerEventHandler {
-  pointermove(info: PointerInfo): void;
-  pointerup(info: PointerInfo): void;
-  pointerdown(info: PointerInfo): void;
+  pointermove(info: PointerInfo<PointerEvent>): void;
+  pointerup(info: PointerInfo<PointerEvent>): void;
+  pointerdown(info: PointerInfo<PointerEvent>): void;
   // optional wheel handler for zooming
-  pointerwheel?(info: PointerInfo): void;
+  pointerwheel?(info: PointerInfo<WheelEvent>): void;
 }
