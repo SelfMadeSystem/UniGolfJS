@@ -13,7 +13,7 @@ export function PlayMenu() {
       exit={{ opacity: 0 }}
     >
       <button
-        className="px-4 py-2 bg-gray-800 text-white rounded cursor-pointer"
+        className="hidden px-4 py-2 bg-gray-800 text-white rounded cursor-pointer"
         onClick={() => {
           $scene.set(new MenuScene());
         }}
