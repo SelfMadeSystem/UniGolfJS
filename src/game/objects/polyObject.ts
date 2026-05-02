@@ -87,7 +87,9 @@ export abstract class PolyObject<
   getPoints(): Vector2[] {
     const { shape, rotation } = this.data;
     const basePoints = SHAPE_POINTS[shape];
-    return basePoints.map((p) => p.rot90(rotation).mult(this.scale).add(this.pos));
+    return basePoints.map((p) =>
+      p.rot90(rotation).mult(this.scale).add(this.pos),
+    );
   }
 
   getSegments(): Segment[] {
@@ -136,10 +138,10 @@ export abstract class PolyObject<
 
   abstract getPathInfo(info: RenderInfo): PathInfo;
 
-  override render(info: RenderInfo): Iterable<RenderPass> {
+  override *render(info: RenderInfo): Iterable<RenderPass> {
     const points = this.getPoints();
     const pathInfo = this.getPathInfo(info);
-    return this.renderPoints({ points, ...pathInfo, debug: this.data.debug });
+    yield* this.renderPoints({ points, ...pathInfo, debug: this.data.debug });
   }
 
   getCollision(

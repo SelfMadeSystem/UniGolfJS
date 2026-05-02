@@ -11,7 +11,7 @@ import { Slope } from "../objects/slope";
 import { BouncyWall } from "../objects/bouncyWall";
 import { ConveyorBelt } from "../objects/conveyorBelt";
 import { Portal } from "../objects/portal";
-import { rgbSchema } from "@/utils/data";
+import { Floor } from "../objects/floor";
 
 type Shape =
   | "rectangle"
@@ -131,6 +131,19 @@ export const placeableGroups: PlaceableGroup[] = [
       id: "wall",
       name: "Wall",
       clazz: Wall,
+    }),
+  ),
+  createPlaceableGroup(
+    {
+      id: "floor",
+      name: "Floor",
+      icon: "ph:square-light",
+      clazz: Floor,
+    },
+    createShapeVariations({
+      id: "floor",
+      name: "Floor",
+      clazz: Floor,
     }),
   ),
   createPlaceableGroup(

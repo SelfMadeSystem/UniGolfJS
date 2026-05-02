@@ -45,7 +45,7 @@ export abstract class CircleObject<
 
   abstract getPathInfo(): PathInfo;
 
-  override render(info: RenderInfo): Iterable<RenderPass> {
+  override *render(info: RenderInfo): Iterable<RenderPass> {
     const pathInfo = this.getPathInfo();
 
     const { pos } = this;
@@ -54,7 +54,7 @@ export abstract class CircleObject<
     shadowPath.arc(
       pos.x,
       pos.y,
-      this.data.radius + pathInfo.outline,
+      this.data.radius + (pathInfo.outline ?? 0),
       0,
       Math.PI * 2,
     );
@@ -62,27 +62,27 @@ export abstract class CircleObject<
     outlinePath.arc(
       pos.x,
       pos.y,
-      this.data.radius + pathInfo.outline,
+      this.data.radius + (pathInfo.outline ?? 0),
       0,
       Math.PI,
     );
     outlinePath.arc(
       pos.x,
-      pos.y - pathInfo.height,
-      this.data.radius + pathInfo.outline,
+      pos.y - (pathInfo.height ?? 0),
+      this.data.radius + (pathInfo.outline ?? 0),
       Math.PI,
       0,
     );
     const fillPath = new Path2D();
     fillPath.arc(
       pos.x,
-      pos.y - pathInfo.height,
+      pos.y - (pathInfo.height ?? 0),
       this.data.radius,
       0,
       Math.PI * 2,
     );
 
-    const paths = this.renderPaths({
+    yield* this.renderPaths({
       shadowPath,
       heightPath: undefined as unknown as Path2D,
       fillPath,
@@ -92,17 +92,14 @@ export abstract class CircleObject<
     });
 
     if (this.data.debug) {
-      paths.push(
-        pass(LAYERS.DEBUG, (ctx) => {
-          ctx.strokeStyle = "#f00";
-          ctx.lineWidth = 0.5;
-          ctx.beginPath();
-          ctx.arc(this.pos.x, this.pos.y, this.data.radius, 0, Math.PI * 2);
-          ctx.stroke();
-        }),
-      );
+      yield pass(LAYERS.DEBUG, (ctx) => {
+        ctx.strokeStyle = "#f00";
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.data.radius, 0, Math.PI * 2);
+        ctx.stroke();
+      });
     }
-    return paths;
   }
 
   intersectsRigidBody(rigidBody: RigidBody): boolean {

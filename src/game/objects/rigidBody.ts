@@ -301,7 +301,7 @@ export abstract class RigidBody<
     const pos = this.prevPos.lerp(this.pos, scene?.playing ? tickInterp : 1);
 
     let { radius } = this;
-    let { height } = pathInfo;
+    let height = pathInfo.height ?? 0;
 
     if (this.inWater) {
       const anim = this.waterAnimation + tickInterp;
@@ -312,7 +312,7 @@ export abstract class RigidBody<
       height = lerp(height, 0, interp);
     }
 
-    if (radius <= pathInfo.outline) return;
+    if (radius <= (pathInfo.outline ?? 0)) return;
 
     const shadowPath = new Path2D();
     shadowPath.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
@@ -323,7 +323,7 @@ export abstract class RigidBody<
     fillPath.arc(
       pos.x,
       pos.y - height,
-      radius - pathInfo.outline,
+      radius - (pathInfo.outline ?? 0),
       0,
       Math.PI * 2,
     );

@@ -6,23 +6,26 @@ import { generatePathsFromPoints } from "@/utils/pathUtils";
 import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
 import { getLevelScene } from "@/scenes/state";
-import { deserializeLevelObject, serializeLevelObject } from "../levelObjectRegistry";
+import {
+  deserializeLevelObject,
+  serializeLevelObject,
+} from "../levelObjectRegistry";
 import { nanoid } from "nanoid";
 
 export const LevelObjectSchema = GameObjectSchema.extend({});
 
 export type PathInfo = {
   shadowLayer?: number;
-  outlineLayer: number;
+  outlineLayer?: number;
   heightLayer?: number;
   fillLayer: number;
   shadowColor?: string;
-  outlineColor: string;
+  outlineColor?: string;
   fillColor: string;
   waterWallColor?: string;
-  height: number;
+  height?: number;
   shadow?: number;
-  outline: number;
+  outline?: number;
   waterWallHeight?: number;
 };
 
@@ -41,7 +44,7 @@ export abstract class LevelObject<
 
   abstract isPointInside(point: Vector2): boolean;
 
-  renderPaths({
+  *renderPaths({
     shadowPath,
     heightPath,
     outlinePath,
@@ -63,50 +66,47 @@ export abstract class LevelObject<
     outlinePath: Path2D;
     fillPath: Path2D;
     waterWallPath?: Path2D;
-  } & PathInfo): RenderPass[] {
-    const passes = [
-      pass(outlineLayer, (ctx) => {
+  } & PathInfo): Iterable<RenderPass> {
+    if (outlineLayer !== undefined && outlineColor)
+      yield pass(outlineLayer, (ctx) => {
         ctx.fillStyle = outlineColor;
         ctx.fill(outlinePath);
-      }),
-      pass(fillLayer, (ctx) => {
-        ctx.fillStyle = fillColor;
-        ctx.strokeStyle = fillColor;
-        ctx.lineWidth = 0.25;
-        ctx.fill(fillPath);
-        ctx.stroke(fillPath);
-      }),
-    ];
-    if (height > 0 && heightLayer !== undefined && outlineColor) {
-      passes.push(
-        pass(heightLayer, (ctx) => {
-          ctx.fillStyle = outlineColor;
-          ctx.fill(heightPath);
-        }),
-      );
+      });
+    yield pass(fillLayer, (ctx) => {
+      ctx.fillStyle = fillColor;
+      ctx.strokeStyle = fillColor;
+      ctx.lineWidth = 0.25;
+      ctx.fill(fillPath);
+      ctx.stroke(fillPath);
+    });
+    if (
+      height !== undefined &&
+      height > 0 &&
+      heightLayer !== undefined &&
+      outlineColor
+    ) {
+      yield pass(heightLayer, (ctx) => {
+        ctx.fillStyle = outlineColor;
+        ctx.fill(heightPath);
+      });
     }
     if (shadowPath && shadow && shadowColor && shadowLayer !== undefined) {
-      passes.push(
-        pass(shadowLayer, (ctx) => {
-          ctx.strokeStyle = shadowColor;
-          ctx.lineWidth = shadow;
-          ctx.lineJoin = "round";
-          ctx.stroke(shadowPath);
-        }),
-      );
+      yield pass(shadowLayer, (ctx) => {
+        ctx.strokeStyle = shadowColor;
+        ctx.lineWidth = shadow;
+        ctx.lineJoin = "round";
+        ctx.stroke(shadowPath);
+      });
     }
     if (waterWallPath && waterWallColor) {
-      passes.push(
-        pass(LAYERS.WATER_WALL_FILL, (ctx) => {
-          ctx.fillStyle = waterWallColor;
-          ctx.fill(waterWallPath);
-        }),
-      );
+      yield pass(LAYERS.WATER_WALL_FILL, (ctx) => {
+        ctx.fillStyle = waterWallColor;
+        ctx.fill(waterWallPath);
+      });
     }
-    return passes;
   }
 
-  renderPoints({
+  *renderPoints({
     points,
     shadowLayer,
     outlineLayer,
@@ -124,11 +124,16 @@ export abstract class LevelObject<
   }: {
     points: Vector2[];
     debug?: boolean;
-  } & PathInfo) {
+  } & PathInfo): Iterable<RenderPass> {
     const { shadowPath, heightPath, outlinePath, fillPath, waterWallPath } =
-      generatePathsFromPoints(points, outline, height, waterWallHeight ?? 0);
+      generatePathsFromPoints(
+        points,
+        outline ?? 0,
+        height ?? 0,
+        waterWallHeight ?? 0,
+      );
 
-    const paths = this.renderPaths({
+    yield* this.renderPaths({
       shadowPath,
       heightPath,
       outlinePath,
@@ -149,22 +154,19 @@ export abstract class LevelObject<
     });
 
     if (debug) {
-      paths.push(
-        pass(LAYERS.DEBUG, (ctx) => {
-          ctx.strokeStyle = "#0f0";
-          ctx.lineWidth = 0.5;
-          ctx.beginPath();
-          for (let i = 0; i < points.length; i++) {
-            const curr = points[i]!;
-            const next = points[(i + 1) % points.length]!;
-            ctx.moveTo(curr.x, curr.y);
-            ctx.lineTo(next.x, next.y);
-          }
-          ctx.stroke();
-        }),
-      );
+      yield pass(LAYERS.DEBUG, (ctx) => {
+        ctx.strokeStyle = "#0f0";
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        for (let i = 0; i < points.length; i++) {
+          const curr = points[i]!;
+          const next = points[(i + 1) % points.length]!;
+          ctx.moveTo(curr.x, curr.y);
+          ctx.lineTo(next.x, next.y);
+        }
+        ctx.stroke();
+      });
     }
-    return paths;
   }
 
   /**

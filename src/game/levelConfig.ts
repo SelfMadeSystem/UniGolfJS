@@ -1,5 +1,4 @@
 import z from "zod";
-import { GameObject } from "./objects/gameObject";
 import { deserializeLevelObject, serializedLevelObject, serializeLevelObject } from "./levelObjectRegistry";
 import { LevelObject } from "./objects/levelObject";
 
