@@ -14,6 +14,7 @@ export const BouncyWallSchema = PolyObjectSchema.extend({
   bouncyWallBoostColor: rgbSchema.default("#ff8787"),
   bouncyWallOutlineColor: rgbSchema.default("#cc5555"),
   wallShadowColor: rgbSchema.default("#76b97e"),
+  waterWallColor: rgbSchema.default("#779977"),
 });
 
 // TODO: share w/ boost
@@ -51,6 +52,8 @@ export class BouncyWall extends PolyObject<typeof BouncyWallSchema> {
       height: WALL_CONFIG.height,
       shadow: WALL_CONFIG.shadow,
       outline: WALL_CONFIG.outline,
+      waterWallColor: this.data.waterWallColor,
+      waterWallHeight: WALL_CONFIG.waterWallHeight - WALL_CONFIG.outline,
     };
   }
 
