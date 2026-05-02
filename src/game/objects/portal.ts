@@ -17,12 +17,12 @@ export const PortalSchema = CircleObjectSchema.extend({
   pairedPortalId: objectIdSchema.optional().meta({ ofType: "portal" }),
 });
 
-const PORTAL_ANIMATION_SPEED = 0.05;
+export const EFFECT_TIME = 10; // frames
 
 export class Portal extends CircleObject<typeof PortalSchema> {
   static override schema = PortalSchema;
-  private portalAnimation: number = 0;
-  private activationCooldown: number = 0;
+  private effectTime: number = 0;
+  private teleportedBodies = new Set<RigidBody>();
 
   constructor(options: z.input<typeof PortalSchema>) {
     super(options);
@@ -34,9 +34,13 @@ export class Portal extends CircleObject<typeof PortalSchema> {
 
   override tick(): void {
     super.tick();
-    this.portalAnimation = (this.portalAnimation + PORTAL_ANIMATION_SPEED) % 1;
-    if (this.activationCooldown > 0) {
-      this.activationCooldown--;
+    if (this.effectTime > 0) {
+      this.effectTime--;
+    }
+
+    for (const body of this.teleportedBodies) {
+      if (this.intersectsRigidBody(body)) return;
+      this.teleportedBodies.delete(body);
     }
   }
 
@@ -56,6 +60,8 @@ export class Portal extends CircleObject<typeof PortalSchema> {
   override *render(info: RenderInfo): Iterable<RenderPass> {
     yield* super.render(info);
 
+    const { tickWithInterp } = info;
+
     // Add animated portal effect
     yield pass(LAYERS.OBJECTS_3, (ctx) => {
       const gradient = ctx.createRadialGradient(
@@ -67,19 +73,23 @@ export class Portal extends CircleObject<typeof PortalSchema> {
         this.radius,
       );
 
-      const t = this.portalAnimation;
-      const c1 = this.data.portalColor;
+      const t = tickWithInterp / 15;
       const c2 = this.data.portalAccentColor;
+      const c1 = blendColors(
+        this.data.portalColor + "00",
+        c2,
+        this.effectTime / EFFECT_TIME,
+      );
 
       gradient.addColorStop(
         0,
-        blendColors(c1, c2, 0.5 + Math.sin(t * Math.PI * 2) * 0.5),
+        blendColors(c1, c2, Math.abs(((t + 1) % 2) - 1)),
       );
       gradient.addColorStop(
-        t,
-        blendColors(c1, c2, Math.abs(Math.sin(t * Math.PI * 2))),
+        t % 1,
+        blendColors(c1, c2, Math.sign((t % 2) - 1) * 0.5 + 0.5),
       );
-      gradient.addColorStop(1, blendColors(c1, c2 + "33", 0.2));
+      gradient.addColorStop(1, blendColors(c1, c2, Math.abs((t % 2) - 1)));
 
       ctx.fillStyle = gradient;
       ctx.beginPath();
@@ -111,29 +121,33 @@ export class Portal extends CircleObject<typeof PortalSchema> {
   }
 
   override onIntersects(rigidBody: RigidBody): void {
-    // Prevent immediate re-teleportation
-    if (this.activationCooldown > 0) return;
+    if (
+      rigidBody.velocity.length() === 0 ||
+      this.teleportedBodies.has(rigidBody)
+    )
+      return;
 
     const pairedPortal = this.getPairedPortal();
     if (!pairedPortal) return;
 
     // Teleport the rigid body to the paired portal
     rigidBody.pos = pairedPortal.pos.add(
-      pairedPortal.pos
+      rigidBody.pos
         .sub(this.pos)
-        .normalize()
-        .mult(this.radius + 5),
+        .div(this.radius)
+        .mult(pairedPortal.radius),
     );
     rigidBody.prevPos = rigidBody.pos;
 
     // Set cooldown on the paired portal to prevent immediate return
-    pairedPortal.activationCooldown = 15;
+    pairedPortal.effectTime = EFFECT_TIME;
+    pairedPortal.teleportedBodies.add(rigidBody);
   }
 
   override reset(): void {
     super.reset();
-    this.portalAnimation = 0;
-    this.activationCooldown = 0;
+    this.effectTime = 0;
+    this.teleportedBodies.clear();
   }
 }
 registerLevelObject("portal", Portal);

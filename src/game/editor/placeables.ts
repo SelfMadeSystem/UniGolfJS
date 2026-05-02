@@ -11,6 +11,7 @@ import { Slope } from "../objects/slope";
 import { BouncyWall } from "../objects/bouncyWall";
 import { ConveyorBelt } from "../objects/conveyorBelt";
 import { Portal } from "../objects/portal";
+import { rgbSchema } from "@/utils/data";
 
 type Shape =
   | "rectangle"
@@ -350,12 +351,43 @@ export const placeableGroups: PlaceableGroup[] = [
     },
     [
       {
-        id: "portal",
+        id: "portal-purple",
         name: "Portal",
         icon: "ph:spiral-light",
         iconColor: "#a855f7",
         clazz: Portal,
         noSize: true,
+        props: {
+          portalColor: "#a855f7",
+          portalOutlineColor: "#7c3aed",
+          portalAccentColor: "#e9d5ff",
+        },
+      },
+      {
+        id: "portal-green",
+        name: "Portal (Green)",
+        icon: "ph:spiral-light",
+        iconColor: "#22c55e",
+        clazz: Portal,
+        noSize: true,
+        props: {
+          portalColor: "#22c55e",
+          portalOutlineColor: "#166534",
+          portalAccentColor: "#bbf7d0",
+        },
+      },
+      {
+        id: "portal-blue",
+        name: "Portal (Blue)",
+        icon: "ph:spiral-light",
+        iconColor: "#3b82f6",
+        clazz: Portal,
+        noSize: true,
+        props: {
+          portalColor: "#3b82f6",
+          portalOutlineColor: "#1d4ed8",
+          portalAccentColor: "#bfdbfe",
+        },
       },
     ],
   ),

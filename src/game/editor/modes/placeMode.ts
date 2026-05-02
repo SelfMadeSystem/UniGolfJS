@@ -5,6 +5,7 @@ import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
 import type { Placeable } from "../placeables";
 import { LevelObject } from "@/game/objects/levelObject";
+import { Portal } from "@/game/objects/portal";
 import { $selectedPlaceable } from "../state";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 import { LAYERS } from "@/game/levelConfig";
@@ -12,6 +13,22 @@ import { LAYERS } from "@/game/levelConfig";
 export class PlaceMode implements InteractionMode {
   private isPlacingSize = false;
   private isMovingExisting = false;
+
+  private linkPortalIfNeeded(newPortal: LevelObject): void {
+    if (!(newPortal instanceof Portal)) return;
+
+    const previousPortal = this.editManager.scene.objects
+      .toReversed()
+      .find(
+        (object): object is Portal =>
+          object instanceof Portal && object !== newPortal,
+      );
+
+    if (!previousPortal || previousPortal.get("pairedPortalId")) return;
+
+    previousPortal.set("pairedPortalId", newPortal.id);
+    newPortal.set("pairedPortalId", previousPortal.id);
+  }
 
   constructor(private editManager: EditManager) {}
 
@@ -84,6 +101,7 @@ export class PlaceMode implements InteractionMode {
       scale: currentAABB.size,
     });
     scene.addObjectToLevel(newObj);
+    this.linkPortalIfNeeded(newObj);
 
     this.editManager.deselectAll();
     this.editManager.selectObject(newObj, false);
@@ -131,6 +149,7 @@ export class PlaceMode implements InteractionMode {
       position: pointerPos,
     });
     scene.addObjectToLevel(newObj);
+    this.linkPortalIfNeeded(newObj);
 
     // Select the new object
     this.editManager.deselectAll();
