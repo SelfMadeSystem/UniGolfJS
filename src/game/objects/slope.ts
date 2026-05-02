@@ -13,7 +13,7 @@ export const SlopeSchema = PolyObjectSchema.extend({
   slopeColor: rgbSchema.default("#a67857"),
   slopeArrowColor: rgbSchema.default("#7c4a31"),
   slopeDirection: Vec2Schema.default(new Vector2(0, 1)),
-  slopeForce: positiveNumberSchema.default(5),
+  slopeForce: positiveNumberSchema.default(2.5),
 });
 
 const ARROW_UPSCALE = 10;
@@ -99,9 +99,18 @@ export class Slope extends PolyObject<typeof SlopeSchema> {
   }
 
   override onIntersects(rigidBody: RigidBody): void {
-    // Apply slope force in the direction the slope is pointing
-    const dir = this.data.slopeDirection.normalize();
-    rigidBody.velocity = rigidBody.velocity.add(dir.mult(this.data.slopeForce));
+    const dir = this.data.slopeDirection.setLength(this.data.slopeForce);
+    rigidBody.velocity = rigidBody.velocity.add(dir);
+  }
+
+  override editorRotateShapeCCW(): void {
+    super.editorRotateShapeCCW();
+    this.set("slopeDirection", this.data.slopeDirection.cw90());
+  }
+
+  override editorRotateShapeCW(): void {
+    super.editorRotateShapeCW();
+    this.set("slopeDirection", this.data.slopeDirection.ccw90());
   }
 }
 registerLevelObject("slope", Slope);

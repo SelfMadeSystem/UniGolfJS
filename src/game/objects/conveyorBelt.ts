@@ -12,8 +12,8 @@ export const ConveyorBeltSchema = PolyObjectSchema.extend({
   conveyorColor: rgbSchema.default("#4a90e2"),
   conveyorArrowColor: rgbSchema.default("#357ABD"),
   conveyorDirection: Vec2Schema.default(new Vector2(1, 0)),
-  conveyorSpeed: positiveNumberSchema.default(5),
-  // TODO: add conveyor friction
+  conveyorSpeed: positiveNumberSchema.default(7.5),
+  conveyorAccel: positiveNumberSchema.default(0.2),
 });
 
 const ARROW_UPSCALE = 10;
@@ -110,16 +110,33 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
   }
 
   override onIntersects(rigidBody: RigidBody): void {
-    // Move the rigid body in the conveyor direction
-    const conveySpeeds = this.data.conveyorDirection
-      .normalize()
-      .mult(this.data.conveyorSpeed);
+    const dir = this.data.conveyorDirection.normalize();
+    const targetSpeed = this.data.conveyorSpeed;
+    const accel = this.data.conveyorAccel * targetSpeed;
 
-    // TODO: this math isn't correct. im gonna need to figure out how conveyors work
-    rigidBody.velocity = rigidBody.velocity
-      .add(conveySpeeds)
-      .mult(0.5)
-      .add(conveySpeeds.mult(0.5));
+    const currentAlong = rigidBody.velocity.dot(dir);
+
+    // Only speed up toward the belt's target speed.
+    // Don't slow down balls that are already faster than the belt.
+    const nextAlong =
+      currentAlong < targetSpeed
+        ? Math.min(currentAlong + accel, targetSpeed)
+        : currentAlong;
+
+    const parallel = dir.mult(currentAlong);
+    const perpendicular = rigidBody.velocity.sub(parallel);
+
+    rigidBody.velocity = perpendicular.add(dir.mult(nextAlong));
+  }
+
+  override editorRotateShapeCCW(): void {
+    super.editorRotateShapeCCW();
+    this.set("conveyorDirection", this.data.conveyorDirection.cw90());
+  }
+
+  override editorRotateShapeCW(): void {
+    super.editorRotateShapeCW();
+    this.set("conveyorDirection", this.data.conveyorDirection.ccw90());
   }
 }
 registerLevelObject("conveyorBelt", ConveyorBelt);
