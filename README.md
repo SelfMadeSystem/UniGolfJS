@@ -1,21 +1,27 @@
-# bun-react-tailwind-template
+# UniGolfJS
 
-To install dependencies:
+Recreation of MonoGolf in JavaScript. Original [UniGolf](https://github.com/SelfMadeSystem/UniGolf) was made in Godot, but I felt more comfortable continuing the game in TypeScript.
 
-```bash
-bun install
-```
-
-To start a development server:
+## Installation
 
 ```bash
-bun dev
+bun i
 ```
 
-To run for production:
+## Development
 
 ```bash
-bun start
+bun run dev
 ```
 
-This project was created using `bun init` in bun v1.3.12. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+## Building
+
+```bash
+bun run build
+```
+
+Output will be in the `dist` folder. You can serve it with any static file server.
+
+## License
+
+This project is licensed under the GPL-3.0 License. See the [LICENSE](LICENSE) file for details.
