@@ -90,7 +90,11 @@ export abstract class LevelScene extends Scene {
     ctx.translate(-this.cameraPos.x, -this.cameraPos.y);
     // TODO: only render objects that are within the camera's view
     renderDrawables(
-      [...this.objects, ...this.drawables],
+      [
+        ...this.objects.drawableObjects(),
+        ...this.objects.drawableStatic(),
+        ...this.drawables,
+      ],
       info,
       ctx,
       this.passes,

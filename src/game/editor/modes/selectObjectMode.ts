@@ -45,8 +45,8 @@ export class SelectObjectMode implements InteractionMode {
     const scene = this.editManager.scene;
     const eligibleObjects = new Set(
       this.targetClass
-        ? scene.objects.getByType(this.targetClass as any)
-        : scene.objects.getByType(LevelObject as any),
+        ? scene.objects.getByType(this.targetClass)
+        : scene.objects.getByType(LevelObject),
     ) as Set<LevelObject<any>>;
 
     const worldPos = scene.screenToWorld(info.pos);

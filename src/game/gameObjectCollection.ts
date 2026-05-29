@@ -1,3 +1,4 @@
+import type { Drawable } from "@/render/drawable";
 import type { GameObject } from "./objects/gameObject";
 
 /**
@@ -14,7 +15,7 @@ export class GameObjectCollection<
 > implements Iterable<T> {
   private readonly items: T[] = [];
   private readonly byId = new Map<string, T>();
-  private readonly byType = new Map<Function, Set<T>>();
+  private readonly byType = new Map<typeof GameObject<any>, Set<T>>();
 
   constructor(objects: Iterable<T> = []) {
     this.replace(objects);
@@ -26,6 +27,20 @@ export class GameObjectCollection<
 
   get size(): number {
     return this.items.length;
+  }
+
+  drawableObjects(): Iterable<T> {
+    return this.byType
+      .entries()
+      .filter(([type]) => type.hasRender())
+      .flatMap(([, objects]) => objects);
+  }
+
+  drawableStatic(): Iterable<Drawable> {
+    return this.byType
+      .keys()
+      .filter((type) => type.hasStaticRender())
+      .map((type) => type.staticDrawable());
   }
 
   add(object: T): void {
@@ -107,14 +122,14 @@ export class GameObjectCollection<
   /**
    * Get all objects that are instances of the given type (including subclasses).
    */
-  getByType<S extends T>(type: new (...args: any[]) => S): S[] {
+  getByType<S extends T>(type: typeof GameObject<any>): S[] {
     return Array.from(this.byType.get(type) ?? []) as S[];
   }
 
   /**
    * Filter objects by type. Objects match if they are instances of the given type.
    */
-  filterByType<S extends T>(type: new (...args: any[]) => S): S[] {
+  filterByType<S extends T>(type: typeof GameObject<any>): S[] {
     return this.getByType(type);
   }
 
@@ -122,7 +137,7 @@ export class GameObjectCollection<
     let proto = Object.getPrototypeOf(object);
 
     while (proto && proto !== Object.prototype) {
-      const constructor = proto.constructor as Function;
+      const constructor = proto.constructor as typeof GameObject<any>;
 
       if (!this.byType.has(constructor)) {
         this.byType.set(constructor, new Set());
@@ -137,7 +152,7 @@ export class GameObjectCollection<
     let proto = Object.getPrototypeOf(object);
 
     while (proto && proto !== Object.prototype) {
-      const constructor = proto.constructor as Function;
+      const constructor = proto.constructor as typeof GameObject<any>;
       this.byType.get(constructor)?.delete(object);
       proto = Object.getPrototypeOf(proto);
     }

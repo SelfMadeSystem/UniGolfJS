@@ -328,7 +328,7 @@ export abstract class RigidBody<
       Math.PI * 2,
     );
 
-    yield* this.renderPaths({
+    yield* RigidBody.renderPaths({
       shadowPath,
       heightPath: undefined as unknown as Path2D,
       fillPath,

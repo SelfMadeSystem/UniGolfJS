@@ -4,6 +4,7 @@ import type { LevelObject } from "./objects/levelObject";
 export const levelObjectRegistry: Map<string, typeof LevelObject<any>> =
   new Map();
 export const objectIdsByClass: Map<typeof LevelObject<any>, string> = new Map();
+export const objectClasses: Set<typeof LevelObject<any>> = new Set();
 
 export const serializedLevelObject = z.object({
   id: z.string(),
@@ -20,6 +21,7 @@ export function registerLevelObject(
   }
   levelObjectRegistry.set(id, clazz);
   objectIdsByClass.set(clazz, id);
+  objectClasses.add(clazz);
 }
 
 export function getLevelObjectClass(

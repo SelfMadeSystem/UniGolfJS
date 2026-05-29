@@ -82,7 +82,7 @@ export abstract class CircleObject<
       Math.PI * 2,
     );
 
-    yield* this.renderPaths({
+    yield* CircleObject.renderPaths({
       shadowPath,
       heightPath: undefined as unknown as Path2D,
       fillPath,

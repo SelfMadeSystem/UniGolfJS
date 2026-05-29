@@ -4,6 +4,7 @@ import { PolyObject, PolyObjectSchema } from "./polyObject";
 import type { PathInfo } from "./levelObject";
 import { rgbSchema } from "@/utils/data";
 import { registerLevelObject } from "../levelObjectRegistry";
+import type { RenderInfo, RenderPass } from "@/render/drawable";
 
 export const WallSchema = PolyObjectSchema.extend({
   wallColor: rgbSchema.default("#388164"),
@@ -17,6 +18,10 @@ export class Wall extends PolyObject<typeof WallSchema> {
 
   constructor(options: z.input<typeof WallSchema>) {
     super(options);
+  }
+
+  override render(info: RenderInfo): Iterable<RenderPass> {
+      return this.polyRender(info);
   }
 
   override getPathInfo(): PathInfo {

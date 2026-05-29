@@ -105,7 +105,9 @@ export abstract class GameObject<
     return this.schema.encode(this.data);
   }
 
-  abstract render(info: RenderInfo): Iterable<RenderPass>;
+  render(info: RenderInfo): Iterable<RenderPass> {
+    throw new Error("Render method not implemented");
+  }
   tick(): void {}
 
   delete(fromLevel = false): void {
@@ -120,5 +122,23 @@ export abstract class GameObject<
    */
   reset(sceneReset = false, scene?: LevelScene): void {
     this.pos = this.data.position;
+  }
+
+  static staticRender(info: RenderInfo): Iterable<RenderPass> {
+    return [];
+  }
+
+  static hasRender(): boolean {
+    return this.prototype.render !== GameObject.prototype.render;
+  }
+
+  static hasStaticRender(): boolean {
+    return this.staticRender !== GameObject.staticRender;
+  }
+
+  static staticDrawable(): Drawable {
+    return {
+      render: (info: RenderInfo) => this.staticRender(info),
+    };
   }
 }

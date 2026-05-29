@@ -44,7 +44,7 @@ export abstract class LevelObject<
 
   abstract isPointInside(point: Vector2): boolean;
 
-  *renderPaths({
+  static *renderPaths({
     shadowPath,
     heightPath,
     outlinePath,
@@ -106,7 +106,7 @@ export abstract class LevelObject<
     }
   }
 
-  *renderPoints({
+  static *renderPoints({
     points,
     shadowLayer,
     outlineLayer,

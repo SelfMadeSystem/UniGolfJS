@@ -138,10 +138,10 @@ export abstract class PolyObject<
 
   abstract getPathInfo(info: RenderInfo): PathInfo;
 
-  override *render(info: RenderInfo): Iterable<RenderPass> {
+  *polyRender(info: RenderInfo): Iterable<RenderPass> {
     const points = this.getPoints();
     const pathInfo = this.getPathInfo(info);
-    yield* this.renderPoints({ points, ...pathInfo, debug: this.data.debug });
+    yield* PolyObject.renderPoints({ points, ...pathInfo, debug: this.data.debug });
   }
 
   getCollision(
