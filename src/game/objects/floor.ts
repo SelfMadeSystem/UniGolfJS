@@ -41,6 +41,12 @@ export class Floor extends PolyObject<typeof FloorSchema> {
     };
   }
 
+  override delete(fromLevel?: boolean): void {
+    super.delete(fromLevel);
+    Floor.points.delete(this);
+    Floor.cachedPath = null;
+  }
+
   static override *staticRender(info: RenderInfo): Iterable<RenderPass> {
     if (!Floor.cachedPath) {
       const allPoints = Array.from(Floor.points.values());
