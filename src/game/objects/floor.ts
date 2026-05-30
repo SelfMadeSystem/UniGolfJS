@@ -14,8 +14,40 @@ export const FloorSchema = PolyObjectSchema.extend({
 
 export class Floor extends PolyObject<typeof FloorSchema> {
   static override schema = FloorSchema;
-  static points: Map<Floor, Vector2[]> = new Map();
-  static cachedPath: Path2D | null = null;
+  static points: Map<string, Map<Floor, Vector2[]>> = new Map();
+  static floorToColor: Map<Floor, string> = new Map();
+  static cachedPath: Map<string, Path2D> = new Map();
+
+  static setPoints(color: string, floor: Floor, points: Vector2[]) {
+    const prevColor = Floor.floorToColor.get(floor);
+    if (prevColor && prevColor !== color) {
+      const prevColorMap = Floor.points.get(prevColor);
+      if (prevColorMap) {
+        prevColorMap.delete(floor);
+        Floor.cachedPath.delete(prevColor);
+      }
+    }
+    Floor.floorToColor.set(floor, color);
+    let colorMap = Floor.points.get(color);
+    if (!colorMap) {
+      colorMap = new Map();
+      Floor.points.set(color, colorMap);
+    }
+    colorMap.set(floor, points);
+    Floor.cachedPath.delete(color);
+  }
+
+  static removePoints(floor: Floor) {
+    const color = Floor.floorToColor.get(floor);
+    if (color) {
+      const colorMap = Floor.points.get(color);
+      if (colorMap) {
+        colorMap.delete(floor);
+        Floor.cachedPath.delete(color);
+      }
+      Floor.floorToColor.delete(floor);
+    }
+  }
 
   override get isSolid(): boolean {
     return false;
@@ -30,8 +62,7 @@ export class Floor extends PolyObject<typeof FloorSchema> {
   }
 
   setPoints() {
-    Floor.points.set(this, this.getPoints());
-    Floor.cachedPath = null;
+    Floor.setPoints(this.data.floorColor, this, this.getPoints());
   }
 
   override getPathInfo(): PathInfo {
@@ -43,31 +74,33 @@ export class Floor extends PolyObject<typeof FloorSchema> {
 
   override delete(fromLevel?: boolean): void {
     super.delete(fromLevel);
-    Floor.points.delete(this);
-    Floor.cachedPath = null;
+    Floor.removePoints(this);
   }
 
   static override *staticRender(info: RenderInfo): Iterable<RenderPass> {
-    if (!Floor.cachedPath) {
-      const allPoints = Array.from(Floor.points.values());
-      const union = unionPolygons(allPoints);
-      const path = new Path2D();
-      for (const p of union) {
-        for (const polygon of p) {
-          path.moveTo(polygon[0]!.x, polygon[0]!.y);
-          for (let i = 1; i < polygon.length; i++) {
-            path.lineTo(polygon[i]!.x, polygon[i]!.y);
+    for (const [color, colorMap] of Floor.points) {
+      let path = Floor.cachedPath.get(color);
+      if (!path) {
+        const allPoints = Array.from(colorMap.values());
+        const union = unionPolygons(allPoints);
+        path = new Path2D();
+        for (const p of union) {
+          for (const polygon of p) {
+            if (polygon.length < 3) continue;
+            path.moveTo(polygon[0]!.x, polygon[0]!.y);
+            for (let i = 1; i < polygon.length; i++) {
+              path.lineTo(polygon[i]!.x, polygon[i]!.y);
+            }
+            path.closePath();
           }
-          path.closePath();
         }
+        Floor.cachedPath.set(color, path);
       }
-      Floor.cachedPath = path;
+      yield pass(LAYERS.FLOOR, (ctx) => {
+        ctx.fillStyle = color;
+        ctx.fill(path);
+      });
     }
-
-    yield pass(LAYERS.FLOOR, (ctx) => {
-      ctx.fillStyle = "#79b87b";
-      ctx.fill(Floor.cachedPath!);
-    });
   }
 }
 registerLevelObject("floor", Floor);
