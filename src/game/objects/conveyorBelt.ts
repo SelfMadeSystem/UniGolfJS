@@ -79,7 +79,7 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
   }
 
   override *render(info: RenderInfo): Iterable<RenderPass> {
-    yield* super.render(info);
+    yield* this.polyRender(info);
     const { tickWithInterp } = info;
 
     // Draw animated directional arrows using pattern

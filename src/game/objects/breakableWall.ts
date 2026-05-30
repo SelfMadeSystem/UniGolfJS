@@ -49,7 +49,7 @@ export class BreakableWall extends PolyObject<typeof WallSchema> {
     if (this.broken) {
       return [];
     }
-    return super.render(info);
+    return this.polyRender(info);
   }
 
   override onCollision(

@@ -35,7 +35,7 @@ export class Boost extends PolyObject<typeof BoostSchema> {
   }
 
   override *render(info: RenderInfo): Iterable<RenderPass> {
-    yield* super.render(info);
+    yield* this.polyRender(info);
     yield pass(LAYERS.OBJECTS_3, (ctx) => {
       const { tickWithInterp } = info;
       const path = this.getPath();

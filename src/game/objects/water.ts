@@ -25,7 +25,7 @@ export class Water extends PolyObject<typeof WaterSchema> {
   }
 
   override *render(info: RenderInfo): Iterable<RenderPass> {
-    yield* super.render(info);
+    yield* this.polyRender(info);
     const path = this.getPath();
     yield pass(LAYERS.WATER_WALL_CLIP_REGIONS, () => {
       const scene = getLevelScene();

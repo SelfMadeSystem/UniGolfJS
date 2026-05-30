@@ -68,7 +68,7 @@ export class Slope extends PolyObject<typeof SlopeSchema> {
   }
 
   override *render(info: RenderInfo): Iterable<RenderPass> {
-    yield* super.render(info);
+    yield* this.polyRender(info);
     // Draw slope direction arrow
     yield pass(LAYERS.OBJECTS_3, (ctx) => {
       const path = this.getPath();
