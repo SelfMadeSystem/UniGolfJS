@@ -26,11 +26,18 @@ export class MoveMode implements InteractionMode {
 
     this.editManager.startPointer = null;
     this.editManager.updateHighlight(info);
+
+    for (const obj of this.editManager.selectedObjects) {
+      obj.stopDragging();
+    }
   }
 
   pointerdown(info: PointerInfo): void {
-    // This shouldn't be called while in move mode, but set start pointer just in case
     const scene = this.editManager.scene;
     this.editManager.startPointer = scene.screenToWorld(info.pos);
+
+    for (const obj of this.editManager.selectedObjects) {
+      obj.startDragging();
+    }
   }
 }

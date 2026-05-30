@@ -17,6 +17,7 @@ export class Floor extends PolyObject<typeof FloorSchema> {
   static points: Map<string, Map<Floor, Vector2[]>> = new Map();
   static floorToColor: Map<Floor, string> = new Map();
   static cachedPath: Map<string, Path2D> = new Map();
+  static draggingFloors: Set<Floor> = new Set();
 
   static setPoints(color: string, floor: Floor, points: Vector2[]) {
     const prevColor = Floor.floorToColor.get(floor);
@@ -56,9 +57,22 @@ export class Floor extends PolyObject<typeof FloorSchema> {
   constructor(options: z.input<typeof FloorSchema>) {
     super(options);
     this.onAny(() => {
+      if (this.dragging) return;
       this.setPoints();
     });
     this.setPoints();
+  }
+
+  override startDragging(): void {
+    super.startDragging();
+    Floor.removePoints(this);
+    Floor.draggingFloors.add(this);
+  }
+
+  override stopDragging(): void {
+    super.stopDragging();
+    this.setPoints();
+    Floor.draggingFloors.delete(this);
   }
 
   setPoints() {
@@ -72,12 +86,33 @@ export class Floor extends PolyObject<typeof FloorSchema> {
     };
   }
 
+  *renderDragging(info: RenderInfo): Iterable<RenderPass> {
+    const points = this.getPoints();
+    if (points.length < 3) return;
+
+    const path = new Path2D();
+    path.moveTo(points[0]!.x, points[0]!.y);
+    for (let i = 1; i < points.length; i++) {
+      path.lineTo(points[i]!.x, points[i]!.y);
+    }
+    path.closePath();
+
+    yield pass(LAYERS.FLOOR, (ctx) => {
+      ctx.fillStyle = this.data.floorColor;
+      ctx.fill(path);
+    });
+  }
+
   override delete(fromLevel?: boolean): void {
     super.delete(fromLevel);
     Floor.removePoints(this);
   }
 
   static override *staticRender(info: RenderInfo): Iterable<RenderPass> {
+    for (const floor of Floor.draggingFloors) {
+      yield* floor.renderDragging(info);
+    }
+
     for (const [color, colorMap] of Floor.points) {
       let path = Floor.cachedPath.get(color);
       if (!path) {

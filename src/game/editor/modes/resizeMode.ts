@@ -69,6 +69,7 @@ export class ResizeMode implements InteractionMode {
 
     for (const obj of this.editManager.selectedObjects) {
       obj.set("position", obj.pos);
+      obj.stopDragging();
     }
 
     this.editManager.startPointer = null;
@@ -76,6 +77,8 @@ export class ResizeMode implements InteractionMode {
   }
 
   pointerdown(info: PointerInfo): void {
-    // Shouldn't happen
+    for (const obj of this.editManager.selectedObjects) {
+      obj.startDragging();
+    }
   }
 }

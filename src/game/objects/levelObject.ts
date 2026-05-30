@@ -33,9 +33,18 @@ export abstract class LevelObject<
   SchemaType extends typeof LevelObjectSchema = typeof LevelObjectSchema,
 > extends GameObject<SchemaType> {
   static override schema = LevelObjectSchema;
+  protected dragging: boolean = false;
 
   constructor(options: z.input<SchemaType>) {
     super(options);
+  }
+
+  startDragging() {
+    this.dragging = true;
+  }
+
+  stopDragging() {
+    this.dragging = false;
   }
 
   abstract getAABB(): AABB;

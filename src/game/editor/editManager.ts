@@ -376,13 +376,12 @@ export class EditManager implements Drawable, PointerEventHandler {
         this.selectObject(obj, false);
       }
 
-      this.startPointer = pointerPos;
       this.setMode("move");
+      this.currentMode.pointerdown(info);
     } else {
       // Empty space - start selection drag
-      this.startPointer = pointerPos;
-      this.selectionPointer = pointerPos;
       this.setMode("select");
+      this.currentMode.pointerdown(info);
     }
 
     this.currentMode.pointerdown(info);
