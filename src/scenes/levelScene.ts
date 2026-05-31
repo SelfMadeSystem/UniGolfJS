@@ -12,6 +12,7 @@ import { AABB } from "@/utils/aabb";
 import type { PointerInfo } from "@/render/pointerEvents";
 import { LevelObjectCollection } from "@/game/levelObjectCollection";
 import type { Tee } from "@/game/objects/tee";
+import { Water } from "@/game/objects/water";
 
 export abstract class LevelScene extends Scene {
   public objects: LevelObjectCollection = new LevelObjectCollection();
@@ -33,6 +34,8 @@ export abstract class LevelScene extends Scene {
 
     this.objects = new LevelObjectCollection(objects);
     this.resetAllObjects(true);
+    // make sure water's rendering logic is always active, even if there are no water objects in the level
+    this.objects.addType(Water);
   }
 
   public getVisibleAABB(): AABB {

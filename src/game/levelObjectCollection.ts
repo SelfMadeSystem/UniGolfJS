@@ -42,6 +42,12 @@ export class LevelObjectCollection implements Iterable<T> {
       .map((type) => type.staticDrawable());
   }
 
+  addType(type: tT): void {
+    if (!this.byType.has(type)) {
+      this.byType.set(type, new Set());
+    }
+  }
+
   add(object: T): void {
     if (this.byId.has(object.id)) {
       throw new Error(`Duplicate game object id: ${object.id}`);
