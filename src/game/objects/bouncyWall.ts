@@ -6,7 +6,7 @@ import { numberSchema, rgbSchema } from "@/utils/data";
 import { registerLevelObject } from "../levelObjectRegistry";
 import type { RigidBody } from "./rigidBody";
 import type { Vector2 } from "@/utils/vec";
-import type { RenderInfo } from "@/render/drawable";
+import type { RenderInfo, RenderPass } from "@/render/drawable";
 import { blendColors } from "@/utils/colorUtils";
 
 export const BouncyWallSchema = PolyObjectSchema.extend({
@@ -27,6 +27,10 @@ export class BouncyWall extends PolyObject<typeof BouncyWallSchema> {
 
   constructor(options: z.input<typeof BouncyWallSchema>) {
     super(options);
+  }
+
+  override render(info: RenderInfo): Iterable<RenderPass> {
+    return this.polyRender(info);
   }
 
   override tick(): void {
