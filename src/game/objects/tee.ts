@@ -14,6 +14,7 @@ import {
 } from "@/utils/data";
 import { registerLevelObject } from "../levelObjectRegistry";
 import type { LevelScene } from "@/scenes/levelScene";
+import type { PointerInfo } from "@/render/pointerEvents";
 
 const TeeSchema = LevelObjectSchema.extend({
   teeColor: rgbSchema.default("#f79d60"),
@@ -53,55 +54,45 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     return this.getAABB().containsPoint(point);
   }
 
-  override tick(): void {
+  onPointerDown() {
     const scene = getLevelScene();
     if (!scene) return;
     if (scene.activeTee !== this) return;
+    if (!this.shot) return;
 
-    const pointers = scene.tickPointers;
-    if (!pointers.length) return;
+    scene.resetAllObjects();
+    this.shot = false;
+    const newBall = new PlayerBall(
+      {
+        position: this.pos,
+        velocity: new Vector2(0, 0),
+        radius: this.data.radius,
+      },
+      this,
+    );
+    scene.addObject(newBall);
+    this.ball = newBall;
+  }
 
-    for (const pointer of pointers) {
-      switch (pointer.eventType) {
-        case "pointerdown": {
-          if (!this.shot) {
-            break;
-          }
-          scene.resetAllObjects();
-          this.shot = false;
-          const newBall = new PlayerBall(
-            {
-              position: this.pos,
-              velocity: new Vector2(0, 0),
-              radius: this.data.radius,
-            },
-            this,
-          );
-          scene.addObject(newBall);
-          this.ball = newBall;
-          break;
-        }
-        case "pointermove": {
-          if (this.shot || !pointer.leftButton) break;
-          this.driverPos = scene.screenToWorld(pointer.pos);
-          break;
-        }
-        case "pointerup": {
-          if (this.driverPos && this.ball) {
-            const velocity = this.ball.pos
-              .sub(this.driverPos)
-              .maxLength(MAX_DRIVER_DISTANCE)
-              .mult(DRIVER_POWER_MULTIPLIER);
-            if (this.ball) {
-              this.shot = true;
-              this.ball.velocity = velocity;
-            }
-          }
-          this.driverPos = null;
-          break;
-        }
+  onPointerMove(event: PointerInfo<PointerEvent>) {
+    const scene = getLevelScene();
+    if (!scene) return;
+    if (this.shot || !event.leftButton) return;
+    this.driverPos = scene.screenToWorld(event.pos);
+  }
+
+  onPointerUp() {
+    if (this.driverPos && this.ball) {
+      const velocity = this.ball.pos
+        .sub(this.driverPos)
+        .maxLength(MAX_DRIVER_DISTANCE)
+        .mult(DRIVER_POWER_MULTIPLIER);
+      if (this.ball) {
+        this.shot = true;
+        this.ball.velocity = velocity;
       }
     }
+    this.driverPos = null;
   }
 
   override *render(info: RenderInfo): Iterable<RenderPass> {

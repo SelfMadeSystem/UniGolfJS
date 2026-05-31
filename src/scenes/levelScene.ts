@@ -108,14 +108,17 @@ export abstract class LevelScene extends Scene {
 
   override pointermove(info: PointerInfo<PointerEvent>): void {
     this.tickPointers.push(info);
+    this.activeTee?.onPointerMove(info);
   }
 
   override pointerup(info: PointerInfo<PointerEvent>): void {
     this.tickPointers.push(info);
+    this.activeTee?.onPointerUp();
   }
 
   override pointerdown(info: PointerInfo<PointerEvent>): void {
     this.tickPointers.push(info);
+    this.activeTee?.onPointerDown();
   }
 
   /**
