@@ -110,11 +110,7 @@ export abstract class GameObject<
   }
   tick(): void {}
 
-  delete(fromLevel = false): void {
-    const scene = getLevelScene();
-    if (!scene) return;
-    scene.removeObject(this);
-  }
+  delete(fromLevel = false): void {}
 
   /**
    * Resets the object to its initial state.
@@ -122,6 +118,10 @@ export abstract class GameObject<
    */
   reset(sceneReset = false, scene?: LevelScene): void {
     this.pos = this.data.position;
+  }
+
+  hasRender(): boolean {
+    return this.render !== GameObject.prototype.render;
   }
 
   static staticRender(info: RenderInfo): Iterable<RenderPass> {

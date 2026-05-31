@@ -23,6 +23,10 @@ export abstract class CircleObject<
 
   constructor(options: z.input<SchemaType>) {
     super(options);
+    //@ts-expect-error abstract classes don't work well with generic schemas
+    this.on("radius", () => {
+      this.emitAabbChange();
+    });
   }
 
   public get radius(): number {

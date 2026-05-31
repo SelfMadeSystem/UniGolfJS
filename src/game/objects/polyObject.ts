@@ -70,6 +70,10 @@ export abstract class PolyObject<
 
   constructor(options: z.input<SchemaType>) {
     super(options);
+    //@ts-expect-error abstract classes don't work well with generic schemas
+    this.on("scale", () => {
+      this.emitAabbChange();
+    });
   }
 
   get isSolid(): boolean {

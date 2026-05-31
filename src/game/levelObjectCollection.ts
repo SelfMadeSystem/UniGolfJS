@@ -1,21 +1,23 @@
 import type { Drawable } from "@/render/drawable";
-import type { GameObject } from "./objects/gameObject";
+import { SpatialHashGrid } from "@/utils/spatialUtils";
+import type { LevelObject } from "./objects/levelObject";
+import type { AABB } from "@/utils/aabb";
 
 /**
  * Central ownership for game objects.
  *
  * The backing structure stays simple for now: a stable ordered list plus an ID
  * index for direct lookup. Objects are also indexed by their class and superclasses
- * for efficient type-based queries. Spatial partitioning can be layered in later
- * without changing the public API of the collection.
+ * for efficient type-based queries.
  */
-// TODO: add spatial partitioning
-export class GameObjectCollection<
-  T extends GameObject<any> = GameObject<any>,
-> implements Iterable<T> {
+type T = LevelObject<any>;
+type tT = typeof LevelObject<any>;
+export class LevelObjectCollection implements Iterable<T> {
   private readonly items: T[] = [];
   private readonly byId = new Map<string, T>();
-  private readonly byType = new Map<typeof GameObject<any>, Set<T>>();
+  private readonly byType = new Map<tT, Set<T>>();
+  private readonly spatialGrid = new SpatialHashGrid<T>(100);
+  private readonly renderSpatialGrid = new SpatialHashGrid<T>(100);
 
   constructor(objects: Iterable<T> = []) {
     this.replace(objects);
@@ -29,11 +31,8 @@ export class GameObjectCollection<
     return this.items.length;
   }
 
-  drawableObjects(): Iterable<T> {
-    return this.byType
-      .entries()
-      .filter(([type]) => type.hasRender())
-      .flatMap(([, objects]) => objects);
+  drawableObjects(aabb: AABB): Iterable<T> {
+    return this.renderSpatialGrid.query(aabb);
   }
 
   drawableStatic(): Iterable<Drawable> {
@@ -50,6 +49,10 @@ export class GameObjectCollection<
 
     this.items.push(object);
     this.byId.set(object.id, object);
+    this.spatialGrid.insert(object);
+    if (object.hasRender()) {
+      this.renderSpatialGrid.insert(object);
+    }
     this.registerByType(object);
   }
 
@@ -60,25 +63,24 @@ export class GameObjectCollection<
 
     this.items.unshift(object);
     this.byId.set(object.id, object);
+    this.spatialGrid.insert(object);
+    if (object.hasRender()) {
+      this.renderSpatialGrid.insert(object);
+    }
     this.registerByType(object);
   }
 
   remove(object: T): boolean {
-    return this.removeById(object.id) !== null;
-  }
-
-  removeById(id: string): T | null {
-    const object = this.byId.get(id);
-    if (!object) return null;
-
-    this.byId.delete(id);
     const index = this.items.indexOf(object);
-    if (index !== -1) {
-      this.items.splice(index, 1);
+    if (index === -1) {
+      return false;
     }
 
+    this.items.splice(index, 1);
+    this.byId.delete(object.id);
+    this.spatialGrid.remove(object);
     this.unregisterByType(object);
-    return object;
+    return true;
   }
 
   getById(id: string): T | null {
@@ -90,6 +92,10 @@ export class GameObjectCollection<
     for (const object of objects) {
       this.add(object);
     }
+  }
+
+  queryByAABB(aabb: AABB): Set<T> {
+    return this.spatialGrid.query(aabb);
   }
 
   clear(): void {
@@ -122,14 +128,14 @@ export class GameObjectCollection<
   /**
    * Get all objects that are instances of the given type (including subclasses).
    */
-  getByType<S extends T>(type: typeof GameObject<any>): S[] {
+  getByType<S extends T>(type: tT): S[] {
     return Array.from(this.byType.get(type) ?? []) as S[];
   }
 
   /**
    * Filter objects by type. Objects match if they are instances of the given type.
    */
-  filterByType<S extends T>(type: typeof GameObject<any>): S[] {
+  filterByType<S extends T>(type: tT): S[] {
     return this.getByType(type);
   }
 
@@ -137,7 +143,7 @@ export class GameObjectCollection<
     let proto = Object.getPrototypeOf(object);
 
     while (proto && proto !== Object.prototype) {
-      const constructor = proto.constructor as typeof GameObject<any>;
+      const constructor = proto.constructor as tT;
 
       if (!this.byType.has(constructor)) {
         this.byType.set(constructor, new Set());
@@ -152,7 +158,7 @@ export class GameObjectCollection<
     let proto = Object.getPrototypeOf(object);
 
     while (proto && proto !== Object.prototype) {
-      const constructor = proto.constructor as typeof GameObject<any>;
+      const constructor = proto.constructor as tT;
       this.byType.get(constructor)?.delete(object);
       proto = Object.getPrototypeOf(proto);
     }

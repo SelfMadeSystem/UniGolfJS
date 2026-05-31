@@ -34,9 +34,26 @@ export abstract class LevelObject<
 > extends GameObject<SchemaType> {
   static override schema = LevelObjectSchema;
   protected dragging: boolean = false;
+  protected aabbListeners: Set<() => void> = new Set();
 
   constructor(options: z.input<SchemaType>) {
     super(options);
+    this.on("position", () => {
+      this.emitAabbChange();
+    });
+  }
+
+  onAabbChange(listener: () => void): () => void {
+    this.aabbListeners.add(listener);
+    return () => {
+      this.aabbListeners.delete(listener);
+    };
+  }
+
+  protected emitAabbChange(): void {
+    for (const listener of this.aabbListeners) {
+      listener();
+    }
   }
 
   startDragging() {

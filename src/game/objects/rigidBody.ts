@@ -51,6 +51,10 @@ export abstract class RigidBody<
     this.velocity = this.data.velocity;
     this.prevPos = this.pos;
     this.rigidBodyId = RigidBody.nextRigidBodyId++;
+    //@ts-expect-error abstract classes don't work well with generic schemas
+    this.on("radius", () => {
+      this.emitAabbChange();
+    });
   }
 
   public get radius(): number {

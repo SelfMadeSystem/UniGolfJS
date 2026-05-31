@@ -3,24 +3,22 @@ import {
   renderDrawables,
   type CanvasRenderInfo,
   type Drawable,
-  type RenderInfo,
   type RenderPass,
 } from "@/render/drawable";
 import { Scene } from "./scene";
-import type { GameObject } from "@/game/objects/gameObject";
 import { LAYERS, WALL_CONFIG, type Level } from "@/game/levelConfig";
 import { $renderer } from "@/render/renderer";
 import { LevelObject } from "@/game/objects/levelObject";
 import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
 import type { PointerInfo } from "@/render/pointerEvents";
-import { GameObjectCollection } from "@/game/gameObjectCollection";
+import { LevelObjectCollection } from "@/game/levelObjectCollection";
 import type { Tee } from "@/game/objects/tee";
 
 const WATER_FILL_COLOR = "#40A0FF"; // TODO: put this somewhere more sensible
 
 export abstract class LevelScene extends Scene {
-  public objects: GameObjectCollection = new GameObjectCollection();
+  public objects: LevelObjectCollection = new LevelObjectCollection();
   public drawables: Drawable[] = [];
   public cameraPos: Vector2 = new Vector2(0, 0);
   public cameraZoom: number = 1;
@@ -60,7 +58,7 @@ export abstract class LevelScene extends Scene {
       }),
     ];
 
-    this.objects = new GameObjectCollection(objects);
+    this.objects = new LevelObjectCollection(objects);
     this.resetAllObjects(true);
   }
 
@@ -86,19 +84,21 @@ export abstract class LevelScene extends Scene {
   override render(info: CanvasRenderInfo, ctx: CanvasRenderingContext2D): void {
     this.updateCameraMovement(info.delta);
 
+    const visibleArea = this.getVisibleAABB();
+
     ctx.save();
     ctx.scale(this.cameraZoom, this.cameraZoom);
     ctx.translate(-this.cameraPos.x, -this.cameraPos.y);
     // TODO: only render objects that are within the camera's view
     renderDrawables(
       [
-        ...this.objects.drawableObjects(),
+        ...this.objects.drawableObjects(visibleArea),
         ...this.objects.drawableStatic(),
         ...this.drawables,
       ],
       {
         ...info,
-        visibleArea: this.getVisibleAABB(),
+        visibleArea,
       },
       ctx,
       this.passes,
@@ -200,7 +200,7 @@ export abstract class LevelScene extends Scene {
     this.cameraZoomTarget = null;
   }
 
-  getObjectAtPointer(pointer: PointerInfo | null): GameObject<any> | null {
+  getObjectAtPointer(pointer: PointerInfo | null): LevelObject<any> | null {
     if (!pointer) return null;
     const worldPos = this.screenToWorld(pointer.pos);
     for (const obj of this.objects.toReversed()) {
@@ -209,7 +209,7 @@ export abstract class LevelScene extends Scene {
     return null;
   }
 
-  removeObject(obj: GameObject<any>): void {
+  removeObject(obj: LevelObject<any>): void {
     this.objects.remove(obj);
   }
 
@@ -221,7 +221,7 @@ export abstract class LevelScene extends Scene {
     }
   }
 
-  addObject(obj: GameObject<any>): void {
+  addObject(obj: LevelObject<any>): void {
     this.objects.add(obj);
   }
 
@@ -230,12 +230,12 @@ export abstract class LevelScene extends Scene {
     this.level.objects.push(obj);
   }
 
-  moveObjectToTop(obj: GameObject<any>): void {
+  moveObjectToTop(obj: LevelObject<any>): void {
     this.removeObject(obj);
     this.addObject(obj);
   }
 
-  moveObjectToBottom(obj: GameObject<any>): void {
+  moveObjectToBottom(obj: LevelObject<any>): void {
     this.removeObject(obj);
     this.objects.prepend(obj);
   }
