@@ -6,10 +6,12 @@ import type { RigidBody } from "./rigidBody";
 import { blendColors } from "@/utils/colorUtils";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
 import { registerLevelObject } from "../levelObjectRegistry";
+import { numberSchema } from "@/utils/data";
 
-export const BoostSchema = PolyObjectSchema.extend({});
+export const BoostSchema = PolyObjectSchema.extend({
+  speed: numberSchema.default(60),
+});
 // TODO: put these in a better place
-export const SPEED = 60;
 export const BOOST_EFFECT_TIME = 10; // frames
 
 const C1 = "#66FF00";
@@ -83,7 +85,7 @@ export class Boost extends PolyObject<typeof BoostSchema> {
   override onIntersects(rigidBody: RigidBody): void {
     if (rigidBody.velocity.length() === 0) return;
 
-    rigidBody.velocity = rigidBody.velocity.setLength(SPEED);
+    rigidBody.velocity = rigidBody.velocity.setLength(this.data.speed);
     this.boostTime = BOOST_EFFECT_TIME;
   }
 

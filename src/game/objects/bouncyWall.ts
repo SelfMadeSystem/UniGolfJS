@@ -2,7 +2,7 @@ import z from "zod";
 import { LAYERS, WALL_CONFIG } from "../levelConfig";
 import { PolyObject, PolyObjectSchema, type CollisionInfo } from "./polyObject";
 import type { PathInfo } from "./levelObject";
-import { rgbSchema } from "@/utils/data";
+import { numberSchema, rgbSchema } from "@/utils/data";
 import { registerLevelObject } from "../levelObjectRegistry";
 import type { RigidBody } from "./rigidBody";
 import type { Vector2 } from "@/utils/vec";
@@ -15,10 +15,10 @@ export const BouncyWallSchema = PolyObjectSchema.extend({
   bouncyWallOutlineColor: rgbSchema.default("#cc5555"),
   wallShadowColor: rgbSchema.default("#76b97e"),
   waterWallColor: rgbSchema.default("#779977"),
+  speed: numberSchema.default(60),
 });
 
 // TODO: share w/ boost
-const SPEED = 60;
 const BOOST_EFFECT_TIME = 10;
 
 export class BouncyWall extends PolyObject<typeof BouncyWallSchema> {
@@ -65,7 +65,7 @@ export class BouncyWall extends PolyObject<typeof BouncyWallSchema> {
       return { velocity: collisionInfo.newVelocity };
 
     this.boostTime = BOOST_EFFECT_TIME;
-    const newVelocity = collisionInfo.newVelocity.setLength(SPEED);
+    const newVelocity = collisionInfo.newVelocity.setLength(this.data.speed);
     return { velocity: newVelocity };
   }
 }
