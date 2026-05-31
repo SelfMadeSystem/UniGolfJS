@@ -1,12 +1,10 @@
 import {
-  pass,
   renderDrawables,
   type CanvasRenderInfo,
   type Drawable,
-  type RenderPass,
 } from "@/render/drawable";
 import { Scene } from "./scene";
-import { LAYERS, WALL_CONFIG, type Level } from "@/game/levelConfig";
+import { type Level } from "@/game/levelConfig";
 import { $renderer } from "@/render/renderer";
 import { LevelObject } from "@/game/objects/levelObject";
 import { Vector2 } from "@/utils/vec";
@@ -14,8 +12,6 @@ import { AABB } from "@/utils/aabb";
 import type { PointerInfo } from "@/render/pointerEvents";
 import { LevelObjectCollection } from "@/game/levelObjectCollection";
 import type { Tee } from "@/game/objects/tee";
-
-const WATER_FILL_COLOR = "#40A0FF"; // TODO: put this somewhere more sensible
 
 export abstract class LevelScene extends Scene {
   public objects: LevelObjectCollection = new LevelObjectCollection();
@@ -29,34 +25,11 @@ export abstract class LevelScene extends Scene {
   public tickPointers: PointerInfo<PointerEvent>[] = [];
   public clipPath: Path2D = new Path2D();
   public activeTee: Tee | null = null;
-  public readonly passes: RenderPass[];
 
   constructor(public level: Level) {
     super();
 
     const { objects } = level;
-
-    this.passes = [
-      pass(LAYERS.WATER_WALL_PRE, (ctx) => {
-        ctx.save();
-        this.clipPath = new Path2D();
-      }),
-      // water will add to the clipPath in WATER_WALL_CLIP_REGIONS
-      pass(LAYERS.WATER_WALL_CLIP, (ctx) => {
-        ctx.clip(this.clipPath);
-      }),
-      pass(LAYERS.WATER_FILL, (ctx) => {
-        ctx.save();
-        ctx.translate(0, WALL_CONFIG.waterWallHeight);
-        ctx.fillStyle = WATER_FILL_COLOR;
-        ctx.fill(this.clipPath);
-        ctx.restore();
-      }),
-      // walls will render their "water walls" in WATER_WALL_FILL
-      pass(LAYERS.WATER_WALL_POST, (ctx) => {
-        ctx.restore();
-      }),
-    ];
 
     this.objects = new LevelObjectCollection(objects);
     this.resetAllObjects(true);
@@ -89,7 +62,6 @@ export abstract class LevelScene extends Scene {
     ctx.save();
     ctx.scale(this.cameraZoom, this.cameraZoom);
     ctx.translate(-this.cameraPos.x, -this.cameraPos.y);
-    // TODO: only render objects that are within the camera's view
     renderDrawables(
       [
         ...this.objects.drawableObjects(visibleArea),
@@ -101,7 +73,6 @@ export abstract class LevelScene extends Scene {
         visibleArea,
       },
       ctx,
-      this.passes,
     );
     ctx.restore();
   }

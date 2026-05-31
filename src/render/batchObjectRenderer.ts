@@ -1,15 +1,16 @@
 import { unionPolygons } from "@/utils/shapeUtils";
 import { MyRBush, type Cluster } from "@/utils/spatialUtils";
-import { type RenderInfo } from "./drawable";
 import type { PolyObject } from "@/game/objects/polyObject";
 import type { AABB } from "@/utils/aabb";
+import type { Vector2 } from "@/utils/vec";
 
 export class BatchObjectRenderer<T extends PolyObject<any>> {
   public rbushes: Map<string, MyRBush<T>> = new Map();
-  public clusterPathCache: Map<string, Map<Cluster<T>, Path2D>> = new Map();
+  public clusterPathCache: Map<string, Map<Cluster<T>, [Path2D, Vector2[][]]>> =
+    new Map();
   public objToColor: Map<T, string> = new Map();
 
-  constructor(public colorFunc: (obj: T) => string = () => "") {}
+  constructor(public colorFunc: (obj: T) => string = () => "\0") {}
 
   public addObject(obj: T) {
     const color = this.colorFunc(obj);
@@ -39,7 +40,9 @@ export class BatchObjectRenderer<T extends PolyObject<any>> {
     }
   }
 
-  public *getPaths(viewport: AABB): Iterable<[string, Iterable<Path2D>]> {
+  public *getPaths(
+    viewport: AABB,
+  ): Iterable<[string, Iterable<[Path2D, Vector2[][]]>]> {
     for (const [color, rbush] of this.rbushes) {
       const clusterCache = this.clusterPathCache.getOrInsertComputed(
         color,
@@ -63,16 +66,16 @@ export class BatchObjectRenderer<T extends PolyObject<any>> {
 function* getPathsImpl<T extends PolyObject<any>>(
   rbush: MyRBush<T>,
   viewport: AABB,
-  clusterCache: Map<Cluster<T>, Path2D>,
-): Iterable<Path2D> {
+  clusterCache: Map<Cluster<T>, [Path2D, Vector2[][]]>,
+): Iterable<[Path2D, Vector2[][]]> {
   for (const cluster of rbush.searchCluster(viewport)) {
-    let path = clusterCache.get(cluster);
-    if (path) {
-      yield path;
+    let cache = clusterCache.get(cluster);
+    if (cache) {
+      yield cache;
     } else {
       const polygons = Array.from(cluster.items, (floor) => floor.getPoints());
       const union = unionPolygons(polygons);
-      path = new Path2D();
+      const path = new Path2D();
       for (const polygon of union) {
         for (const points of polygon) {
           if (points.length < 3) continue;
@@ -83,8 +86,8 @@ function* getPathsImpl<T extends PolyObject<any>>(
           path.closePath();
         }
       }
-      clusterCache.set(cluster, path);
-      yield path;
+      clusterCache.set(cluster, [path, union.flat()]);
+      yield [path, union.flat()];
     }
   }
 }

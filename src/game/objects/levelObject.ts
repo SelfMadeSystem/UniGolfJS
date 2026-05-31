@@ -5,7 +5,7 @@ import { type RenderPass, pass } from "@/render/drawable";
 import { generatePathsFromPoints } from "@/utils/pathUtils";
 import { Vector2 } from "@/utils/vec";
 import { AABB } from "@/utils/aabb";
-import { getLevelScene } from "@/scenes/state";
+import { getLevelConfig, getLevelScene } from "@/scenes/state";
 import {
   deserializeLevelObject,
   serializeLevelObject,
@@ -19,10 +19,8 @@ export type PathInfo = {
   outlineLayer?: number;
   heightLayer?: number;
   fillLayer: number;
-  shadowColor?: string;
   outlineColor?: string;
   fillColor: string;
-  waterWallColor?: string;
   height?: number;
   shadow?: number;
   outline?: number;
@@ -80,10 +78,8 @@ export abstract class LevelObject<
     heightLayer,
     outlineLayer,
     fillLayer,
-    shadowColor,
     outlineColor,
     fillColor,
-    waterWallColor,
     height,
     shadow,
   }: {
@@ -116,17 +112,18 @@ export abstract class LevelObject<
         ctx.fill(heightPath);
       });
     }
-    if (shadowPath && shadow && shadowColor && shadowLayer !== undefined) {
+    if (shadowPath && shadow && shadowLayer !== undefined) {
       yield pass(shadowLayer, (ctx) => {
+        const shadowColor = getLevelConfig().shadowColor;
         ctx.strokeStyle = shadowColor;
         ctx.lineWidth = shadow;
         ctx.lineJoin = "round";
         ctx.stroke(shadowPath);
       });
     }
-    if (waterWallPath && waterWallColor) {
+    if (waterWallPath) {
       yield pass(LAYERS.WATER_WALL_FILL, (ctx) => {
-        ctx.fillStyle = waterWallColor;
+        ctx.fillStyle = getLevelConfig().waterWallColor;
         ctx.fill(waterWallPath);
       });
     }
@@ -138,10 +135,8 @@ export abstract class LevelObject<
     outlineLayer,
     heightLayer,
     fillLayer,
-    shadowColor,
     outlineColor,
     fillColor,
-    waterWallColor,
     height,
     shadow,
     outline,
@@ -169,10 +164,8 @@ export abstract class LevelObject<
       heightLayer,
       outlineLayer,
       fillLayer,
-      shadowColor,
       outlineColor,
       fillColor,
-      waterWallColor,
       height,
       shadow,
       outline,

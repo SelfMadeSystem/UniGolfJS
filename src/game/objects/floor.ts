@@ -24,7 +24,7 @@ export class Floor extends PolyObject<typeof FloorSchema> {
 
   constructor(options: z.input<typeof FloorSchema>) {
     super(options);
-    this.onAny((key) => {
+    this.onAny(() => {
       if (this.dragging) return;
       Floor.batchRenderer.removeObject(this);
       Floor.batchRenderer.addObject(this);
@@ -81,7 +81,7 @@ export class Floor extends PolyObject<typeof FloorSchema> {
     for (const [color, paths] of Floor.batchRenderer.getPaths(info.visibleArea)) {
       yield pass(LAYERS.FLOOR, (ctx) => {
         ctx.fillStyle = color;
-        for (const path of paths) {
+        for (const [path] of paths) {
           ctx.fill(path);
         }
       });

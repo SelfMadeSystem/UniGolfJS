@@ -13,8 +13,6 @@ export const BouncyWallSchema = PolyObjectSchema.extend({
   bouncyWallColor: rgbSchema.default("#ff6b6b"),
   bouncyWallBoostColor: rgbSchema.default("#ff8787"),
   bouncyWallOutlineColor: rgbSchema.default("#cc5555"),
-  wallShadowColor: rgbSchema.default("#76b97e"),
-  waterWallColor: rgbSchema.default("#779977"),
   speed: numberSchema.default(60),
 });
 
@@ -46,7 +44,6 @@ export class BouncyWall extends PolyObject<typeof BouncyWallSchema> {
       heightLayer: LAYERS.WALL_HEIGHT,
       outlineLayer: LAYERS.WALL_OUTLINE,
       fillLayer: LAYERS.WALL_FILL,
-      shadowColor: this.data.wallShadowColor,
       outlineColor: this.data.bouncyWallOutlineColor,
       fillColor: blendColors(
         this.data.bouncyWallColor,
@@ -56,7 +53,6 @@ export class BouncyWall extends PolyObject<typeof BouncyWallSchema> {
       height: WALL_CONFIG.height,
       shadow: WALL_CONFIG.shadow,
       outline: WALL_CONFIG.outline,
-      waterWallColor: this.data.waterWallColor,
       waterWallHeight: WALL_CONFIG.waterWallHeight - WALL_CONFIG.outline,
     };
   }

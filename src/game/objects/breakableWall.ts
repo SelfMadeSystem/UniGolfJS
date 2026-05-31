@@ -11,8 +11,6 @@ import { registerLevelObject } from "../levelObjectRegistry";
 export const WallSchema = PolyObjectSchema.extend({
   wallColor: rgbSchema.default("#388164"),
   wallOutlineColor: rgbSchema.default("#29694f"),
-  wallShadowColor: rgbSchema.default("#76b97e"),
-  waterWallColor: rgbSchema.default("#779977"),
 });
 
 export class BreakableWall extends PolyObject<typeof WallSchema> {
@@ -34,10 +32,8 @@ export class BreakableWall extends PolyObject<typeof WallSchema> {
       heightLayer: LAYERS.WALL_HEIGHT,
       outlineLayer: LAYERS.WALL_OUTLINE,
       fillLayer: LAYERS.WALL_FILL,
-      shadowColor: this.data.wallShadowColor,
       outlineColor: this.data.wallOutlineColor,
       fillColor: this.data.wallColor,
-      waterWallColor: this.data.waterWallColor,
       height: WALL_CONFIG.height,
       shadow: WALL_CONFIG.shadow,
       outline: -WALL_CONFIG.outline,
