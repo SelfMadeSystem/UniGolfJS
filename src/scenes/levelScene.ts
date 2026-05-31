@@ -1,6 +1,7 @@
 import {
   pass,
   renderDrawables,
+  type CanvasRenderInfo,
   type Drawable,
   type RenderInfo,
   type RenderPass,
@@ -82,7 +83,7 @@ export abstract class LevelScene extends Scene {
     this.tickPointers.length = 0;
   }
 
-  override render(info: RenderInfo, ctx: CanvasRenderingContext2D): void {
+  override render(info: CanvasRenderInfo, ctx: CanvasRenderingContext2D): void {
     this.updateCameraMovement(info.delta);
 
     ctx.save();
@@ -95,7 +96,10 @@ export abstract class LevelScene extends Scene {
         ...this.objects.drawableStatic(),
         ...this.drawables,
       ],
-      info,
+      {
+        ...info,
+        visibleArea: this.getVisibleAABB(),
+      },
       ctx,
       this.passes,
     );

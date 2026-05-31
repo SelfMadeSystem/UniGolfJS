@@ -10,14 +10,17 @@ import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import init from "ishape_wasm";
 import ishapeWasm from "ishape_wasm/ishape_wasm_bg.wasm" with { type: "file" };
+import "./utils/polyfill";
 
 await init({
   module_or_path: ishapeWasm,
-}).then(() => {
-  console.log("ishape_wasm initialized");
-}).catch((err) => {
-  console.error("Failed to initialize ishape_wasm", err);
-});
+})
+  .then(() => {
+    console.log("ishape_wasm initialized");
+  })
+  .catch((err) => {
+    console.error("Failed to initialize ishape_wasm", err);
+  });
 
 const elem = document.getElementById("root")!;
 const app = (

@@ -5,8 +5,8 @@ import type { PathInfo } from "./levelObject";
 import { rgbSchema } from "@/utils/data";
 import { registerLevelObject } from "../levelObjectRegistry";
 import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import type { Vector2 } from "@/utils/vec";
 import { unionPolygons } from "@/utils/shapeUtils";
+import { Cluster, MyRBush } from "@/utils/spatialUtils";
 
 export const FloorSchema = PolyObjectSchema.extend({
   floorColor: rgbSchema.default("#79b87b"),
@@ -14,39 +14,36 @@ export const FloorSchema = PolyObjectSchema.extend({
 
 export class Floor extends PolyObject<typeof FloorSchema> {
   static override schema = FloorSchema;
-  static points: Map<string, Map<Floor, Vector2[]>> = new Map();
+  static rbushes: Map<string, MyRBush<Floor>> = new Map();
+  static clusterPathCache: Map<string, Map<Cluster<Floor>, Path2D>> = new Map();
   static floorToColor: Map<Floor, string> = new Map();
-  static cachedPath: Map<string, Path2D> = new Map();
   static draggingFloors: Set<Floor> = new Set();
 
-  static setPoints(color: string, floor: Floor, points: Vector2[]) {
-    const prevColor = Floor.floorToColor.get(floor);
-    if (prevColor && prevColor !== color) {
-      const prevColorMap = Floor.points.get(prevColor);
-      if (prevColorMap) {
-        prevColorMap.delete(floor);
-        Floor.cachedPath.delete(prevColor);
-      }
+  static addFloor(floor: Floor) {
+    const color = floor.data.floorColor;
+    const rbush = this.rbushes.getOrInsertComputed(color, () => new MyRBush());
+    rbush.insert(floor);
+    this.floorToColor.set(floor, color);
+
+    const cluster = rbush.itemToCluster.get(floor);
+    if (cluster) {
+      const clusterCache = this.clusterPathCache.get(color);
+      clusterCache?.delete(cluster);
     }
-    Floor.floorToColor.set(floor, color);
-    let colorMap = Floor.points.get(color);
-    if (!colorMap) {
-      colorMap = new Map();
-      Floor.points.set(color, colorMap);
-    }
-    colorMap.set(floor, points);
-    Floor.cachedPath.delete(color);
   }
 
-  static removePoints(floor: Floor) {
-    const color = Floor.floorToColor.get(floor);
-    if (color) {
-      const colorMap = Floor.points.get(color);
-      if (colorMap) {
-        colorMap.delete(floor);
-        Floor.cachedPath.delete(color);
-      }
-      Floor.floorToColor.delete(floor);
+  static removeFloor(floor: Floor) {
+    const color = this.floorToColor.get(floor);
+    if (!color) return;
+    this.floorToColor.delete(floor);
+    const rbush = this.rbushes.get(color);
+    if (!rbush) return;
+    rbush.remove(floor);
+
+    const cluster = rbush.itemToCluster.get(floor);
+    if (cluster) {
+      const clusterCache = this.clusterPathCache.get(color);
+      clusterCache?.delete(cluster);
     }
   }
 
@@ -56,27 +53,24 @@ export class Floor extends PolyObject<typeof FloorSchema> {
 
   constructor(options: z.input<typeof FloorSchema>) {
     super(options);
-    this.onAny(() => {
+    this.onAny((key) => {
       if (this.dragging) return;
-      this.setPoints();
+      Floor.removeFloor(this);
+      Floor.addFloor(this);
     });
-    this.setPoints();
+    Floor.addFloor(this);
   }
 
   override startDragging(): void {
     super.startDragging();
-    Floor.removePoints(this);
+    Floor.removeFloor(this);
     Floor.draggingFloors.add(this);
   }
 
   override stopDragging(): void {
     super.stopDragging();
-    this.setPoints();
+    Floor.addFloor(this);
     Floor.draggingFloors.delete(this);
-  }
-
-  setPoints() {
-    Floor.setPoints(this.data.floorColor, this, this.getPoints());
   }
 
   override getPathInfo(): PathInfo {
@@ -105,7 +99,7 @@ export class Floor extends PolyObject<typeof FloorSchema> {
 
   override delete(fromLevel?: boolean): void {
     super.delete(fromLevel);
-    Floor.removePoints(this);
+    Floor.removeFloor(this);
   }
 
   static override *staticRender(info: RenderInfo): Iterable<RenderPass> {
@@ -113,27 +107,46 @@ export class Floor extends PolyObject<typeof FloorSchema> {
       yield* floor.renderDragging(info);
     }
 
-    for (const [color, colorMap] of Floor.points) {
-      let path = Floor.cachedPath.get(color);
-      if (!path) {
-        const allPoints = Array.from(colorMap.values());
-        const union = unionPolygons(allPoints);
-        path = new Path2D();
-        for (const p of union) {
-          for (const polygon of p) {
-            if (polygon.length < 3) continue;
-            path.moveTo(polygon[0]!.x, polygon[0]!.y);
-            for (let i = 1; i < polygon.length; i++) {
-              path.lineTo(polygon[i]!.x, polygon[i]!.y);
-            }
-            path.closePath();
-          }
+    for (const [color, rbush] of this.rbushes) {
+      const clusterCache = this.clusterPathCache.getOrInsertComputed(color, () => new Map());
+
+      const clusters = rbush.clusters;
+
+      // Remove any clusters that no longer exist
+      for (const cachedCluster of clusterCache.keys()) {
+        if (!clusters.has(cachedCluster)) {
+          clusterCache.delete(cachedCluster);
         }
-        Floor.cachedPath.set(color, path);
       }
+
+      for (const cluster of clusters) {
+        let path = clusterCache.get(cluster);
+        if (!path) {
+          const polygons = Array.from(cluster.items, (floor) => floor.getPoints());
+          const union = unionPolygons(polygons);
+          path = new Path2D();
+          for (const polygon of union) {
+            for (const points of polygon) {
+              if (points.length < 3) continue;
+              path.moveTo(points[0]!.x, points[0]!.y);
+              for (let i = 1; i < points.length; i++) {
+                path.lineTo(points[i]!.x, points[i]!.y);
+              }
+              path.closePath();
+            }
+          }
+          clusterCache.set(cluster, path);
+        }
+      }
+
       yield pass(LAYERS.FLOOR, (ctx) => {
         ctx.fillStyle = color;
-        ctx.fill(path);
+        for (const cluster of rbush.searchCluster(info.visibleArea)) {
+          const path = clusterCache.get(cluster);
+          if (path) {
+            ctx.fill(path);
+          }
+        }
       });
     }
   }

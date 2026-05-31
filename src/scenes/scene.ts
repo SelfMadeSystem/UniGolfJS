@@ -1,4 +1,4 @@
-import type { RenderInfo } from "@/render/drawable";
+import type { CanvasRenderInfo, RenderInfo } from "@/render/drawable";
 import type { PointerEventHandler, PointerInfo } from "@/render/pointerEvents";
 
 export abstract class Scene implements PointerEventHandler {
@@ -20,7 +20,7 @@ export abstract class Scene implements PointerEventHandler {
 
   tick(): void {}
 
-  render(info: RenderInfo, ctx: CanvasRenderingContext2D): void {}
+  render(info: CanvasRenderInfo, ctx: CanvasRenderingContext2D): void {}
 
   dispose(): void {}
 }

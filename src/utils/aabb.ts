@@ -34,6 +34,22 @@ export class AABB {
     return this.br.x;
   }
 
+  get minX() {
+    return this.left;
+  }
+
+  get minY() {
+    return this.top;
+  }
+
+  get maxX() {
+    return this.right;
+  }
+
+  get maxY() {
+    return this.bottom;
+  }
+
   get width() {
     return this.right - this.left;
   }

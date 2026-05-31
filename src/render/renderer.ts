@@ -1,5 +1,5 @@
 import { $scene, getLevelScene } from "@/scenes/state";
-import type { RenderInfo } from "./drawable";
+import type { CanvasRenderInfo, RenderInfo } from "./drawable";
 import { Vector2 } from "@/utils/vec";
 import { atom } from "nanostores";
 import type { PointerInfo } from "./pointerEvents";
@@ -14,7 +14,7 @@ export class Renderer {
   private tickAccumulator: number = 0;
   private tickCount: number = 0;
   private readonly stopCbs: (() => void)[] = [];
-  public lastRenderInfo: RenderInfo | null = null;
+  public lastRenderInfo: CanvasRenderInfo | null = null;
 
   constructor(public readonly canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d")!;
@@ -41,7 +41,7 @@ export class Renderer {
       }
 
       const tickInterp = this.tickAccumulator / this.tickInterval;
-      const renderInfo: RenderInfo = {
+      const renderInfo: CanvasRenderInfo = {
         delta,
         tickInterp,
         tick: this.tickCount,
@@ -110,7 +110,7 @@ export class Renderer {
     this.stopCbs.length = 0;
   }
 
-  render(info: RenderInfo) {
+  render(info: CanvasRenderInfo) {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     this.ctx.save();
     this.ctx.translate(this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);

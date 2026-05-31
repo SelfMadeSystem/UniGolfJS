@@ -1,13 +1,19 @@
+import type { AABB } from "@/utils/aabb";
+
 export type RenderPass = {
   layer: number;
   draw: (ctx: CanvasRenderingContext2D) => void;
 };
 
-export type RenderInfo = {
+export type CanvasRenderInfo = {
   delta: number;
   tickInterp: number;
   tick: number;
   tickWithInterp: number;
+};
+
+export type RenderInfo = CanvasRenderInfo & {
+  visibleArea: AABB;
 };
 
 export interface Drawable {
