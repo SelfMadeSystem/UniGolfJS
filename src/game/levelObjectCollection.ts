@@ -85,6 +85,7 @@ export class LevelObjectCollection implements Iterable<T> {
     this.items.splice(index, 1);
     this.byId.delete(object.id);
     this.spatialGrid.remove(object);
+    this.renderSpatialGrid.remove(object);
     this.unregisterByType(object);
     return true;
   }
@@ -108,6 +109,8 @@ export class LevelObjectCollection implements Iterable<T> {
     this.items.length = 0;
     this.byId.clear();
     this.byType.clear();
+    this.spatialGrid.clear();
+    this.renderSpatialGrid.clear();
   }
 
   toArray(): T[] {

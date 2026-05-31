@@ -266,4 +266,9 @@ export class SpatialHashGrid<T extends LevelObject<any>> {
     }
     return results;
   }
+
+  clear(): void {
+    this.grid.clear();
+    this.itemToCells.clear();
+  }
 }
