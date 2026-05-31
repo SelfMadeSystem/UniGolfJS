@@ -80,6 +80,7 @@ export class Water extends PolyObject<typeof WaterSchema> {
       yield pass(LAYERS.WALL_SHADOW, (ctx) => {
         ctx.strokeStyle = shadowColor;
         ctx.lineWidth = WALL_CONFIG.shadow;
+        ctx.lineJoin = "round";
         ctx.stroke(path);
       });
       clipPath.addPath(path);
@@ -99,6 +100,7 @@ export class Water extends PolyObject<typeof WaterSchema> {
         yield pass(LAYERS.WALL_SHADOW, (ctx) => {
           ctx.strokeStyle = shadowColor;
           ctx.lineWidth = WALL_CONFIG.shadow;
+          ctx.lineJoin = "round";
           ctx.stroke(path);
         });
         clipPath.addPath(path);
