@@ -14,9 +14,9 @@ export class EditorGrid implements Drawable {
       ctx.save();
       ctx.strokeStyle = "#FFFFFF";
       ctx.lineWidth = 0.5;
-      const aabb = this.scene.getVisibleAABB();
-      const startX = Math.floor(aabb.left / this.gridSize) * this.gridSize;
-      const startY = Math.floor(aabb.top / this.gridSize) * this.gridSize;
+      const aabb = this.scene.getVisibleAABB().expand(this.scene.cameraZoom * ctx.lineWidth);
+      const startX = Math.ceil(aabb.left / this.gridSize) * this.gridSize;
+      const startY = Math.ceil(aabb.top / this.gridSize) * this.gridSize;
       for (let x = startX; x < aabb.right; x += this.gridSize) {
         ctx.beginPath();
         ctx.moveTo(x, aabb.top);
