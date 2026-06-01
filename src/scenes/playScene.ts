@@ -2,6 +2,7 @@ import { LevelScene } from "./levelScene";
 import { RigidBody } from "@/game/objects/rigidBody";
 import { stepPhysics } from "@/game/physics";
 import { PlayMenu } from "@/ui/PlayMenu";
+import { markFpsTick } from "@/stores/fpsChart";
 
 export class PlayScene extends LevelScene {
   override get playing() {
@@ -17,6 +18,7 @@ export class PlayScene extends LevelScene {
       obj.tick();
     }
     stepPhysics(this);
+    markFpsTick();
 
     super.tick();
   }
