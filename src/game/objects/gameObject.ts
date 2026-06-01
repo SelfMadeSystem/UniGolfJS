@@ -45,11 +45,19 @@ export abstract class GameObject<
     return this.data.id;
   }
 
-  public pos: Vector2;
+  protected _pos: Vector2;
+
+  get pos(): Vector2 {
+    return this._pos;
+  }
+
+  set pos(value: Vector2) {
+    this._pos = value;
+  }
 
   constructor(options: z.input<typeof GameObjectSchema>) {
     this.data = this.schema.parse(options);
-    this.pos = this.data.position;
+    this._pos = this.data.position;
   }
 
   on<K extends SchemaKeys | "position">(
@@ -117,7 +125,7 @@ export abstract class GameObject<
    * If `sceneReset` is true, also resets any scene-level state related to this object.
    */
   reset(sceneReset = false, scene?: LevelScene): void {
-    this.pos = this.data.position;
+    this._pos = this.data.position;
   }
 
   hasRender(): boolean {

@@ -11,6 +11,7 @@ import {
   serializeLevelObject,
 } from "../levelObjectRegistry";
 import { nanoid } from "nanoid";
+import type { LevelScene } from "@/scenes/levelScene";
 
 export const LevelObjectSchema = GameObjectSchema.extend({});
 
@@ -33,6 +34,16 @@ export abstract class LevelObject<
   static override schema = LevelObjectSchema;
   protected dragging: boolean = false;
   protected aabbListeners: Set<() => void> = new Set();
+
+  public override get pos(): Vector2 {
+    return this._pos;
+  }
+
+  public override set pos(value: Vector2) {
+    if (this._pos.equals(value)) return;
+    this._pos = value;
+    this.emitAabbChange();
+  }
 
   constructor(options: z.input<SchemaType>) {
     super(options);
@@ -243,4 +254,9 @@ export abstract class LevelObject<
    * Rotates the object's shape clockwise by 90 degrees. The object's AABB should be the same after this operation.
    */
   editorRotateShapeCW(): void {}
+
+  override reset(sceneReset?: boolean, scene?: LevelScene): void {
+    super.reset(sceneReset, scene);
+    this.emitAabbChange();
+  }
 }

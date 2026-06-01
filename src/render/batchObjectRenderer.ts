@@ -1,11 +1,11 @@
 import { unionPolygons } from "@/utils/shapeUtils";
-import { MyRBush, type Cluster } from "@/utils/spatialUtils";
+import { ClusteredRBush, type Cluster } from "@/utils/spatialUtils";
 import type { PolyObject } from "@/game/objects/polyObject";
 import type { AABB } from "@/utils/aabb";
 import type { Vector2 } from "@/utils/vec";
 
 export class BatchObjectRenderer<T extends PolyObject<any>> {
-  public rbushes: Map<string, MyRBush<T>> = new Map();
+  public rbushes: Map<string, ClusteredRBush<T>> = new Map();
   public clusterPathCache: Map<string, Map<Cluster<T>, [Path2D, Vector2[][]]>> =
     new Map();
   public objToColor: Map<T, string> = new Map();
@@ -14,7 +14,10 @@ export class BatchObjectRenderer<T extends PolyObject<any>> {
 
   public addObject(obj: T) {
     const color = this.colorFunc(obj);
-    const rbush = this.rbushes.getOrInsertComputed(color, () => new MyRBush());
+    const rbush = this.rbushes.getOrInsertComputed(
+      color,
+      () => new ClusteredRBush(),
+    );
     rbush.insert(obj);
     this.objToColor.set(obj, color);
 
@@ -64,7 +67,7 @@ export class BatchObjectRenderer<T extends PolyObject<any>> {
 }
 
 function* getPathsImpl<T extends PolyObject<any>>(
-  rbush: MyRBush<T>,
+  rbush: ClusteredRBush<T>,
   viewport: AABB,
   clusterCache: Map<Cluster<T>, [Path2D, Vector2[][]]>,
 ): Iterable<[Path2D, Vector2[][]]> {

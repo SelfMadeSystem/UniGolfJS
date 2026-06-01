@@ -7,6 +7,7 @@ import type { LevelScene } from "@/scenes/levelScene";
 export type SimpleCollision = {
   normal: Vector2;
   step: number;
+  overlap?: number;
 };
 
 export type RigidBodyInfo = {
@@ -25,9 +26,13 @@ export function rigidBodyCollision(
   const radiusSum = rba.radius + rbb.radius;
 
   // Check if the circles are already overlapping
-  if (relPos.length() < radiusSum) {
-    console.warn("Warning: Objects are already overlapping.");
-    return null;
+  const relPosLenSq = relPos.lenSq();
+  if (relPosLenSq + 0.001 < radiusSum * radiusSum) {
+    const relPosLen = Math.sqrt(relPosLenSq);
+    const normal = relPos.div(relPosLen);
+    const overlap = radiusSum - relPosLen;
+    console.warn(`Overlap: ${overlap}`);
+    return { normal, step: 0, overlap };
   }
 
   // Check if the circles are moving towards each other
@@ -220,7 +225,20 @@ export function getCollision(
 
 export function resolveCollision(collision: ObjectCollision): void {
   if (collision.kind === "rigid") {
-    const { objectA, objectB, normal } = collision;
+    const { objectA, objectB, normal, overlap } = collision;
+
+    if (overlap) {
+      // Separate the objects to resolve overlap
+      const totalRadius = objectA.radius + objectB.radius;
+      const separationA = normal.mult((overlap * objectB.radius) / totalRadius);
+      const separationB = normal.mult(
+        (-overlap * objectA.radius) / totalRadius,
+      );
+      objectA.pos = objectA.pos.add(separationA);
+      objectB.pos = objectB.pos.add(separationB);
+      return;
+    }
+
     const relativeVelocity = objectB.velocity.sub(objectA.velocity);
     const velAlongNormal = relativeVelocity.dot(normal);
     if (velAlongNormal > 0) return;
@@ -249,7 +267,7 @@ export function stepPhysics(level: LevelScene): void {
     let earliestCollision: ObjectCollision | null = null;
 
     for (const obj of level.objects) {
-      if (obj instanceof RigidBody) {
+      if (obj instanceof RigidBody && obj.velocity.lenSq() > 0) {
         const collision = getCollision(obj, level);
         if (
           collision &&
@@ -275,7 +293,7 @@ export function stepPhysics(level: LevelScene): void {
     const step = earliestCollision.step;
     for (const obj of level.objects) {
       if (obj instanceof RigidBody) {
-        obj.pos = obj.pos.add(obj.velocity.mult(step));
+        obj.set("pos", obj.pos.add(obj.velocity.mult(step)));
       }
     }
 
@@ -285,7 +303,9 @@ export function stepPhysics(level: LevelScene): void {
     timeRemaining -= step;
     iteration++;
     if (iteration > 10) {
-      console.warn("Too many collision iterations, breaking out to prevent infinite loop");
+      console.warn(
+        "Too many collision iterations, breaking out to prevent infinite loop",
+      );
       break;
     }
   }

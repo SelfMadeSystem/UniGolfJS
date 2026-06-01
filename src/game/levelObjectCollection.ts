@@ -1,5 +1,5 @@
 import type { Drawable } from "@/render/drawable";
-import { SpatialHashGrid } from "@/utils/spatialUtils";
+import { LevelObjectRBush } from "@/utils/spatialUtils";
 import type { LevelObject } from "./objects/levelObject";
 import type { AABB } from "@/utils/aabb";
 
@@ -16,8 +16,8 @@ export class LevelObjectCollection implements Iterable<T> {
   private readonly items: T[] = [];
   private readonly byId = new Map<string, T>();
   private readonly byType = new Map<tT, Set<T>>();
-  private readonly spatialGrid = new SpatialHashGrid<T>(100);
-  private readonly renderSpatialGrid = new SpatialHashGrid<T>(100);
+  private readonly spatialGrid = new LevelObjectRBush<T>();
+  private readonly renderSpatialGrid = new LevelObjectRBush<T>();
 
   constructor(objects: Iterable<T> = []) {
     this.replace(objects);
@@ -32,7 +32,7 @@ export class LevelObjectCollection implements Iterable<T> {
   }
 
   drawableObjects(aabb: AABB): Iterable<T> {
-    return this.renderSpatialGrid.query(aabb);
+    return this.renderSpatialGrid.search(aabb);
   }
 
   drawableStatic(): Iterable<Drawable> {
@@ -53,6 +53,12 @@ export class LevelObjectCollection implements Iterable<T> {
       throw new Error(`Duplicate game object id: ${object.id}`);
     }
 
+    object.onAabbChange(() => {
+      this.spatialGrid.update(object);
+      if (object.hasRender()) {
+        this.renderSpatialGrid.update(object);
+      }
+    });
     this.items.push(object);
     this.byId.set(object.id, object);
     this.spatialGrid.insert(object);
@@ -101,8 +107,8 @@ export class LevelObjectCollection implements Iterable<T> {
     }
   }
 
-  queryByAABB(aabb: AABB): Set<T> {
-    return this.spatialGrid.query(aabb);
+  queryByAABB(aabb: AABB): Iterable<T> {
+    return this.spatialGrid.search(aabb);
   }
 
   clear(): void {
