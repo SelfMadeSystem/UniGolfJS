@@ -1,5 +1,6 @@
 import { LevelScene } from "./levelScene";
 import { RigidBody } from "@/game/objects/rigidBody";
+import { stepPhysics } from "@/game/physics";
 import { PlayMenu } from "@/ui/PlayMenu";
 
 export class PlayScene extends LevelScene {
@@ -12,10 +13,10 @@ export class PlayScene extends LevelScene {
   }
 
   override tick(): void {
-    RigidBody.beginFrame();
     for (const obj of this.objects) {
       obj.tick();
     }
+    stepPhysics(this);
 
     super.tick();
   }

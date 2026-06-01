@@ -32,16 +32,9 @@ export abstract class RigidBody<
   SchemaType extends typeof RigidBodySchema = typeof RigidBodySchema,
 > extends LevelObject<SchemaType> {
   static override schema = RigidBodySchema;
-  private static nextRigidBodyId = 1;
-  private static resolvedPairsThisFrame = new Set<string>();
-
-  static beginFrame(): void {
-    this.resolvedPairsThisFrame.clear();
-  }
 
   public prevPos: Vector2;
   public velocity: Vector2;
-  private readonly rigidBodyId: number;
   protected constraint: Constraint | null = null;
   public inWater = false;
   protected waterAnimation = 0;
@@ -50,7 +43,6 @@ export abstract class RigidBody<
     super(options);
     this.velocity = this.data.velocity;
     this.prevPos = this.pos;
-    this.rigidBodyId = RigidBody.nextRigidBodyId++;
     //@ts-expect-error abstract classes don't work well with generic schemas
     this.on("radius", () => {
       this.emitAabbChange();
@@ -61,8 +53,16 @@ export abstract class RigidBody<
     return this.data.radius;
   }
 
-  override getAABB(): AABB {
+  getBaseAABB(): AABB {
     return AABB.fromCenterSize(this.pos, [this.radius * 2, this.radius * 2]);
+  }
+
+  override getAABB(): AABB {
+    return this.getMovementAABB();
+  }
+
+  getMovementAABB(): AABB {
+    return this.getBaseAABB().expandVec(this.velocity);
   }
 
   override getPath(): Path2D {
@@ -77,10 +77,6 @@ export abstract class RigidBody<
 
   getConstraint(): Constraint | null {
     return this.constraint;
-  }
-
-  getMovementAABB(): AABB {
-    return this.getAABB().expandVec(this.velocity);
   }
 
   override isPointInside(point: Vector2): boolean {
@@ -104,7 +100,7 @@ export abstract class RigidBody<
       return;
     }
 
-    for (const obj of scene.objects) {
+    for (const obj of scene.objects.queryByAABB(this.getBaseAABB())) {
       if (
         obj instanceof PolyObject &&
         !obj.isSolid &&
@@ -119,23 +115,6 @@ export abstract class RigidBody<
 
     if (this.inWater) return;
 
-    const collision = RigidBody.getEarliestWallCollision(
-      scene,
-      this.pos,
-      this.radius,
-      this.velocity,
-    );
-
-    if (collision) {
-      const modifiedCollision = collision.object.onCollision(this, collision);
-      this.pos = collision.hit;
-      this.velocity = modifiedCollision.velocity;
-    } else {
-      this.pos = this.pos.add(this.velocity);
-    }
-
-    this.resolveRigidBodyCollisions(scene);
-
     this.resolveConstraint();
 
     this.velocity = this.velocity.mult(DRAG_COEFFICIENT);
@@ -146,80 +125,6 @@ export abstract class RigidBody<
       );
     } else {
       this.velocity = this.velocity.mult(1 - FRICTION_FORCE);
-    }
-  }
-
-  private resolveRigidBodyCollisions(scene: LevelScene): void {
-    const myRadius = this.radius;
-    const myInvMass = 1 / this.data.mass;
-
-    const constraint = this.getConstraint();
-
-    for (const obj of scene.objects) {
-      if (!(obj instanceof RigidBody) || obj === this) continue;
-      const otherConstraint = obj.getConstraint();
-
-      if (obj.inWater) continue;
-
-      // Continue if constraints are different
-      if (
-        !constraint !== !otherConstraint ||
-        (constraint &&
-          otherConstraint &&
-          (constraint.pos !== otherConstraint.pos ||
-            constraint.radius !== otherConstraint.radius))
-      )
-        continue;
-
-      const pairKey =
-        this.rigidBodyId < obj.rigidBodyId
-          ? `${this.rigidBodyId}:${obj.rigidBodyId}`
-          : `${obj.rigidBodyId}:${this.rigidBodyId}`;
-      if (RigidBody.resolvedPairsThisFrame.has(pairKey)) continue;
-      RigidBody.resolvedPairsThisFrame.add(pairKey);
-
-      const otherRadius = obj.radius;
-      const delta = obj.pos.sub(this.pos);
-      const distSq = delta.lenSq();
-      const minDist = myRadius + otherRadius;
-      const minDistSq = minDist * minDist;
-
-      if (distSq >= minDistSq) continue;
-
-      const dist = Math.sqrt(distSq);
-      const normal = dist === 0 ? new Vector2(1, 0) : delta.div(dist);
-
-      // Separate circles so they are no longer overlapping.
-      const otherInvMass = 1 / obj.data.mass;
-      const invMassSum = myInvMass + otherInvMass;
-      const penetration = minDist - dist;
-      const correction = normal.mult(penetration / invMassSum);
-      const thisDelta = correction.mult(-myInvMass);
-      const otherDelta = correction.mult(otherInvMass);
-      this.pos = RigidBody.sweepPositionAgainstWalls(
-        scene,
-        this.pos,
-        myRadius,
-        thisDelta,
-      );
-      obj.pos = RigidBody.sweepPositionAgainstWalls(
-        scene,
-        obj.pos,
-        otherRadius,
-        otherDelta,
-      );
-
-      // Apply an elastic impulse if circles are moving toward each other.
-      const relativeVelocity = obj.velocity.sub(this.velocity);
-      const velAlongNormal = relativeVelocity.dot(normal);
-      if (velAlongNormal > 0) continue;
-
-      const restitution = 1;
-      const impulseMagnitude =
-        (-(1 + restitution) * velAlongNormal) / invMassSum;
-      const impulse = normal.mult(impulseMagnitude);
-      this.velocity = this.velocity.sub(impulse.mult(myInvMass));
-      obj.velocity = obj.velocity.add(impulse.mult(otherInvMass));
     }
   }
 
@@ -251,50 +156,6 @@ export abstract class RigidBody<
     this.velocity = this.velocity
       .add(springForce)
       .mult(CONSTRAINED_DRAG_MULTIPLIER);
-  }
-
-  private static getEarliestWallCollision(
-    scene: LevelScene,
-    pos: Vector2,
-    radius: number,
-    velocity: Vector2,
-  ): CollisionInfo | null {
-    if (velocity.lenSq() === 0) return null;
-
-    const radiusVec = new Vector2(radius, radius);
-    const movementAABB = new AABB(
-      pos.sub(radiusVec),
-      pos.add(radiusVec),
-    ).expandVec(velocity);
-
-    const polys = scene.objects.filter(
-      (obj): obj is PolyObject =>
-        obj instanceof PolyObject &&
-        obj.isSolid &&
-        obj.getAABB().intersects(movementAABB),
-    );
-
-    let collision: CollisionInfo | null = null;
-    for (const poly of polys) {
-      const polyCollision = poly.getCollision(pos, radius, velocity);
-      if (!polyCollision) continue;
-      if (!collision || polyCollision.time < collision.time) {
-        collision = polyCollision;
-      }
-    }
-
-    return collision;
-  }
-
-  private static sweepPositionAgainstWalls(
-    scene: LevelScene,
-    pos: Vector2,
-    radius: number,
-    delta: Vector2,
-  ): Vector2 {
-    const collision = this.getEarliestWallCollision(scene, pos, radius, delta);
-    if (collision) return collision.hit;
-    return pos.add(delta);
   }
 
   override *render({ tickInterp }: RenderInfo): Iterable<RenderPass> {

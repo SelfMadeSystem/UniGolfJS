@@ -59,14 +59,12 @@ export class BouncyWall extends PolyObject<typeof BouncyWallSchema> {
 
   override onCollision(
     rigidBody: RigidBody,
-    collisionInfo: CollisionInfo,
-  ): { velocity: Vector2 } {
+  ) {
     if (rigidBody.velocity.length() === 0)
-      return { velocity: collisionInfo.newVelocity };
+      return;
 
     this.boostTime = BOOST_EFFECT_TIME;
-    const newVelocity = collisionInfo.newVelocity.setLength(this.data.speed);
-    return { velocity: newVelocity };
+    rigidBody.velocity = rigidBody.velocity.setLength(this.data.speed);
   }
 }
 registerLevelObject("bouncyWall", BouncyWall);

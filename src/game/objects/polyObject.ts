@@ -145,7 +145,11 @@ export abstract class PolyObject<
   *polyRender(info: RenderInfo): Iterable<RenderPass> {
     const points = this.getPoints();
     const pathInfo = this.getPathInfo(info);
-    yield* PolyObject.renderPoints({ points, ...pathInfo, debug: this.data.debug });
+    yield* PolyObject.renderPoints({
+      points,
+      ...pathInfo,
+      debug: this.data.debug,
+    });
   }
 
   getCollision(
@@ -269,12 +273,7 @@ export abstract class PolyObject<
   /**
    * Called when a RigidBody collides with this PolyObject.
    */
-  onCollision(
-    rigidBody: RigidBody,
-    collisionInfo: CollisionInfo,
-  ): { velocity: Vector2 } {
-    return { velocity: collisionInfo.newVelocity };
-  }
+  onCollision(rigidBody: RigidBody) {}
 
   /**
    * Called when a RigidBody intersects with this PolyObject.
