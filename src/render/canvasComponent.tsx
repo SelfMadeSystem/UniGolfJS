@@ -41,6 +41,6 @@ export function CanvasComponent() {
   }, [canvas]);
 
   return (
-    <canvas ref={setCanvas} className="absolute inset-0 w-full h-full -z-10" />
+    <canvas ref={setCanvas} className="absolute inset-0 w-full h-full" />
   );
 }

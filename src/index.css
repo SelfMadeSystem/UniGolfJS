@@ -5,3 +5,7 @@
     @apply bg-[#85c486] text-gray-100 touch-none;
   }
 }
+
+#root {
+  @apply w-full h-screen overflow-hidden relative;
+}
