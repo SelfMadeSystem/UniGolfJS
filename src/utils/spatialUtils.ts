@@ -38,7 +38,14 @@ export class Cluster<T extends LevelObject<any>> {
 }
 
 export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
+  // cache the AABBs because otherwise, removing items from the RBush doesn't
+  // remove the old AABB if the item's position has changed since it was inserted
+  private readonly itemAabbCache: Map<T, BBox> = new Map();
+
   override toBBox(item: T): BBox {
+    if (this && this.itemAabbCache.has(item)) {
+      return this.itemAabbCache.get(item)!;
+    }
     return item.getAABB();
   }
 
@@ -50,13 +57,27 @@ export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
     return a.getAABB().minY - b.getAABB().minY;
   }
 
+  override insert(item: T): RBush<T> {
+    if (this.itemAabbCache.has(item)) {
+      console.warn("Inserting item that already exists in RBush:", item);
+    }
+    this.itemAabbCache.set(item, item.getAABB());
+    return super.insert(item);
+  }
+
+  override remove(item: T): RBush<T> {
+    const r = super.remove(item);
+    this.itemAabbCache.delete(item);
+    return r;
+  }
+
   update(item: T): void {
     this.remove(item);
     this.insert(item);
   }
 }
 
-export class ClusteredRBush<T extends LevelObject<any>> extends RBush<T> {
+export class ClusteredRBush<T extends LevelObject<any>> extends LevelObjectRBush<T> {
   public clusters: Set<Cluster<T>> = new Set();
   public itemToCluster: Map<T, Cluster<T>> = new Map();
 
@@ -161,17 +182,5 @@ export class ClusteredRBush<T extends LevelObject<any>> extends RBush<T> {
       }
     }
     return nearbyClusters;
-  }
-
-  override toBBox(item: T): BBox {
-    return item.getAABB();
-  }
-
-  override compareMinX(a: T, b: T): number {
-    return a.getAABB().minX - b.getAABB().minX;
-  }
-
-  override compareMinY(a: T, b: T): number {
-    return a.getAABB().minY - b.getAABB().minY;
   }
 }

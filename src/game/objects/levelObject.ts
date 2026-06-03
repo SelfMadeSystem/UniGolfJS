@@ -34,6 +34,7 @@ export abstract class LevelObject<
   static override schema = LevelObjectSchema;
   protected dragging: boolean = false;
   protected aabbListeners: Set<() => void> = new Set();
+  public deleted = false;
 
   public override get pos(): Vector2 {
     return this._pos;
@@ -220,6 +221,10 @@ export abstract class LevelObject<
   override delete(fromLevel = false): void {
     const scene = getLevelScene();
     if (!scene) return;
+    this.deleted = true;
+    this.aabbListeners.clear();
+    this.listeners.clear();
+    this.anyListeners.clear();
     if (fromLevel) {
       scene.removeObjectFromLevel(this);
     } else {

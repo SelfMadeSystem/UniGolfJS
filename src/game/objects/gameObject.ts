@@ -28,11 +28,11 @@ export abstract class GameObject<
   SchemaKeys extends GameObjectKey<SchemaType> = GameObjectKey<SchemaType>,
 > implements Drawable {
   static schema = GameObjectSchema;
-  private readonly listeners = new Map<
+  protected readonly listeners = new Map<
     GameObjectKey<SchemaType>,
     Set<(value: unknown) => void>
   >();
-  private readonly anyListeners = new Set<
+  protected readonly anyListeners = new Set<
     (key: string, value: unknown) => void
   >();
   protected data: z.infer<SchemaType>;
@@ -123,6 +123,7 @@ export abstract class GameObject<
   /**
    * Resets the object to its initial state.
    * If `sceneReset` is true, also resets any scene-level state related to this object.
+   * TODO: I don't think `sceneReset` is actually needed anymore
    */
   reset(sceneReset = false, scene?: LevelScene): void {
     this._pos = this.data.position;

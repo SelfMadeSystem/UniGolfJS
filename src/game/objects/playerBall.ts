@@ -46,4 +46,8 @@ export class PlayerBall extends Ball {
     tee.activate();
     tee.focusCamera();
   }
+
+  override reset() {
+    this.delete();
+  }
 }

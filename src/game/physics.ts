@@ -31,7 +31,7 @@ export function rigidBodyCollision(
     const relPosLen = Math.sqrt(relPosLenSq);
     const normal = relPos.div(relPosLen);
     const overlap = radiusSum - relPosLen;
-    console.warn(`Overlap: ${overlap}`);
+    // console.warn(`Overlap: ${overlap}`);
     return { normal, step: 0, overlap };
   }
 
@@ -293,7 +293,7 @@ export function stepPhysics(level: LevelScene): void {
     const step = earliestCollision.step;
     for (const obj of level.objects) {
       if (obj instanceof RigidBody) {
-        obj.set("pos", obj.pos.add(obj.velocity.mult(step)));
+        obj.pos = obj.pos.add(obj.velocity.mult(step));
       }
     }
 
@@ -303,9 +303,9 @@ export function stepPhysics(level: LevelScene): void {
     timeRemaining -= step;
     iteration++;
     if (iteration > 10) {
-      console.warn(
-        "Too many collision iterations, breaking out to prevent infinite loop",
-      );
+      // console.warn(
+      //   "Too many collision iterations, breaking out to prevent infinite loop",
+      // );
       break;
     }
   }

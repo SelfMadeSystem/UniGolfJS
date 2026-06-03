@@ -48,7 +48,7 @@ export class LevelObjectCollection implements Iterable<T> {
     }
   }
 
-  add(object: T): void {
+  add(object: T, batch = false): void {
     if (this.byId.has(object.id)) {
       throw new Error(`Duplicate game object id: ${object.id}`);
     }
@@ -61,11 +61,12 @@ export class LevelObjectCollection implements Iterable<T> {
     });
     this.items.push(object);
     this.byId.set(object.id, object);
+    this.registerByType(object);
+    if (batch) return;
     this.spatialGrid.insert(object);
     if (object.hasRender()) {
       this.renderSpatialGrid.insert(object);
     }
-    this.registerByType(object);
   }
 
   prepend(object: T): void {
@@ -105,6 +106,8 @@ export class LevelObjectCollection implements Iterable<T> {
     for (const object of objects) {
       this.add(object);
     }
+    this.spatialGrid.load([...objects]);
+    this.renderSpatialGrid.load([...objects].filter((obj) => obj.hasRender()));
   }
 
   queryByAABB(aabb: AABB): Iterable<T> {
