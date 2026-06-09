@@ -42,23 +42,26 @@ export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
   // remove the old AABB if the item's position has changed since it was inserted
   private readonly itemAabbCache: Map<T, BBox> = new Map();
 
+  constructor(maxEntries?: number) {
+    super(maxEntries);
+    this.toBBox = this.toBBox.bind(this);
+    this.compareMinX = this.compareMinX.bind(this);
+    this.compareMinY = this.compareMinY.bind(this);
+  }
+
   override toBBox(item: T): BBox {
-    if (this && this.itemAabbCache.has(item)) {
+    if (this.itemAabbCache.has(item)) {
       return this.itemAabbCache.get(item)!;
     }
     return item.getAABB();
   }
 
   override compareMinX(a: T, b: T): number {
-    return this
-      ? this.toBBox(a).minX - this.toBBox(b).minX
-      : a.getAABB().minX - b.getAABB().minX;
+    return this.toBBox(a).minX - this.toBBox(b).minX;
   }
 
   override compareMinY(a: T, b: T): number {
-    return this
-      ? this.toBBox(a).minY - this.toBBox(b).minY
-      : a.getAABB().minY - b.getAABB().minY;
+    return this.toBBox(a).minY - this.toBBox(b).minY;
   }
 
   override insert(item: T): RBush<T> {
