@@ -79,6 +79,20 @@ export abstract class RigidBody<
     return this.constraint;
   }
 
+  canCollide(other: RigidBody): boolean {
+    if (other.constraint === this.constraint) {
+      return true;
+    }
+    if (!other.constraint || !this.constraint) {
+      return false;
+    }
+
+    return (
+      other.constraint.radius === this.constraint.radius &&
+      other.constraint.pos.equals(this.constraint.pos)
+    );
+  }
+
   override isPointInside(point: Vector2): boolean {
     if (this.inWater) return false;
     const radius = this.radius;

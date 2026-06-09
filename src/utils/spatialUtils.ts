@@ -50,11 +50,15 @@ export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
   }
 
   override compareMinX(a: T, b: T): number {
-    return a.getAABB().minX - b.getAABB().minX;
+    return this
+      ? this.toBBox(a).minX - this.toBBox(b).minX
+      : a.getAABB().minX - b.getAABB().minX;
   }
 
   override compareMinY(a: T, b: T): number {
-    return a.getAABB().minY - b.getAABB().minY;
+    return this
+      ? this.toBBox(a).minY - this.toBBox(b).minY
+      : a.getAABB().minY - b.getAABB().minY;
   }
 
   override insert(item: T): RBush<T> {
@@ -71,13 +75,20 @@ export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
     return r;
   }
 
+  override clear(): RBush<T> {
+    this.itemAabbCache?.clear();
+    return super.clear();
+  }
+
   update(item: T): void {
     this.remove(item);
     this.insert(item);
   }
 }
 
-export class ClusteredRBush<T extends LevelObject<any>> extends LevelObjectRBush<T> {
+export class ClusteredRBush<
+  T extends LevelObject<any>,
+> extends LevelObjectRBush<T> {
   public clusters: Set<Cluster<T>> = new Set();
   public itemToCluster: Map<T, Cluster<T>> = new Map();
 

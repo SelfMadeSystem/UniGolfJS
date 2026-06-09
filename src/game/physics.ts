@@ -28,11 +28,12 @@ export function rigidBodyCollision(
   // Check if the circles are already overlapping
   const relPosLenSq = relPos.lenSq();
   if (relPosLenSq + 0.001 < radiusSum * radiusSum) {
-    const relPosLen = Math.sqrt(relPosLenSq);
-    const normal = relPos.div(relPosLen);
-    const overlap = radiusSum - relPosLen;
+    return null;
+    // const relPosLen = Math.sqrt(relPosLenSq);
+    // const normal = relPos.div(relPosLen);
+    // const overlap = radiusSum - relPosLen + 0.001;
     // console.warn(`Overlap: ${overlap}`);
-    return { normal, step: 0, overlap };
+    // return { normal, step: 0, overlap };
   }
 
   // Check if the circles are moving towards each other
@@ -193,7 +194,11 @@ export function getCollision(
 
     let collision: ObjectCollision | null = null;
     if (obj instanceof RigidBody) {
-      if (!body.getMovementAABB().intersects(obj.getMovementAABB())) continue;
+      if (
+        !body.canCollide(obj) ||
+        !body.getMovementAABB().intersects(obj.getMovementAABB())
+      )
+        continue;
       const infoB = {
         position: obj.pos,
         velocity: obj.velocity,
@@ -229,11 +234,9 @@ export function resolveCollision(collision: ObjectCollision): void {
 
     if (overlap) {
       // Separate the objects to resolve overlap
-      const totalRadius = objectA.radius + objectB.radius;
-      const separationA = normal.mult((overlap * objectB.radius) / totalRadius);
-      const separationB = normal.mult(
-        (-overlap * objectA.radius) / totalRadius,
-      );
+      // const totalRadius = objectA.radius + objectB.radius;
+      const separationA = normal.mult(overlap);
+      const separationB = normal.mult(-overlap);
       objectA.pos = objectA.pos.add(separationA);
       objectB.pos = objectB.pos.add(separationB);
       return;

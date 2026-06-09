@@ -1,8 +1,9 @@
+import type { BBox } from "rbush";
 import { clamp, mod, round } from "./mathUtils";
 
 export type VecLike = { x: number; y: number } | [number, number];
 
-export class Vector2 {
+export class Vector2 implements BBox {
   public readonly x: number;
   public readonly y: number;
 
@@ -25,6 +26,19 @@ export class Vector2 {
 
     this.x = args[0];
     this.y = args[1] ?? args[0];
+  }
+
+  get minX(): number {
+    return this.x;
+  }
+  get minY(): number {
+    return this.y;
+  }
+  get maxX(): number {
+    return this.x;
+  }
+  get maxY(): number {
+    return this.y;
   }
 
   get yx(): Vector2 {
