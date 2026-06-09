@@ -247,11 +247,11 @@ export function resolveCollision(collision: ObjectCollision): void {
     if (velAlongNormal > 0) return;
 
     const impulseMagnitude =
-      (-2 * velAlongNormal) / (1 / objectA.radius + 1 / objectB.radius);
+      (-2 * velAlongNormal) / (1 / objectA.totalMass + 1 / objectB.totalMass);
     const impulse = normal.mult(impulseMagnitude);
 
-    objectA.velocity = objectA.velocity.sub(impulse.div(objectA.radius));
-    objectB.velocity = objectB.velocity.add(impulse.div(objectB.radius));
+    objectA.velocity = objectA.velocity.sub(impulse.div(objectA.totalMass));
+    objectB.velocity = objectB.velocity.add(impulse.div(objectB.totalMass));
   } else if (collision.kind === "poly") {
     const { body, normal, object } = collision;
     const velAlongNormal = body.velocity.dot(normal);

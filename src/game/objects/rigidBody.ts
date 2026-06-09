@@ -53,6 +53,14 @@ export abstract class RigidBody<
     return this.data.radius;
   }
 
+  public get mass(): number {
+    return this.data.mass;
+  }
+
+  public get totalMass(): number {
+    return this.radius * this.mass;
+  }
+
   getBaseAABB(): AABB {
     return AABB.fromCenterSize(this.pos, [this.radius * 2, this.radius * 2]);
   }
