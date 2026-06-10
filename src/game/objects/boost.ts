@@ -83,7 +83,7 @@ export class Boost extends PolyObject<typeof BoostSchema> {
   }
 
   override onIntersects(rigidBody: RigidBody): void {
-    if (rigidBody.velocity.length() === 0) return;
+    if (rigidBody.velocity.lenSq() === 0) return;
 
     rigidBody.velocity = rigidBody.velocity.setLength(this.data.speed);
     this.boostTime = BOOST_EFFECT_TIME;

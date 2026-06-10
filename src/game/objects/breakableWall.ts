@@ -1,16 +1,16 @@
 import z from "zod";
 import { LAYERS, WALL_CONFIG } from "../levelConfig";
-import { PolyObject, PolyObjectSchema, type CollisionInfo } from "./polyObject";
+import { PolyObject, PolyObjectSchema } from "./polyObject";
 import type { PathInfo } from "./levelObject";
-import type { Vector2 } from "@/utils/vec";
 import type { RigidBody } from "./rigidBody";
 import type { RenderInfo, RenderPass } from "@/render/drawable";
-import { rgbSchema } from "@/utils/data";
+import { numberSchema, rgbSchema } from "@/utils/data";
 import { registerLevelObject } from "../levelObjectRegistry";
 
 export const WallSchema = PolyObjectSchema.extend({
   wallColor: rgbSchema.default("#388164"),
   wallOutlineColor: rgbSchema.default("#29694f"),
+  boost: numberSchema.default(0),
 });
 
 export class BreakableWall extends PolyObject<typeof WallSchema> {
@@ -47,12 +47,11 @@ export class BreakableWall extends PolyObject<typeof WallSchema> {
     return this.polyRender(info);
   }
 
-  override onCollision(
-    rigidBody: RigidBody,
-    collisionInfo: CollisionInfo,
-  ): { velocity: Vector2 } {
+  override onCollision(rigidBody: RigidBody) {
     this.broken = true;
-    return super.onCollision(rigidBody, collisionInfo);
+    if (this.data.boost === 0 || rigidBody.velocity.lenSq() === 0) return;
+
+    rigidBody.velocity = rigidBody.velocity.setLength(this.data.boost);
   }
 
   override reset(): void {
