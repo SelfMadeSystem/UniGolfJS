@@ -1,5 +1,5 @@
-import { $scene, getLevelScene } from "@/scenes/state";
-import type { CanvasRenderInfo, RenderInfo } from "./drawable";
+import { $scene } from "@/scenes/state";
+import type { CanvasRenderInfo } from "./drawable";
 import { Vector2 } from "@/utils/vec";
 import { atom } from "nanostores";
 import type { PointerInfo } from "./pointerEvents";
@@ -11,6 +11,7 @@ export class Renderer {
   private lastTime: number = 0;
   private requestId: number | null = null;
   private readonly tickInterval: number = 1000 / 30;
+  private readonly maxTicksAtOnce: number = 4;
   private tickAccumulator: number = 0;
   private tickCount: number = 0;
   private readonly stopCbs: (() => void)[] = [];
@@ -34,10 +35,16 @@ export class Renderer {
       this.lastTime = time;
       this.tickAccumulator += delta;
 
-      while (this.tickAccumulator >= this.tickInterval) {
+      if (this.tickAccumulator >= this.tickInterval * this.maxTicksAtOnce) {
         this.tick();
         this.tickCount++;
-        this.tickAccumulator -= this.tickInterval;
+        this.tickAccumulator = 0;
+      } else {
+        while (this.tickAccumulator >= this.tickInterval) {
+          this.tick();
+          this.tickCount++;
+          this.tickAccumulator -= this.tickInterval;
+        }
       }
 
       const tickInterp = this.tickAccumulator / this.tickInterval;
