@@ -86,6 +86,7 @@ export class LevelObjectCollection implements Iterable<T> {
   remove(object: T): boolean {
     const index = this.items.indexOf(object);
     if (index === -1) {
+      console.warn("Object not found:", object)
       return false;
     }
 
@@ -104,7 +105,7 @@ export class LevelObjectCollection implements Iterable<T> {
   replace(objects: Iterable<T>): void {
     this.clear();
     for (const object of objects) {
-      this.add(object);
+      this.add(object, true);
     }
     this.spatialGrid.load([...objects]);
     this.renderSpatialGrid.load([...objects].filter((obj) => obj.hasRender()));

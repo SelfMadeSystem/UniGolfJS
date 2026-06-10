@@ -64,6 +64,16 @@ export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
     return this.toBBox(a).minY - this.toBBox(b).minY;
   }
 
+  override load(items: readonly T[]): RBush<T> {
+    for (const item of items) {
+      if (this.itemAabbCache.has(item)) {
+        console.warn("Loading item that already exists in RBush:", item);
+      }
+      this.itemAabbCache.set(item, item.getAABB());
+    }
+    return super.load(items);
+  }
+
   override insert(item: T): RBush<T> {
     if (this.itemAabbCache.has(item)) {
       console.warn("Inserting item that already exists in RBush:", item);
