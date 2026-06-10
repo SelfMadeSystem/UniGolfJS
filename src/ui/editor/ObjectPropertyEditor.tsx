@@ -1,14 +1,14 @@
-import { useStore } from "@nanostores/react";
+import './fieldComponents';
+import { getSchemaComponent } from './schemaRegistry';
 import {
   $selectedObjects,
   setCopiedObjectProperties,
-} from "@/game/editor/state";
-import { getSchemaComponent } from "./schemaRegistry";
-import { LevelObject } from "@/game/objects/levelObject";
-import z from "zod";
-import { Vector2 } from "@/utils/vec";
-import { useCallback, useState, useSyncExternalStore } from "react";
-import "./fieldComponents";
+} from '@/game/editor/state';
+import { LevelObject } from '@/game/objects/levelObject';
+import { Vector2 } from '@/utils/vec';
+import { useStore } from '@nanostores/react';
+import { useCallback, useState, useSyncExternalStore } from 'react';
+import z from 'zod';
 
 export function ObjectPropertyEditor() {
   const selectedObjects = useStore($selectedObjects);
@@ -29,9 +29,9 @@ function SingleObjectPropertyEditor({ object }: { object: LevelObject }) {
 
   const copySelectedFields = useCallback(() => {
     const entries = selectedFields
-      .filter((fieldKey) => fieldKey in shape)
+      .filter(fieldKey => fieldKey in shape)
       .map(
-        (fieldKey) =>
+        fieldKey =>
           [fieldKey, clonePropertyValue(object.get(fieldKey as any))] as const,
       );
 
@@ -45,8 +45,8 @@ function SingleObjectPropertyEditor({ object }: { object: LevelObject }) {
       <div className="flex items-center justify-between gap-2">
         <div className="text-gray-400">
           {selectedFields.length === 0
-            ? "No fields selected"
-            : `${selectedFields.length} field${selectedFields.length === 1 ? "" : "s"} selected`}
+            ? 'No fields selected'
+            : `${selectedFields.length} field${selectedFields.length === 1 ? '' : 's'} selected`}
         </div>
         <button
           className="rounded bg-blue-600 px-2 py-1 text-white disabled:cursor-not-allowed disabled:bg-gray-700"
@@ -66,10 +66,10 @@ function SingleObjectPropertyEditor({ object }: { object: LevelObject }) {
             object={object}
             selected={selectedFields.includes(key)}
             onToggleSelected={() => {
-              if (key === "id") return;
-              setSelectedFields((current) =>
+              if (key === 'id') return;
+              setSelectedFields(current =>
                 current.includes(key)
-                  ? current.filter((fieldKey) => fieldKey !== key)
+                  ? current.filter(fieldKey => fieldKey !== key)
                   : [...current, key],
               );
             }}
@@ -85,7 +85,7 @@ function clonePropertyValue<T>(value: T): T {
     return value.clone() as T;
   }
 
-  if (value && typeof value === "object") {
+  if (value && typeof value === 'object') {
     return structuredClone(value);
   }
 
@@ -94,7 +94,7 @@ function clonePropertyValue<T>(value: T): T {
 
 function useObjectData(object: LevelObject, fieldKey: string) {
   return useSyncExternalStore(
-    (callback) => {
+    callback => {
       const onChange = () => callback();
       const off = object.on(fieldKey as any, onChange);
       return () => off();
@@ -130,29 +130,29 @@ function PropertyField({
   );
 
   const copyId = useCallback(async () => {
-    const text = String(value ?? "");
+    const text = String(value ?? '');
 
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text);
       return;
     }
 
-    const textArea = document.createElement("textarea");
+    const textArea = document.createElement('textarea');
     textArea.value = text;
-    textArea.style.position = "fixed";
-    textArea.style.opacity = "0";
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
-    document.execCommand("copy");
+    document.execCommand('copy');
     textArea.remove();
   }, [value]);
 
-  if (fieldKey === "id") {
+  if (fieldKey === 'id') {
     return (
       <button
         type="button"
-        className="cursor-pointer rounded px-1 py-0.5 text-left italic text-gray-500 transition hover:bg-gray-800 hover:text-gray-300"
+        className="cursor-pointer rounded px-1 py-0.5 text-left text-gray-500 italic transition hover:bg-gray-800 hover:text-gray-300"
         onClick={() => {
           void copyId();
         }}

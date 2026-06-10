@@ -1,15 +1,15 @@
-import z from "zod";
-import { Vector2 } from "@/utils/vec";
-import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { positiveNumberSchema, Vec2Schema } from "@/utils/data";
-import { getLevelScene } from "@/scenes/state";
-import { LevelScene } from "@/scenes/levelScene";
-import { PolyObject, type CollisionInfo } from "./polyObject";
-import { AABB } from "@/utils/aabb";
-import { LAYERS } from "../levelConfig";
-import { CircleObject } from "./circleObject";
-import { lerp } from "@/utils/mathUtils";
+import { LAYERS } from '../levelConfig';
+import { CircleObject } from './circleObject';
+import { LevelObject, LevelObjectSchema, type PathInfo } from './levelObject';
+import { type CollisionInfo, PolyObject } from './polyObject';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import { LevelScene } from '@/scenes/levelScene';
+import { getLevelScene } from '@/scenes/state';
+import { AABB } from '@/utils/aabb';
+import { Vec2Schema, positiveNumberSchema } from '@/utils/data';
+import { lerp } from '@/utils/mathUtils';
+import { Vector2 } from '@/utils/vec';
+import z from 'zod';
 
 export const RigidBodySchema = LevelObjectSchema.extend({
   radius: positiveNumberSchema.default(12.5),
@@ -44,7 +44,7 @@ export abstract class RigidBody<
     this.velocity = this.data.velocity;
     this.prevPos = this.pos;
     //@ts-expect-error abstract classes don't work well with generic schemas
-    this.on("radius", () => {
+    this.on('radius', () => {
       this.emitAabbChange();
     });
   }
@@ -225,8 +225,8 @@ export abstract class RigidBody<
     });
 
     if (this.data.debug) {
-      yield pass(LAYERS.DEBUG, (ctx) => {
-        ctx.strokeStyle = "#f00";
+      yield pass(LAYERS.DEBUG, ctx => {
+        ctx.strokeStyle = '#f00';
         ctx.lineWidth = 0.5;
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
@@ -246,6 +246,6 @@ export abstract class RigidBody<
 
   override editorScale(scale: Vector2): void {
     // @ts-expect-error abstract classes don't work well with generic schemas
-    this.set("radius", (this.radius * (scale.x + scale.y)) / 2);
+    this.set('radius', (this.radius * (scale.x + scale.y)) / 2);
   }
 }

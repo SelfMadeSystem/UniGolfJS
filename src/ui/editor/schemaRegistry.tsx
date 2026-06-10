@@ -1,5 +1,5 @@
-import type { ComponentType } from "react";
-import z from "zod";
+import type { ComponentType } from 'react';
+import z from 'zod';
 
 export type FieldComponentProps<T = any> = {
   value: T;

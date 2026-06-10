@@ -1,4 +1,4 @@
-import { atom } from "nanostores";
+import { atom } from 'nanostores';
 
 export const $fpsTickCounter = atom(0);
 

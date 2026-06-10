@@ -1,5 +1,5 @@
-import z from "zod";
-import type { LevelObject } from "./objects/levelObject";
+import type { LevelObject } from './objects/levelObject';
+import z from 'zod';
 
 export const levelObjectRegistry: Map<string, typeof LevelObject<any>> =
   new Map();

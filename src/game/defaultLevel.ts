@@ -1,8 +1,8 @@
-import { Vector2 } from "@/utils/vec";
-import { defaultLevelConfig, type Level } from "./levelConfig";
-import { Wall } from "./objects/wall";
-import { Tee } from "./objects/tee";
-import { Hole } from "./objects/hole";
+import { type Level, defaultLevelConfig } from './levelConfig';
+import { Hole } from './objects/hole';
+import { Tee } from './objects/tee';
+import { Wall } from './objects/wall';
+import { Vector2 } from '@/utils/vec';
 
 const width = 400;
 const height = 600;

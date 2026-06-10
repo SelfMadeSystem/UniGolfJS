@@ -1,4 +1,4 @@
-import { Vector2 } from "./vec";
+import { Vector2 } from './vec';
 
 /**
  * Represents an infinite line defined by two points

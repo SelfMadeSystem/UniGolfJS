@@ -1,6 +1,6 @@
-import { pass, type Drawable } from "@/render/drawable";
-import { LAYERS } from "../levelConfig";
-import type { EditScene } from "@/scenes/editScene";
+import { LAYERS } from '../levelConfig';
+import { type Drawable, pass } from '@/render/drawable';
+import type { EditScene } from '@/scenes/editScene';
 
 export class EditorGrid implements Drawable {
   constructor(
@@ -10,11 +10,13 @@ export class EditorGrid implements Drawable {
 
   *render() {
     if (this.gridSize <= 1) return;
-    yield pass(LAYERS.FLOOR, (ctx) => {
+    yield pass(LAYERS.FLOOR, ctx => {
       ctx.save();
-      ctx.strokeStyle = "#FFFFFF";
+      ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 0.5;
-      const aabb = this.scene.getVisibleAABB().expand(this.scene.cameraZoom * ctx.lineWidth);
+      const aabb = this.scene
+        .getVisibleAABB()
+        .expand(this.scene.cameraZoom * ctx.lineWidth);
       const startX = Math.ceil(aabb.left / this.gridSize) * this.gridSize;
       const startY = Math.ceil(aabb.top / this.gridSize) * this.gridSize;
       for (let x = startX; x < aabb.right; x += this.gridSize) {

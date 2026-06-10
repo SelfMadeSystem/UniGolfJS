@@ -1,14 +1,14 @@
-import z from "zod";
-import { LAYERS, WALL_CONFIG } from "../levelConfig";
-import { PolyObject, PolyObjectSchema } from "./polyObject";
-import type { PathInfo } from "./levelObject";
-import { rgbSchema } from "@/utils/data";
-import { registerLevelObject } from "../levelObjectRegistry";
-import type { RenderInfo, RenderPass } from "@/render/drawable";
+import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { registerLevelObject } from '../levelObjectRegistry';
+import type { PathInfo } from './levelObject';
+import { PolyObject, PolyObjectSchema } from './polyObject';
+import type { RenderInfo, RenderPass } from '@/render/drawable';
+import { rgbSchema } from '@/utils/data';
+import z from 'zod';
 
 export const WallSchema = PolyObjectSchema.extend({
-  wallColor: rgbSchema.default("#388164"),
-  wallOutlineColor: rgbSchema.default("#29694f"),
+  wallColor: rgbSchema.default('#388164'),
+  wallOutlineColor: rgbSchema.default('#29694f'),
 });
 
 export class Wall extends PolyObject<typeof WallSchema> {
@@ -19,7 +19,7 @@ export class Wall extends PolyObject<typeof WallSchema> {
   }
 
   override render(info: RenderInfo): Iterable<RenderPass> {
-      return this.polyRender(info);
+    return this.polyRender(info);
   }
 
   override getPathInfo(): PathInfo {
@@ -37,4 +37,4 @@ export class Wall extends PolyObject<typeof WallSchema> {
     };
   }
 }
-registerLevelObject("wall", Wall);
+registerLevelObject('wall', Wall);

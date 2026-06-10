@@ -1,26 +1,26 @@
+import { LAYERS } from '../levelConfig';
+import { LevelObject } from '../objects/levelObject';
+import { HandlesManager } from './handles';
+import { KeybindsManager } from './keybindsManager';
+import type { InteractionMode } from './modes/interactionMode';
+import { MoveMode } from './modes/moveMode';
+import { PanMode } from './modes/panMode';
+import { PlaceMode } from './modes/placeMode';
+import { ResizeMode } from './modes/resizeMode';
+import { SelectMode } from './modes/selectMode';
+import { syncSelectedObjects } from './state';
 import {
-  pass,
   type Drawable,
   type RenderInfo,
   type RenderPass,
-} from "@/render/drawable";
-import { LevelObject } from "../objects/levelObject";
-import { AABB } from "@/utils/aabb";
-import { LAYERS } from "../levelConfig";
-import type { EditScene } from "@/scenes/editScene";
-import { Vector2 } from "@/utils/vec";
-import { HandlesManager } from "./handles";
-import type { PointerEventHandler, PointerInfo } from "@/render/pointerEvents";
-import type { InteractionMode } from "./modes/interactionMode";
-import { SelectMode } from "./modes/selectMode";
-import { MoveMode } from "./modes/moveMode";
-import { ResizeMode } from "./modes/resizeMode";
-import { PlaceMode } from "./modes/placeMode";
-import { PanMode } from "./modes/panMode";
-import { syncSelectedObjects } from "./state";
-import { KeybindsManager } from "./keybindsManager";
+  pass,
+} from '@/render/drawable';
+import type { PointerEventHandler, PointerInfo } from '@/render/pointerEvents';
+import type { EditScene } from '@/scenes/editScene';
+import { AABB } from '@/utils/aabb';
+import { Vector2 } from '@/utils/vec';
 
-export type Tool = "select" | "place" | "pan";
+export type Tool = 'select' | 'place' | 'pan';
 
 export class EditManager implements Drawable, PointerEventHandler {
   private selectedObjectsInternal: Set<LevelObject> = new Set();
@@ -30,7 +30,7 @@ export class EditManager implements Drawable, PointerEventHandler {
   public selectionPointer: Vector2 | null = null;
   public handles: HandlesManager | null = null;
 
-  public selectedTool: Tool = "select";
+  public selectedTool: Tool = 'select';
 
   public overrideMode = false;
   public currentMode: InteractionMode;
@@ -51,17 +51,17 @@ export class EditManager implements Drawable, PointerEventHandler {
     syncSelectedObjects(this.selectedObjectsInternal);
 
     // delete objects
-    this.keybinds.register({ key: "Backspace" }, () => {
+    this.keybinds.register({ key: 'Backspace' }, () => {
       this.deleteSelectedObjects();
     });
-    this.keybinds.register({ key: "Delete" }, () => {
+    this.keybinds.register({ key: 'Delete' }, () => {
       this.deleteSelectedObjects();
     });
     // duplicate objects
-    this.keybinds.register({ key: "d", ctrl: true }, () => {
+    this.keybinds.register({ key: 'd', ctrl: true }, () => {
       this.duplicateSelectedObjects();
     });
-    this.keybinds.register({ key: "d", meta: true }, () => {
+    this.keybinds.register({ key: 'd', meta: true }, () => {
       this.duplicateSelectedObjects();
     });
   }
@@ -109,7 +109,7 @@ export class EditManager implements Drawable, PointerEventHandler {
   }
 
   // ===== Mode Management =====
-  public setMode(mode: "select" | "move" | "resize" | "place" | "pan"): void {
+  public setMode(mode: 'select' | 'move' | 'resize' | 'place' | 'pan'): void {
     this.setInteractionMode(
       {
         select: this.selectMode,
@@ -178,13 +178,13 @@ export class EditManager implements Drawable, PointerEventHandler {
         ogSize.x === 0 ? 1 : newSize.x / ogSize.x,
         ogSize.y === 0 ? 1 : newSize.y / ogSize.y,
       );
-      obj.set("position", (obj.pos = targetAABB.tl.add(relPos.mult(newScale))));
+      obj.set('position', (obj.pos = targetAABB.tl.add(relPos.mult(newScale))));
       return;
     }
 
     for (const obj of this.selectedObjectsInternal) {
       const relPos = obj.pos.sub(sourceAABB.tl);
-      obj.set("position", (obj.pos = targetAABB.tl.add(relPos.mult(scale))));
+      obj.set('position', (obj.pos = targetAABB.tl.add(relPos.mult(scale))));
       obj.editorScale(scale);
     }
   }
@@ -204,7 +204,7 @@ export class EditManager implements Drawable, PointerEventHandler {
       const rel = obj.pos.sub(center);
       const relRot = new Vector2(rel.y, -rel.x); // CCW 90
       obj.editorRotateCCW();
-      obj.set("position", (obj.pos = center.add(relRot)));
+      obj.set('position', (obj.pos = center.add(relRot)));
     }
   }
 
@@ -222,7 +222,7 @@ export class EditManager implements Drawable, PointerEventHandler {
       const rel = obj.pos.sub(center);
       const relRot = new Vector2(-rel.y, rel.x); // CW 90
       obj.editorRotateCW();
-      obj.set("position", (obj.pos = center.add(relRot)));
+      obj.set('position', (obj.pos = center.add(relRot)));
     }
   }
 
@@ -231,9 +231,9 @@ export class EditManager implements Drawable, PointerEventHandler {
   *render(info: RenderInfo): Iterable<RenderPass> {
     const aabb = this.getSelectedAABB();
     if (aabb) {
-      yield pass(LAYERS.EDITOR, (ctx) => {
+      yield pass(LAYERS.EDITOR, ctx => {
         ctx.save();
-        ctx.strokeStyle = "#FFFFFF";
+        ctx.strokeStyle = '#FFFFFF';
         ctx.lineWidth = 2;
         ctx.setLineDash([5, 5]);
         ctx.lineDashOffset = info.tickWithInterp;
@@ -246,7 +246,7 @@ export class EditManager implements Drawable, PointerEventHandler {
         ctx.restore();
 
         if (this.selectedObjectsInternal.size <= 1) return;
-        ctx.strokeStyle = "#FFFFFF";
+        ctx.strokeStyle = '#FFFFFF';
         ctx.lineWidth = 1;
         for (const obj of this.selectedObjectsInternal) {
           const path = obj.getPath();
@@ -267,8 +267,8 @@ export class EditManager implements Drawable, PointerEventHandler {
       !this.selectedObjectsInternal.has(this.highlightedObject)
     ) {
       const path = this.highlightedObject.getPath();
-      yield pass(LAYERS.EDITOR, (ctx) => {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+      yield pass(LAYERS.EDITOR, ctx => {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.fill(path);
       });
     }
@@ -319,36 +319,36 @@ export class EditManager implements Drawable, PointerEventHandler {
       if (hit) {
         const act = hit.action();
         switch (act) {
-          case "delete":
+          case 'delete':
             this.deleteSelectedObjects();
             return;
-          case "copy": {
+          case 'copy': {
             this.duplicateSelectedObjects();
             this.highlightedObject = null;
             this.startPointer = pointerPos;
-            this.setMode("move");
+            this.setMode('move');
             this.currentMode.pointerdown(info);
             return;
           }
-          case "rotateCCW":
+          case 'rotateCCW':
             this.rotateSelectionCCW();
             return;
-          case "rotateCW":
+          case 'rotateCW':
             this.rotateSelectionCW();
             return;
-          case "resize":
+          case 'resize':
             this.startPointer = pointerPos;
-            this.setMode("resize");
+            this.setMode('resize');
             this.currentMode.pointerdown(info);
             return;
           default:
-            console.warn("Unknown handle action:", act);
+            console.warn('Unknown handle action:', act);
             return;
         }
       }
     }
 
-    if (this.selectedTool === "place") {
+    if (this.selectedTool === 'place') {
       this.currentMode = this.placeMode;
       this.startPointer = pointerPos;
       this.selectionPointer = pointerPos;
@@ -356,7 +356,7 @@ export class EditManager implements Drawable, PointerEventHandler {
       return;
     }
 
-    if (this.selectedTool === "pan") {
+    if (this.selectedTool === 'pan') {
       this.currentMode = this.panMode;
       this.startPointer = pointerPos;
       this.currentMode.pointerdown(info);
@@ -376,11 +376,11 @@ export class EditManager implements Drawable, PointerEventHandler {
         this.selectObject(obj, false);
       }
 
-      this.setMode("move");
+      this.setMode('move');
       this.currentMode.pointerdown(info);
     } else {
       // Empty space - start selection drag
-      this.setMode("select");
+      this.setMode('select');
       this.currentMode.pointerdown(info);
     }
 
@@ -406,7 +406,7 @@ export class EditManager implements Drawable, PointerEventHandler {
     // helper to recursively replace any id references in data
     function replaceIdsInPlace(value: any) {
       if (value === null || value === undefined) return value;
-      if (typeof value === "string") {
+      if (typeof value === 'string') {
         return idMap.get(value) ?? value;
       }
       if (Array.isArray(value)) {
@@ -415,7 +415,7 @@ export class EditManager implements Drawable, PointerEventHandler {
         }
         return value;
       }
-      if (typeof value === "object") {
+      if (typeof value === 'object') {
         for (const k of Object.keys(value)) {
           value[k] = replaceIdsInPlace(value[k]);
         }

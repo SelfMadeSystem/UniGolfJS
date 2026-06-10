@@ -1,6 +1,6 @@
-import { getLevelScene } from "@/scenes/state";
-import { EditScene } from "@/scenes/editScene";
-import { useState } from "react";
+import { EditScene } from '@/scenes/editScene';
+import { getLevelScene } from '@/scenes/state';
+import { useState } from 'react';
 
 const GRID_SIZE_OPTIONS = [1, 12.5, 25, 50, 100] as const;
 
@@ -24,11 +24,11 @@ export function EditorOptions() {
       <label className="flex items-center justify-between gap-3">
         <span className="text-gray-200">Grid size</span>
         <select
-          className="rounded bg-gray-800 px-2 py-1 text-white outline-none ring-1 ring-white/10"
+          className="rounded bg-gray-800 px-2 py-1 text-white ring-1 ring-white/10 outline-none"
           value={gridSize}
-          onChange={(event) => handleGridSizeChange(Number(event.target.value))}
+          onChange={event => handleGridSizeChange(Number(event.target.value))}
         >
-          {GRID_SIZE_OPTIONS.map((option) => (
+          {GRID_SIZE_OPTIONS.map(option => (
             <option key={option} value={option}>
               {option}px
             </option>

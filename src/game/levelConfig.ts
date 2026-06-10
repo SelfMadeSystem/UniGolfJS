@@ -1,6 +1,10 @@
-import z from "zod";
-import { deserializeLevelObject, serializedLevelObject, serializeLevelObject } from "./levelObjectRegistry";
-import { LevelObject } from "./objects/levelObject";
+import {
+  deserializeLevelObject,
+  serializeLevelObject,
+  serializedLevelObject,
+} from './levelObjectRegistry';
+import { LevelObject } from './objects/levelObject';
+import z from 'zod';
 
 // TODO: put these in a more sensible place
 export const WALL_CONFIG = {
@@ -38,9 +42,9 @@ export enum LAYERS {
 }
 
 export const levelConfigSchema = z.object({
-  waterFillColor: z.string().default("#40A0FF"),
-  waterWallColor: z.string().default("#779977"),
-  shadowColor: z.string().default("#76b97e"),
+  waterFillColor: z.string().default('#40A0FF'),
+  waterWallColor: z.string().default('#779977'),
+  shadowColor: z.string().default('#76b97e'),
 });
 export const defaultLevelConfig = levelConfigSchema.parse({});
 export type LevelConfig = z.infer<typeof levelConfigSchema>;
@@ -58,14 +62,14 @@ export type SerializedLevel = z.infer<typeof serializedLevelSchema>;
 
 export function serializeLevel(level: Level): SerializedLevel {
   return {
-    objects: level.objects.map((obj) => serializeLevelObject(obj)),
+    objects: level.objects.map(obj => serializeLevelObject(obj)),
     config: level.config,
   };
 }
 
 export function deserializeLevel(serialized: SerializedLevel): Level {
   return {
-    objects: serialized.objects.map((obj) => deserializeLevelObject(obj)),
+    objects: serialized.objects.map(obj => deserializeLevelObject(obj)),
     config: serialized.config,
   };
 }

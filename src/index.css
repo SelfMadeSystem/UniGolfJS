@@ -1,11 +1,11 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @layer base {
   body {
-    @apply bg-[#85c486] text-gray-100 touch-none;
+    @apply touch-none bg-[#85c486] text-gray-100;
   }
 }
 
 #root {
-  @apply w-full h-screen overflow-hidden relative;
+  @apply relative h-screen w-full overflow-hidden;
 }

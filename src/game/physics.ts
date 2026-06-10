@@ -1,8 +1,8 @@
-import { Segment } from "@/utils/line";
-import { Vector2 } from "@/utils/vec";
-import { RigidBody } from "./objects/rigidBody";
-import { PolyObject } from "./objects/polyObject";
-import type { LevelScene } from "@/scenes/levelScene";
+import { PolyObject } from './objects/polyObject';
+import { RigidBody } from './objects/rigidBody';
+import type { LevelScene } from '@/scenes/levelScene';
+import { Segment } from '@/utils/line';
+import { Vector2 } from '@/utils/vec';
 
 export type SimpleCollision = {
   normal: Vector2;
@@ -164,13 +164,13 @@ export function polyCollision(
 }
 
 export type RigidCollision = SimpleCollision & {
-  kind: "rigid";
+  kind: 'rigid';
   objectA: RigidBody<any>;
   objectB: RigidBody<any>;
 };
 
 export type PolyCollision = SimpleCollision & {
-  kind: "poly";
+  kind: 'poly';
   body: RigidBody<any>;
   object: PolyObject<any>;
 };
@@ -206,14 +206,14 @@ export function getCollision(
       };
       const result = rigidBodyCollision(infoA, infoB);
       if (result) {
-        collision = { ...result, objectA: body, objectB: obj, kind: "rigid" };
+        collision = { ...result, objectA: body, objectB: obj, kind: 'rigid' };
       }
     } else if (obj instanceof PolyObject) {
       if (!obj.isSolid) continue;
       if (!body.getMovementAABB().intersects(obj.getAABB())) continue;
       const result = polyCollision(infoA, obj.getPoints());
       if (result) {
-        collision = { ...result, body, object: obj, kind: "poly" };
+        collision = { ...result, body, object: obj, kind: 'poly' };
       }
     }
 
@@ -229,7 +229,7 @@ export function getCollision(
 }
 
 export function resolveCollision(collision: ObjectCollision): void {
-  if (collision.kind === "rigid") {
+  if (collision.kind === 'rigid') {
     const { objectA, objectB, normal, overlap } = collision;
 
     if (overlap) {
@@ -252,7 +252,7 @@ export function resolveCollision(collision: ObjectCollision): void {
 
     objectA.velocity = objectA.velocity.sub(impulse.div(objectA.totalMass));
     objectB.velocity = objectB.velocity.add(impulse.div(objectB.totalMass));
-  } else if (collision.kind === "poly") {
+  } else if (collision.kind === 'poly') {
     const { body, normal, object } = collision;
     const velAlongNormal = body.velocity.dot(normal);
     if (velAlongNormal > 0) return;

@@ -1,16 +1,16 @@
-import { getLevelScene } from "@/scenes/state";
-import { motion } from "motion/react";
-import { PlaceMenu } from "./editor/PlaceMenu";
-import { placeableGroups } from "@/game/editor/placeables";
-import { Icon } from "@iconify/react";
-import { useState } from "react";
-import { useStore } from "@nanostores/react";
-import { $selectedPlaceable } from "@/game/editor/state";
-import { EditScene } from "@/scenes/editScene";
-import type { Tool } from "@/game/editor/editManager";
-import { SelectionStatus } from "./editor/SelectionStatus.tsx";
-import { LevelControls } from "./editor/LevelControls";
-import { EditorOptions } from "./editor/EditorOptions";
+import { EditorOptions } from './editor/EditorOptions';
+import { LevelControls } from './editor/LevelControls';
+import { PlaceMenu } from './editor/PlaceMenu';
+import { SelectionStatus } from './editor/SelectionStatus.tsx';
+import type { Tool } from '@/game/editor/editManager';
+import { placeableGroups } from '@/game/editor/placeables';
+import { $selectedPlaceable } from '@/game/editor/state';
+import { EditScene } from '@/scenes/editScene';
+import { getLevelScene } from '@/scenes/state';
+import { Icon } from '@iconify/react';
+import { useStore } from '@nanostores/react';
+import { motion } from 'motion/react';
+import { useState } from 'react';
 
 export function EditMenu() {
   const [showPlaceMenu, setShowPlaceMenu] = useState(false);
@@ -18,7 +18,7 @@ export function EditMenu() {
   const [selectedTool, setSelectedTool] = useState<Tool>(() => {
     const ls = getLevelScene();
     if (ls instanceof EditScene) return ls.editManager.selectedTool;
-    return "select";
+    return 'select';
   });
 
   const setTool = (tool: Tool) => {
@@ -37,19 +37,19 @@ export function EditMenu() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <div className="absolute top-0 left-0 pointer-events-auto">
+      <div className="pointer-events-auto absolute top-0 left-0">
         <LevelControls />
       </div>
       <div className="absolute top-0 right-0 flex gap-2 p-2">
         <div className="pointer-events-auto">
           <button
             title="Select"
-            className={`cursor-pointer px-3 py-2 rounded flex items-center gap-2 ${
-              selectedTool === "select"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-white"
+            className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 ${
+              selectedTool === 'select'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-800 text-white'
             }`}
-            onClick={() => setTool("select")}
+            onClick={() => setTool('select')}
           >
             <Icon icon="mdi:cursor-default" width={18} height={18} />
           </button>
@@ -58,12 +58,12 @@ export function EditMenu() {
         <div className="pointer-events-auto">
           <button
             title="Pan"
-            className={`cursor-pointer px-3 py-2 rounded flex items-center gap-2 ${
-              selectedTool === "pan"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-white"
+            className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 ${
+              selectedTool === 'pan'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-800 text-white'
             }`}
-            onClick={() => setTool("pan")}
+            onClick={() => setTool('pan')}
           >
             <Icon icon="mdi:pan" width={18} height={18} />
           </button>
@@ -72,21 +72,21 @@ export function EditMenu() {
         <div className="pointer-events-auto flex items-center gap-1">
           <button
             title="Place"
-            className={`cursor-pointer px-3 py-2 rounded flex items-center gap-2 ${
-              selectedTool === "place"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-white"
+            className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 ${
+              selectedTool === 'place'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-800 text-white'
             }`}
-            onClick={() => setTool("place")}
+            onClick={() => setTool('place')}
           >
             <Icon icon={selectedPlaceable?.icon} width={18} height={18} />
           </button>
           <button
             title="Open place menu"
-            className="cursor-pointer px-2 py-2 bg-gray-800 text-white rounded"
+            className="cursor-pointer rounded bg-gray-800 px-2 py-2 text-white"
             onClick={() => {
-              setShowPlaceMenu((s) => !s);
-              setTool("place");
+              setShowPlaceMenu(s => !s);
+              setTool('place');
             }}
           >
             <Icon icon="mdi:chevron-down" width={18} height={18} />
@@ -105,7 +105,7 @@ export function EditMenu() {
         <EditorOptions />
       </div>
 
-      <div className="absolute bottom-4 right-4">
+      <div className="absolute right-4 bottom-4">
         <SelectionStatus />
       </div>
     </motion.div>

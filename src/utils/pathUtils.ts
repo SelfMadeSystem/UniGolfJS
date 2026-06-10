@@ -1,6 +1,6 @@
-import { lineLineIntersection } from "./line";
-import { mod } from "./mathUtils";
-import { Vector2 } from "./vec";
+import { lineLineIntersection } from './line';
+import { mod } from './mathUtils';
+import { Vector2 } from './vec';
 
 /**
  * Clips a line segment to specified bounds.
@@ -184,14 +184,14 @@ export function generatePathsFromPoints(
       );
 
       if (!prevClip || !nextClip) {
-        throw new Error("Failed to clip line segments");
+        throw new Error('Failed to clip line segments');
       }
 
       a = prevClip.end;
       b = nextClip.start;
     }
 
-    const op = i === 0 ? "moveTo" : "lineTo";
+    const op = i === 0 ? 'moveTo' : 'lineTo';
 
     if (outline > 0) {
       shadowPath[op](...a.a);
@@ -231,7 +231,7 @@ export function generatePathsFromPoints(
 
         for (let j = 0; j < cw.length; j++) {
           const p = cw[j]!;
-          const op = j === 0 ? "moveTo" : "lineTo";
+          const op = j === 0 ? 'moveTo' : 'lineTo';
           heightPath[op](...p.a);
         }
 
@@ -251,7 +251,7 @@ export function generatePathsFromPoints(
 
         for (let j = 0; j < cw.length; j++) {
           const p = cw[j]!;
-          const op = j === 0 ? "moveTo" : "lineTo";
+          const op = j === 0 ? 'moveTo' : 'lineTo';
           waterWallPath[op](...p.a);
         }
 
@@ -262,7 +262,7 @@ export function generatePathsFromPoints(
 
   for (let i = 0; i < newPoints.length; i++) {
     const curr = newPoints[newPoints.length - i - 1]!;
-    const op = i === 0 ? "moveTo" : "lineTo";
+    const op = i === 0 ? 'moveTo' : 'lineTo';
     outlinePath[op](curr.x, curr.y - height + 0.2);
   }
   outlinePath.closePath();

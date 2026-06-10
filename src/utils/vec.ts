@@ -1,5 +1,5 @@
-import type { BBox } from "rbush";
-import { clamp, mod, round } from "./mathUtils";
+import { clamp, mod, round } from './mathUtils';
+import type { BBox } from 'rbush';
 
 export type VecLike = { x: number; y: number } | [number, number];
 
@@ -14,7 +14,7 @@ export class Vector2 implements BBox {
       | [[number, number] | { x: number; y: number }]
   ) {
     if (args[0] instanceof Object) {
-      if ("x" in args[0]) {
+      if ('x' in args[0]) {
         this.x = args[0].x;
         this.y = args[0].y;
       } else {
@@ -63,7 +63,7 @@ export class Vector2 implements BBox {
   }
 
   mult(x: number | VecLike, y?: number): Vector2 {
-    if (typeof x === "object") {
+    if (typeof x === 'object') {
       const o = new Vector2(x);
       return new Vector2(this.x * o.x, this.y * o.y);
     }
@@ -71,7 +71,7 @@ export class Vector2 implements BBox {
   }
 
   div(x: number | VecLike, y?: number): Vector2 {
-    if (typeof x === "object") {
+    if (typeof x === 'object') {
       const o = new Vector2(x);
       return new Vector2(this.x / o.x, this.y / o.y);
     }
@@ -165,7 +165,7 @@ export class Vector2 implements BBox {
       case 270:
         return this.ccw90();
       default:
-        throw new Error("Rotation must be 0, 90, 180, or 270. Got " + amount);
+        throw new Error('Rotation must be 0, 90, 180, or 270. Got ' + amount);
     }
   }
 

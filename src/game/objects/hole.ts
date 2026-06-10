@@ -1,19 +1,19 @@
-import z from "zod";
-import { LAYERS } from "../levelConfig";
-import type { PathInfo } from "./levelObject";
-import type { RigidBody } from "./rigidBody";
-import { CircleObject, CircleObjectSchema } from "./circleObject";
-import { AABB } from "@/utils/aabb";
-import type { Vector2 } from "@/utils/vec";
-import { objectIdSchema, positiveNumberSchema, rgbSchema } from "@/utils/data";
-import { registerLevelObject } from "../levelObjectRegistry";
-import { getLevelScene } from "@/scenes/state";
-import { Tee } from "./tee";
+import { LAYERS } from '../levelConfig';
+import { registerLevelObject } from '../levelObjectRegistry';
+import { CircleObject, CircleObjectSchema } from './circleObject';
+import type { PathInfo } from './levelObject';
+import type { RigidBody } from './rigidBody';
+import { Tee } from './tee';
+import { getLevelScene } from '@/scenes/state';
+import { AABB } from '@/utils/aabb';
+import { objectIdSchema, positiveNumberSchema, rgbSchema } from '@/utils/data';
+import type { Vector2 } from '@/utils/vec';
+import z from 'zod';
 
 export const HoleSchema = CircleObjectSchema.extend({
-  teeColor: rgbSchema.default("#f79d60"),
+  teeColor: rgbSchema.default('#f79d60'),
   radius: positiveNumberSchema.default(20),
-  nextTee: objectIdSchema.optional().meta({ ofType: "tee" }),
+  nextTee: objectIdSchema.optional().meta({ ofType: 'tee' }),
   nextTeeDelay: positiveNumberSchema.default(0.5),
 });
 
@@ -38,7 +38,7 @@ export class Hole extends CircleObject<typeof HoleSchema> {
       outlineLayer: LAYERS.HOLE_OUTLINE,
       fillLayer: LAYERS.HOLE_FILL,
       outlineColor: this.data.teeColor,
-      fillColor: "#000000",
+      fillColor: '#000000',
       height: 0,
       outline: HOLE_OUTLINE_WIDTH,
     };
@@ -79,7 +79,7 @@ export class Hole extends CircleObject<typeof HoleSchema> {
     const newRadius =
       ((this.radius + HOLE_OUTLINE_WIDTH) * (scale.x + scale.y)) / 2 -
       HOLE_OUTLINE_WIDTH;
-    this.set("radius", Math.max(newRadius, 1));
+    this.set('radius', Math.max(newRadius, 1));
   }
 }
-registerLevelObject("hole", Hole);
+registerLevelObject('hole', Hole);

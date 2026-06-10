@@ -1,10 +1,9 @@
-import { booleanSchema, Vec2Schema } from "@/utils/data";
-import type { Drawable, RenderInfo, RenderPass } from "@/render/drawable";
-import { Vector2 } from "@/utils/vec";
-import z from "zod";
-import { getLevelScene } from "@/scenes/state";
-import type { LevelScene } from "@/scenes/levelScene";
-import { nanoid } from "nanoid";
+import type { Drawable, RenderInfo, RenderPass } from '@/render/drawable';
+import type { LevelScene } from '@/scenes/levelScene';
+import { Vec2Schema, booleanSchema } from '@/utils/data';
+import { Vector2 } from '@/utils/vec';
+import { nanoid } from 'nanoid';
+import z from 'zod';
 
 export const GameObjectSchema = z.object({
   /** IDs should be unique */
@@ -20,7 +19,7 @@ type GameObjectKey<SchemaType extends typeof GameObjectSchema> = Extract<
 >;
 type GameObjectListener<
   SchemaType extends typeof GameObjectSchema,
-  K extends GameObjectKey<SchemaType> | "position",
+  K extends GameObjectKey<SchemaType> | 'position',
 > = (value: z.infer<SchemaType>[K]) => void;
 
 export abstract class GameObject<
@@ -60,7 +59,7 @@ export abstract class GameObject<
     this._pos = this.data.position;
   }
 
-  on<K extends SchemaKeys | "position">(
+  on<K extends SchemaKeys | 'position'>(
     key: K,
     listener: GameObjectListener<SchemaType, K>,
   ): () => void;
@@ -81,7 +80,7 @@ export abstract class GameObject<
     return () => this.anyListeners.delete(listener);
   }
 
-  protected emit<K extends GameObjectKey<SchemaType> | "position">(
+  protected emit<K extends GameObjectKey<SchemaType> | 'position'>(
     key: K,
     value: z.infer<SchemaType>[K],
   ): void;
@@ -89,13 +88,13 @@ export abstract class GameObject<
     key: K,
     value: z.infer<SchemaType>[K],
   ): void {
-    this.listeners.get(key)?.forEach((listener) => listener(value));
-    this.anyListeners.forEach((listener) => listener(key, value));
+    this.listeners.get(key)?.forEach(listener => listener(value));
+    this.anyListeners.forEach(listener => listener(key, value));
   }
 
   set<K extends SchemaKeys>(key: K, value: z.infer<SchemaType>[K]): void {
     this.data[key] = value;
-    if (key === "position") {
+    if (key === 'position') {
       this.pos = value as unknown as Vector2;
     }
     this.emit(key, value);
@@ -114,7 +113,7 @@ export abstract class GameObject<
   }
 
   render(info: RenderInfo): Iterable<RenderPass> {
-    throw new Error("Render method not implemented");
+    throw new Error('Render method not implemented');
   }
   tick(): void {}
 

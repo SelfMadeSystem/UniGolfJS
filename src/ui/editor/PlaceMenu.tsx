@@ -2,10 +2,10 @@ import type {
   Placeable,
   PlaceableGroup,
   PlaceableVariation,
-} from "@/game/editor/placeables";
-import { $selectedPlaceable, setSelectedPlaceable } from "@/game/editor/state";
-import { Icon } from "@iconify/react";
-import { useStore } from "@nanostores/react";
+} from '@/game/editor/placeables';
+import { $selectedPlaceable, setSelectedPlaceable } from '@/game/editor/state';
+import { Icon } from '@iconify/react';
+import { useStore } from '@nanostores/react';
 
 function PlaceableNodeComponent({
   node,
@@ -16,7 +16,7 @@ function PlaceableNodeComponent({
   onSelect: () => void;
   depth?: number;
 }) {
-  if ("variations" in node) {
+  if ('variations' in node) {
     return (
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2 text-sm font-semibold text-gray-200">
@@ -31,9 +31,9 @@ function PlaceableNodeComponent({
           <span>{node.name}</span>
         </div>
         <div
-          className={`flex flex-row flex-wrap gap-2 ${depth > 0 ? "pl-4" : ""}`}
+          className={`flex flex-row flex-wrap gap-2 ${depth > 0 ? 'pl-4' : ''}`}
         >
-          {node.variations.map((variation) => (
+          {node.variations.map(variation => (
             <PlaceableNodeComponent
               key={variation.id}
               node={variation}
@@ -61,8 +61,8 @@ function PlaceableComponent({
 
   return (
     <div
-      className={`flex flex-col items-center gap-1 p-2 rounded cursor-pointer text-center ${
-        isSelected ? "bg-blue-500 text-white" : "hover:bg-gray-700/50"
+      className={`flex cursor-pointer flex-col items-center gap-1 rounded p-2 text-center ${
+        isSelected ? 'bg-blue-500 text-white' : 'hover:bg-gray-700/50'
       }`}
       onClick={() => {
         setSelectedPlaceable(placeable);
@@ -93,17 +93,17 @@ export function PlaceMenu({
         className="pointer-events-auto absolute inset-0 bg-black/50"
         onClick={onClose}
       />
-      <div className="pointer-events-auto p-4 bg-black/80 rounded shadow absolute inset-4 overflow-auto">
+      <div className="pointer-events-auto absolute inset-4 overflow-auto rounded bg-black/80 p-4 shadow">
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
           onClick={onClose}
         >
           <Icon icon="mdi:close" width={24} height={24} />
         </button>
-        <h2 className="text-lg font-bold mb-3">Placeables</h2>
+        <h2 className="mb-3 text-lg font-bold">Placeables</h2>
         <div className="flex flex-row flex-wrap gap-4">
-          {placeableGroups.map((group) => (
-            <div key={group.id} className="flex flex-col gap-2 min-w-32">
+          {placeableGroups.map(group => (
+            <div key={group.id} className="flex min-w-32 flex-col gap-2">
               <PlaceableNodeComponent node={group} onSelect={onClose} />
             </div>
           ))}

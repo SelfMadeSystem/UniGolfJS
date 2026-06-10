@@ -1,15 +1,15 @@
-import { serve } from "bun";
-import index from "./index.html";
+import index from './index.html';
+import { serve } from 'bun';
 
 const server = serve({
-  hostname: "0.0.0.0",
+  hostname: '0.0.0.0',
 
   routes: {
     // Serve index.html for all unmatched routes.
-    "/*": index,
+    '/*': index,
   },
 
-  development: process.env.NODE_ENV !== "production" && {
+  development: process.env.NODE_ENV !== 'production' && {
     // Enable browser hot reloading in development
     hmr: true,
 

@@ -1,12 +1,12 @@
-import { rgbSchema } from "@/utils/data";
-import { RigidBody, RigidBodySchema } from "./rigidBody";
-import type z from "zod";
-import { LAYERS } from "../levelConfig";
-import type { PathInfo } from "./levelObject";
-import { registerLevelObject } from "../levelObjectRegistry";
+import { LAYERS } from '../levelConfig';
+import { registerLevelObject } from '../levelObjectRegistry';
+import type { PathInfo } from './levelObject';
+import { RigidBody, RigidBodySchema } from './rigidBody';
+import { rgbSchema } from '@/utils/data';
+import type z from 'zod';
 
 export const BallSchema = RigidBodySchema.extend({
-  color: rgbSchema.default("#fff"),
+  color: rgbSchema.default('#fff'),
 });
 
 export class Ball extends RigidBody<typeof BallSchema> {
@@ -21,11 +21,11 @@ export class Ball extends RigidBody<typeof BallSchema> {
       shadowLayer: LAYERS.BALL,
       outlineLayer: LAYERS.BALL,
       fillLayer: LAYERS.BALL,
-      outlineColor: "#000",
+      outlineColor: '#000',
       fillColor: this.data.color,
       height: 4,
       outline: 2,
     };
   }
 }
-registerLevelObject("ball", Ball);
+registerLevelObject('ball', Ball);

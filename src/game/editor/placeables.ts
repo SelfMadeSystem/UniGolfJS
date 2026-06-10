@@ -1,24 +1,24 @@
-import type { IconifyIcon } from "@iconify/react";
-import type { LevelObject } from "../objects/levelObject";
-import { Wall } from "../objects/wall";
-import { Water } from "../objects/water";
-import { Boost } from "../objects/boost";
-import { Ball } from "../objects/ball";
-import { Tee } from "../objects/tee";
-import { Hole } from "../objects/hole";
-import { BreakableWall } from "../objects/breakableWall";
-import { Slope } from "../objects/slope";
-import { BouncyWall } from "../objects/bouncyWall";
-import { ConveyorBelt } from "../objects/conveyorBelt";
-import { Portal } from "../objects/portal";
-import { Floor } from "../objects/floor";
+import { Ball } from '../objects/ball';
+import { Boost } from '../objects/boost';
+import { BouncyWall } from '../objects/bouncyWall';
+import { BreakableWall } from '../objects/breakableWall';
+import { ConveyorBelt } from '../objects/conveyorBelt';
+import { Floor } from '../objects/floor';
+import { Hole } from '../objects/hole';
+import type { LevelObject } from '../objects/levelObject';
+import { Portal } from '../objects/portal';
+import { Slope } from '../objects/slope';
+import { Tee } from '../objects/tee';
+import { Wall } from '../objects/wall';
+import { Water } from '../objects/water';
+import type { IconifyIcon } from '@iconify/react';
 
 type Shape =
-  | "rectangle"
-  | "triangle"
-  | "quarterCircle"
-  | "inverseQuarterCircle"
-  | "circle";
+  | 'rectangle'
+  | 'triangle'
+  | 'quarterCircle'
+  | 'inverseQuarterCircle'
+  | 'circle';
 
 type PlaceableBase = {
   id: string;
@@ -45,7 +45,7 @@ export type PlaceableGroup = {
 export type PlaceableVariation = Placeable | PlaceableGroup;
 
 function createPlaceableGroup(
-  group: Omit<PlaceableGroup, "variations">,
+  group: Omit<PlaceableGroup, 'variations'>,
   variations: PlaceableVariation[],
 ): PlaceableGroup {
   return {
@@ -90,13 +90,13 @@ function createShapeVariations(placeable: {
   props?: Record<string, unknown>;
 }): Placeable[] {
   const shapes: Shape[] = [
-    "rectangle",
-    "triangle",
-    "quarterCircle",
-    "inverseQuarterCircle",
-    "circle",
+    'rectangle',
+    'triangle',
+    'quarterCircle',
+    'inverseQuarterCircle',
+    'circle',
   ];
-  return shapes.map((shape) => ({
+  return shapes.map(shape => ({
     id: `${placeable.id}-${shape}`,
     name: `${placeable.name} (${shape})`,
     icon: shapeIcons[shape],
@@ -112,8 +112,8 @@ function createShapeVariations(placeable: {
 function flattenPlaceableVariations(
   variations: PlaceableVariation[],
 ): Placeable[] {
-  return variations.flatMap((variation) =>
-    "variations" in variation
+  return variations.flatMap(variation =>
+    'variations' in variation
       ? flattenPlaceableVariations(variation.variations)
       : [variation],
   );
@@ -122,137 +122,137 @@ function flattenPlaceableVariations(
 export const placeableGroups: PlaceableGroup[] = [
   createPlaceableGroup(
     {
-      id: "wall",
-      name: "Wall",
-      icon: "ph:wall-light",
+      id: 'wall',
+      name: 'Wall',
+      icon: 'ph:wall-light',
       clazz: Wall,
     },
     createShapeVariations({
-      id: "wall",
-      name: "Wall",
+      id: 'wall',
+      name: 'Wall',
       clazz: Wall,
     }),
   ),
   createPlaceableGroup(
     {
-      id: "floor",
-      name: "Floor",
-      icon: "ph:square-light",
+      id: 'floor',
+      name: 'Floor',
+      icon: 'ph:square-light',
       clazz: Floor,
     },
     createShapeVariations({
-      id: "floor",
-      name: "Floor",
+      id: 'floor',
+      name: 'Floor',
       clazz: Floor,
     }),
   ),
   createPlaceableGroup(
     {
-      id: "water",
-      name: "Water",
-      icon: "ph:drop-light",
+      id: 'water',
+      name: 'Water',
+      icon: 'ph:drop-light',
       clazz: Water,
     },
     createShapeVariations({
-      id: "water",
-      name: "Water",
+      id: 'water',
+      name: 'Water',
       clazz: Water,
     }),
   ),
   createPlaceableGroup(
     {
-      id: "boost",
-      name: "Boost",
-      icon: "ph:rocket-light",
+      id: 'boost',
+      name: 'Boost',
+      icon: 'ph:rocket-light',
       clazz: Boost,
     },
     createShapeVariations({
-      id: "boost",
-      name: "Boost",
+      id: 'boost',
+      name: 'Boost',
       clazz: Boost,
     }),
   ),
   createPlaceableGroup(
     {
-      id: "breakable-wall",
-      name: "Breakable Wall",
-      icon: "ph:wall-light",
+      id: 'breakable-wall',
+      name: 'Breakable Wall',
+      icon: 'ph:wall-light',
       clazz: BreakableWall,
     },
     [
       createPlaceableGroup(
         {
-          id: "breakable-wall-red",
-          name: "Red",
-          icon: "ph:wall-light",
-          iconColor: "#ff0000",
+          id: 'breakable-wall-red',
+          name: 'Red',
+          icon: 'ph:wall-light',
+          iconColor: '#ff0000',
           clazz: BreakableWall,
         },
         createShapeVariations({
-          id: "breakable-wall-red",
-          name: "Red",
+          id: 'breakable-wall-red',
+          name: 'Red',
           clazz: BreakableWall,
-          iconColor: "#ff0000",
+          iconColor: '#ff0000',
           props: {
-            wallColor: "#ff0000",
-            wallOutlineColor: "#800000",
+            wallColor: '#ff0000',
+            wallOutlineColor: '#800000',
           },
         }),
       ),
       createPlaceableGroup(
         {
-          id: "breakable-wall-yellow",
-          name: "Yellow",
-          icon: "ph:wall-light",
-          iconColor: "#ffcc00",
+          id: 'breakable-wall-yellow',
+          name: 'Yellow',
+          icon: 'ph:wall-light',
+          iconColor: '#ffcc00',
           clazz: BreakableWall,
         },
         createShapeVariations({
-          id: "breakable-wall-yellow",
-          name: "Yellow",
+          id: 'breakable-wall-yellow',
+          name: 'Yellow',
           clazz: BreakableWall,
-          iconColor: "#ffcc00",
+          iconColor: '#ffcc00',
           props: {
-            wallColor: "#ffcc00",
-            wallOutlineColor: "#806600",
+            wallColor: '#ffcc00',
+            wallOutlineColor: '#806600',
           },
         }),
       ),
       createPlaceableGroup(
         {
-          id: "breakable-wall-green",
-          name: "Green",
-          icon: "ph:wall-light",
-          iconColor: "#22c55e",
+          id: 'breakable-wall-green',
+          name: 'Green',
+          icon: 'ph:wall-light',
+          iconColor: '#22c55e',
           clazz: BreakableWall,
         },
         createShapeVariations({
-          id: "breakable-wall-green",
-          name: "Green",
+          id: 'breakable-wall-green',
+          name: 'Green',
           clazz: BreakableWall,
-          iconColor: "#22c55e",
+          iconColor: '#22c55e',
           props: {
-            wallColor: "#22c55e",
-            wallOutlineColor: "#166534",
+            wallColor: '#22c55e',
+            wallOutlineColor: '#166534',
           },
         }),
       ),
       createPlaceableGroup(
         {
-          id: "breakable-wall-blue",
-          name: "Blue",
-          icon: "ph:wall-light",
-          iconColor: "#3b82f6",
+          id: 'breakable-wall-blue',
+          name: 'Blue',
+          icon: 'ph:wall-light',
+          iconColor: '#3b82f6',
           clazz: BreakableWall,
         },
         createShapeVariations({
-          id: "breakable-wall-blue",
-          name: "Blue",
+          id: 'breakable-wall-blue',
+          name: 'Blue',
           clazz: BreakableWall,
-          iconColor: "#3b82f6",
+          iconColor: '#3b82f6',
           props: {
-            wallColor: "#3b82f6",
-            wallOutlineColor: "#1d4ed8",
+            wallColor: '#3b82f6',
+            wallOutlineColor: '#1d4ed8',
           },
         }),
       ),
@@ -260,16 +260,16 @@ export const placeableGroups: PlaceableGroup[] = [
   ),
   createPlaceableGroup(
     {
-      id: "ball",
-      name: "Ball",
-      icon: "ph:soccer-ball-light",
+      id: 'ball',
+      name: 'Ball',
+      icon: 'ph:soccer-ball-light',
       clazz: Ball,
     },
     [
       {
-        id: "ball",
-        name: "Ball",
-        icon: "ph:soccer-ball-light",
+        id: 'ball',
+        name: 'Ball',
+        icon: 'ph:soccer-ball-light',
         clazz: Ball,
         noSize: true,
       },
@@ -277,16 +277,16 @@ export const placeableGroups: PlaceableGroup[] = [
   ),
   createPlaceableGroup(
     {
-      id: "tee",
-      name: "Tee",
-      icon: "ph:golf",
+      id: 'tee',
+      name: 'Tee',
+      icon: 'ph:golf',
       clazz: Tee,
     },
     [
       {
-        id: "tee",
-        name: "Tee",
-        icon: "ph:golf",
+        id: 'tee',
+        name: 'Tee',
+        icon: 'ph:golf',
         clazz: Tee,
         noSize: true,
       },
@@ -294,16 +294,16 @@ export const placeableGroups: PlaceableGroup[] = [
   ),
   createPlaceableGroup(
     {
-      id: "hole",
-      name: "Hole",
-      icon: "ph:flag-light",
+      id: 'hole',
+      name: 'Hole',
+      icon: 'ph:flag-light',
       clazz: Hole,
     },
     [
       {
-        id: "hole",
-        name: "Hole",
-        icon: "ph:flag-light",
+        id: 'hole',
+        name: 'Hole',
+        icon: 'ph:flag-light',
         clazz: Hole,
         noSize: true,
       },
@@ -311,95 +311,95 @@ export const placeableGroups: PlaceableGroup[] = [
   ),
   createPlaceableGroup(
     {
-      id: "slope",
-      name: "Slope",
-      icon: "ph:ramp-light",
-      iconColor: "#a67857",
+      id: 'slope',
+      name: 'Slope',
+      icon: 'ph:ramp-light',
+      iconColor: '#a67857',
       clazz: Slope,
     },
     createShapeVariations({
-      id: "slope",
-      name: "Slope",
+      id: 'slope',
+      name: 'Slope',
       clazz: Slope,
-      iconColor: "#a67857",
+      iconColor: '#a67857',
     }),
   ),
   createPlaceableGroup(
     {
-      id: "bouncy-wall",
-      name: "Bouncy Wall",
-      icon: "ph:wall-light",
-      iconColor: "#ff6b6b",
+      id: 'bouncy-wall',
+      name: 'Bouncy Wall',
+      icon: 'ph:wall-light',
+      iconColor: '#ff6b6b',
       clazz: BouncyWall,
     },
     createShapeVariations({
-      id: "bouncy-wall",
-      name: "Bouncy Wall",
+      id: 'bouncy-wall',
+      name: 'Bouncy Wall',
       clazz: BouncyWall,
-      iconColor: "#ff6b6b",
+      iconColor: '#ff6b6b',
     }),
   ),
   createPlaceableGroup(
     {
-      id: "conveyor-belt",
-      name: "Conveyor Belt",
-      icon: "ph:arrow-right-bold",
-      iconColor: "#4a90e2",
+      id: 'conveyor-belt',
+      name: 'Conveyor Belt',
+      icon: 'ph:arrow-right-bold',
+      iconColor: '#4a90e2',
       clazz: ConveyorBelt,
     },
     createShapeVariations({
-      id: "conveyor-belt",
-      name: "Conveyor Belt",
+      id: 'conveyor-belt',
+      name: 'Conveyor Belt',
       clazz: ConveyorBelt,
-      iconColor: "#4a90e2",
+      iconColor: '#4a90e2',
     }),
   ),
   createPlaceableGroup(
     {
-      id: "portal",
-      name: "Portal",
-      icon: "ph:spiral-light",
-      iconColor: "#a855f7",
+      id: 'portal',
+      name: 'Portal',
+      icon: 'ph:spiral-light',
+      iconColor: '#a855f7',
       clazz: Portal,
     },
     [
       {
-        id: "portal-purple",
-        name: "Portal",
-        icon: "ph:spiral-light",
-        iconColor: "#a855f7",
+        id: 'portal-purple',
+        name: 'Portal',
+        icon: 'ph:spiral-light',
+        iconColor: '#a855f7',
         clazz: Portal,
         noSize: true,
         props: {
-          portalColor: "#a855f7",
-          portalOutlineColor: "#7c3aed",
-          portalAccentColor: "#e9d5ff",
+          portalColor: '#a855f7',
+          portalOutlineColor: '#7c3aed',
+          portalAccentColor: '#e9d5ff',
         },
       },
       {
-        id: "portal-green",
-        name: "Portal (Green)",
-        icon: "ph:spiral-light",
-        iconColor: "#22c55e",
+        id: 'portal-green',
+        name: 'Portal (Green)',
+        icon: 'ph:spiral-light',
+        iconColor: '#22c55e',
         clazz: Portal,
         noSize: true,
         props: {
-          portalColor: "#22c55e",
-          portalOutlineColor: "#166534",
-          portalAccentColor: "#bbf7d0",
+          portalColor: '#22c55e',
+          portalOutlineColor: '#166534',
+          portalAccentColor: '#bbf7d0',
         },
       },
       {
-        id: "portal-blue",
-        name: "Portal (Blue)",
-        icon: "ph:spiral-light",
-        iconColor: "#3b82f6",
+        id: 'portal-blue',
+        name: 'Portal (Blue)',
+        icon: 'ph:spiral-light',
+        iconColor: '#3b82f6',
         clazz: Portal,
         noSize: true,
         props: {
-          portalColor: "#3b82f6",
-          portalOutlineColor: "#1d4ed8",
-          portalAccentColor: "#bfdbfe",
+          portalColor: '#3b82f6',
+          portalOutlineColor: '#1d4ed8',
+          portalAccentColor: '#bfdbfe',
         },
       },
     ],

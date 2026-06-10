@@ -1,6 +1,6 @@
-import type { InteractionMode } from "./interactionMode";
-import type { PointerInfo } from "@/render/pointerEvents";
-import type { EditManager } from "../editManager";
+import type { EditManager } from '../editManager';
+import type { InteractionMode } from './interactionMode';
+import type { PointerInfo } from '@/render/pointerEvents';
 
 export class MoveMode implements InteractionMode {
   constructor(private editManager: EditManager) {}
@@ -13,7 +13,7 @@ export class MoveMode implements InteractionMode {
 
     const delta = pointerPos.sub(this.editManager.startPointer);
     for (const obj of this.editManager.selectedObjects) {
-      obj.set("position", obj.pos = obj.pos.add(delta));
+      obj.set('position', (obj.pos = obj.pos.add(delta)));
     }
     this.editManager.startPointer = pointerPos;
   }
@@ -21,7 +21,7 @@ export class MoveMode implements InteractionMode {
   pointerup(info: PointerInfo): void {
     for (const obj of this.editManager.selectedObjects) {
       obj.editorSnapToGrid(this.editManager.scene.editorGrid.gridSize);
-      obj.set("position", obj.pos);
+      obj.set('position', obj.pos);
     }
 
     this.editManager.startPointer = null;

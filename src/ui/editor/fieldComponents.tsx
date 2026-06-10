@@ -1,26 +1,26 @@
-import { Vector2 } from "@/utils/vec";
+import {
+  type FieldComponentProps,
+  registerSchemaComponent,
+} from './schemaRegistry';
+import { SelectObjectMode } from '@/game/editor/modes/selectObjectMode';
+import { getLevelObjectClass } from '@/game/levelObjectRegistry';
+import type { LevelObject } from '@/game/objects/levelObject';
+import { EditScene } from '@/scenes/editScene';
+import { getLevelScene } from '@/scenes/state';
 import {
   Vec2Schema,
+  booleanSchema,
+  numberSchema,
+  objectIdSchema,
+  positiveNumberSchema,
   rgbSchema,
   rgbaSchema,
-  numberSchema,
-  booleanSchema,
-  shapeSchema,
   rotationSchema,
-  positiveNumberSchema,
+  shapeSchema,
   stringSchema,
-  objectIdSchema,
-} from "@/utils/data";
-import {
-  registerSchemaComponent,
-  type FieldComponentProps,
-} from "./schemaRegistry";
-import { useCallback, useEffect, useState } from "react";
-import { getLevelObjectClass } from "@/game/levelObjectRegistry";
-import { getLevelScene } from "@/scenes/state";
-import { EditScene } from "@/scenes/editScene";
-import { SelectObjectMode } from "@/game/editor/modes/selectObjectMode";
-import type { LevelObject } from "@/game/objects/levelObject";
+} from '@/utils/data';
+import { Vector2 } from '@/utils/vec';
+import { useCallback, useEffect, useState } from 'react';
 
 function Vec2Field({ value, onChange }: FieldComponentProps<Vector2>) {
   const setX = useCallback(
@@ -37,13 +37,13 @@ function Vec2Field({ value, onChange }: FieldComponentProps<Vector2>) {
   return (
     <div className="flex gap-2">
       <input
-        className="bg-gray-800 text-white px-2 rounded w-20"
+        className="w-20 rounded bg-gray-800 px-2 text-white"
         type="number"
         value={value.x}
         onChange={setX}
       />
       <input
-        className="bg-gray-800 text-white px-2 rounded w-20"
+        className="w-20 rounded bg-gray-800 px-2 text-white"
         type="number"
         value={value.y}
         onChange={setY}
@@ -55,10 +55,10 @@ function Vec2Field({ value, onChange }: FieldComponentProps<Vector2>) {
 function ColorField({ value, onChange }: FieldComponentProps<string>) {
   return (
     <input
-      className="bg-gray-800 text-white px-2 rounded w-24"
+      className="w-24 rounded bg-gray-800 px-2 text-white"
       type="text"
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={e => onChange(e.target.value)}
     />
   );
 }
@@ -66,11 +66,11 @@ function ColorField({ value, onChange }: FieldComponentProps<string>) {
 function ShapeField({ value, onChange }: FieldComponentProps<string>) {
   return (
     <select
-      className="bg-gray-800 text-white px-2 rounded"
+      className="rounded bg-gray-800 px-2 text-white"
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={e => onChange(e.target.value)}
     >
-      {shapeSchema.options.map((option) => (
+      {shapeSchema.options.map(option => (
         <option key={option} value={option}>
           {option}
         </option>
@@ -82,11 +82,11 @@ function ShapeField({ value, onChange }: FieldComponentProps<string>) {
 function RotationField({ value, onChange }: FieldComponentProps<number>) {
   return (
     <select
-      className="bg-gray-800 text-white px-2 rounded"
+      className="rounded bg-gray-800 px-2 text-white"
       value={value}
-      onChange={(e) => onChange(Number(e.target.value))}
+      onChange={e => onChange(Number(e.target.value))}
     >
-      {rotationSchema.options.map((option) => (
+      {rotationSchema.options.map(option => (
         <option key={option.value} value={option.value}>
           {option.value}°
         </option>
@@ -98,10 +98,10 @@ function RotationField({ value, onChange }: FieldComponentProps<number>) {
 function NumberField({ value, onChange }: FieldComponentProps<number>) {
   return (
     <input
-      className="bg-gray-800 text-white px-2 rounded w-24"
+      className="w-24 rounded bg-gray-800 px-2 text-white"
       type="number"
       value={value}
-      onChange={(e) => onChange(Number(e.target.value))}
+      onChange={e => onChange(Number(e.target.value))}
     />
   );
 }
@@ -109,11 +109,11 @@ function NumberField({ value, onChange }: FieldComponentProps<number>) {
 function PositiveNumberField({ value, onChange }: FieldComponentProps<number>) {
   return (
     <input
-      className="bg-gray-800 text-white px-2 rounded w-24"
+      className="w-24 rounded bg-gray-800 px-2 text-white"
       type="number"
       min={0}
       value={value}
-      onChange={(e) => onChange(Math.max(0, Number(e.target.value)))}
+      onChange={e => onChange(Math.max(0, Number(e.target.value)))}
     />
   );
 }
@@ -123,7 +123,7 @@ function BooleanField({ value, onChange }: FieldComponentProps<boolean>) {
     <input
       type="checkbox"
       checked={value}
-      onChange={(e) => onChange(Boolean(e.target.checked))}
+      onChange={e => onChange(Boolean(e.target.checked))}
     />
   );
 }
@@ -131,10 +131,10 @@ function BooleanField({ value, onChange }: FieldComponentProps<boolean>) {
 function StringField({ value, onChange }: FieldComponentProps<string>) {
   return (
     <input
-      className="bg-gray-800 text-white px-2 rounded w-full"
+      className="w-full rounded bg-gray-800 px-2 text-white"
       type="text"
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={e => onChange(e.target.value)}
     />
   );
 }
@@ -147,7 +147,7 @@ function ObjectIdField({
   const meta = schema.meta();
   const ofType = meta?.ofType;
   const ObjectClass =
-    typeof ofType === "string" ? getLevelObjectClass(ofType) : null;
+    typeof ofType === 'string' ? getLevelObjectClass(ofType) : null;
   const [isPicking, setIsPicking] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -188,7 +188,7 @@ function ObjectIdField({
     const som = new SelectObjectMode(
       editManager,
       ObjectClass,
-      (object) => onChange(object.id),
+      object => onChange(object.id),
       () => {
         setIsPicking(false);
         editManager.overrideMode = false;
@@ -205,10 +205,10 @@ function ObjectIdField({
   return (
     <div className="flex items-center gap-2">
       <input
-        className="bg-gray-800 text-white px-2 rounded w-24"
+        className="w-24 rounded bg-gray-800 px-2 text-white"
         type="text"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       />
@@ -219,13 +219,13 @@ function ObjectIdField({
         disabled={!ObjectClass}
         title={
           isPicking
-            ? "Cancel picking"
+            ? 'Cancel picking'
             : ObjectClass
               ? `Pick an object of type ${ObjectClass.name}`
-              : "Pick an object"
+              : 'Pick an object'
         }
       >
-        {isPicking ? "Cancel" : "Pick"}
+        {isPicking ? 'Cancel' : 'Pick'}
       </button>
     </div>
   );

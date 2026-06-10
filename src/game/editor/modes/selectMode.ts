@@ -1,9 +1,9 @@
-import type { InteractionMode } from "./interactionMode";
-import type { PointerInfo } from "@/render/pointerEvents";
-import type { EditManager } from "../editManager";
-import { LevelObject } from "@/game/objects/levelObject";
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { LAYERS } from "@/game/levelConfig";
+import type { EditManager } from '../editManager';
+import type { InteractionMode } from './interactionMode';
+import { LAYERS } from '@/game/levelConfig';
+import { LevelObject } from '@/game/objects/levelObject';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import type { PointerInfo } from '@/render/pointerEvents';
 
 export class SelectMode implements InteractionMode {
   constructor(private editManager: EditManager) {}
@@ -18,10 +18,10 @@ export class SelectMode implements InteractionMode {
     const selectionRegion = this.editManager.getSelectionRegionAABB();
     if (!selectionRegion) return;
 
-    yield pass(LAYERS.EDITOR, (ctx) => {
+    yield pass(LAYERS.EDITOR, ctx => {
       ctx.save();
-      ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
-      ctx.strokeStyle = "#FFFFFF";
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 4]);
       ctx.fillRect(

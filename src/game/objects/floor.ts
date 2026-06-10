@@ -1,20 +1,20 @@
-import z from "zod";
-import { LAYERS } from "../levelConfig";
-import { PolyObject, PolyObjectSchema } from "./polyObject";
-import type { PathInfo } from "./levelObject";
-import { rgbSchema } from "@/utils/data";
-import { registerLevelObject } from "../levelObjectRegistry";
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { BatchObjectRenderer } from "@/render/batchObjectRenderer";
+import { LAYERS } from '../levelConfig';
+import { registerLevelObject } from '../levelObjectRegistry';
+import type { PathInfo } from './levelObject';
+import { PolyObject, PolyObjectSchema } from './polyObject';
+import { BatchObjectRenderer } from '@/render/batchObjectRenderer';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import { rgbSchema } from '@/utils/data';
+import z from 'zod';
 
 export const FloorSchema = PolyObjectSchema.extend({
-  floorColor: rgbSchema.default("#79b87b"),
+  floorColor: rgbSchema.default('#79b87b'),
 });
 
 export class Floor extends PolyObject<typeof FloorSchema> {
   static override schema = FloorSchema;
   static batchRenderer = new BatchObjectRenderer<Floor>(
-    (floor) => floor.data.floorColor,
+    floor => floor.data.floorColor,
   );
   static draggingFloors: Set<Floor> = new Set();
 
@@ -62,7 +62,7 @@ export class Floor extends PolyObject<typeof FloorSchema> {
     }
     path.closePath();
 
-    yield pass(LAYERS.FLOOR, (ctx) => {
+    yield pass(LAYERS.FLOOR, ctx => {
       ctx.fillStyle = this.data.floorColor;
       ctx.fill(path);
     });
@@ -78,8 +78,10 @@ export class Floor extends PolyObject<typeof FloorSchema> {
       yield* floor.renderDragging(info);
     }
 
-    for (const [color, paths] of Floor.batchRenderer.getPaths(info.visibleArea)) {
-      yield pass(LAYERS.FLOOR, (ctx) => {
+    for (const [color, paths] of Floor.batchRenderer.getPaths(
+      info.visibleArea,
+    )) {
+      yield pass(LAYERS.FLOOR, ctx => {
         ctx.fillStyle = color;
         for (const [path] of paths) {
           ctx.fill(path);
@@ -88,4 +90,4 @@ export class Floor extends PolyObject<typeof FloorSchema> {
     }
   }
 }
-registerLevelObject("floor", Floor);
+registerLevelObject('floor', Floor);

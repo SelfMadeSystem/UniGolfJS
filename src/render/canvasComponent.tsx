@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Renderer } from "./renderer";
+import { Renderer } from './renderer';
+import { useEffect, useState } from 'react';
 
 export function CanvasComponent() {
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
@@ -40,7 +40,5 @@ export function CanvasComponent() {
     };
   }, [canvas]);
 
-  return (
-    <canvas ref={setCanvas} className="absolute inset-0 w-full h-full" />
-  );
+  return <canvas ref={setCanvas} className="absolute inset-0 h-full w-full" />;
 }

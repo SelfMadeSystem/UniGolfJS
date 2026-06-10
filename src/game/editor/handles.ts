@@ -1,16 +1,16 @@
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { AABB } from "@/utils/aabb";
-import { Vector2 } from "@/utils/vec";
-import { LAYERS } from "../levelConfig";
-import type { EditScene } from "@/scenes/editScene";
-import { icons as mdiIcons } from "@iconify-json/mdi";
+import { LAYERS } from '../levelConfig';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import type { EditScene } from '@/scenes/editScene';
+import { AABB } from '@/utils/aabb';
+import { Vector2 } from '@/utils/vec';
+import { icons as mdiIcons } from '@iconify-json/mdi';
 
 export type HandleAction =
-  | "resize"
-  | "rotateCW"
-  | "rotateCCW"
-  | "delete"
-  | "copy";
+  | 'resize'
+  | 'rotateCW'
+  | 'rotateCCW'
+  | 'delete'
+  | 'copy';
 
 type IconName = keyof typeof mdiIcons.icons;
 
@@ -44,13 +44,7 @@ function drawIcon(
 
   ctx.save();
   ctx.fillStyle = color;
-  ctx.drawImage(
-    image,
-    aabb.tl.x,
-    aabb.tl.y,
-    aabb.width,
-    aabb.height,
-  );
+  ctx.drawImage(image, aabb.tl.x, aabb.tl.y, aabb.width, aabb.height);
   ctx.restore();
 }
 
@@ -77,7 +71,7 @@ class EditorHandle {
 
   *render(selectionAABB: AABB, info: RenderInfo) {
     const aabb = this.getAABB(selectionAABB);
-    yield pass(LAYERS.EDITOR, (ctx) => {
+    yield pass(LAYERS.EDITOR, ctx => {
       ctx.save();
       ctx.fillStyle = this.fillColor;
       ctx.beginPath();
@@ -89,7 +83,7 @@ class EditorHandle {
         4 / this.scene.cameraZoom,
       );
       ctx.fill();
-      drawIcon(ctx, this.iconName, aabb, "#111111");
+      drawIcon(ctx, this.iconName, aabb, '#111111');
       ctx.restore();
     });
   }
@@ -111,36 +105,36 @@ export class HandlesManager {
       new EditorHandle(
         scene,
         (aabb, size) => new AABB(aabb.br, aabb.br.add(new Vector2(size))),
-        "arrow-top-left-bottom-right",
-        "#FFFFFF",
-        "nwse-resize",
-        "resize",
+        'arrow-top-left-bottom-right',
+        '#FFFFFF',
+        'nwse-resize',
+        'resize',
       ),
       new EditorHandle(
         scene,
         (aabb, size) =>
           new AABB(aabb.tr, aabb.tr.add(new Vector2(size, -size))),
-        "rotate-left",
-        "#FFFFFF",
-        "pointer",
-        "rotateCCW",
+        'rotate-left',
+        '#FFFFFF',
+        'pointer',
+        'rotateCCW',
       ),
       new EditorHandle(
         scene,
         (aabb, size) =>
           new AABB(aabb.bl, aabb.bl.add(new Vector2(-size, size))),
-        "content-copy",
-        "#FFFFFF",
-        "pointer",
-        "copy",
+        'content-copy',
+        '#FFFFFF',
+        'pointer',
+        'copy',
       ),
       new EditorHandle(
         scene,
         (aabb, size) => new AABB(aabb.tl.sub(new Vector2(size)), aabb.tl),
-        "close",
-        "#FF5555",
-        "pointer",
-        "delete",
+        'close',
+        '#FF5555',
+        'pointer',
+        'delete',
       ),
     ];
   }

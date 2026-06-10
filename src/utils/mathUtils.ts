@@ -73,7 +73,7 @@ export function randomBool(probability = 0.5): boolean {
 export function randomId(length = 8): string {
   return Array.from({ length }, () =>
     Math.floor(Math.random() * 16).toString(16),
-  ).join("");
+  ).join('');
 }
 
 /**

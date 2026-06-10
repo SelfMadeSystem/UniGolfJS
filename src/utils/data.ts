@@ -1,5 +1,5 @@
-import { Vector2 } from "@/utils/vec";
-import z from "zod";
+import { Vector2 } from '@/utils/vec';
+import z from 'zod';
 
 export const Vec2Schema = z.codec(
   z.union([
@@ -26,11 +26,11 @@ export const rgbaSchema = z
   .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/);
 
 export const shapeSchema = z.enum([
-  "rectangle",
-  "triangle",
-  "quarterCircle",
-  "inverseQuarterCircle",
-  "circle",
+  'rectangle',
+  'triangle',
+  'quarterCircle',
+  'inverseQuarterCircle',
+  'circle',
 ]);
 export const rotationSchema = z.union([
   z.literal(0),

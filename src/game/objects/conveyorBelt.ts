@@ -1,16 +1,16 @@
-import z from "zod";
-import { LAYERS, WALL_CONFIG } from "../levelConfig";
-import { PolyObject, PolyObjectSchema } from "./polyObject";
-import type { PathInfo } from "./levelObject";
-import type { RigidBody } from "./rigidBody";
-import { positiveNumberSchema, Vec2Schema, rgbSchema } from "@/utils/data";
-import { registerLevelObject } from "../levelObjectRegistry";
-import { Vector2 } from "@/utils/vec";
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
+import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { registerLevelObject } from '../levelObjectRegistry';
+import type { PathInfo } from './levelObject';
+import { PolyObject, PolyObjectSchema } from './polyObject';
+import type { RigidBody } from './rigidBody';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import { Vec2Schema, positiveNumberSchema, rgbSchema } from '@/utils/data';
+import { Vector2 } from '@/utils/vec';
+import z from 'zod';
 
 export const ConveyorBeltSchema = PolyObjectSchema.extend({
-  conveyorColor: rgbSchema.default("#4a90e2"),
-  conveyorArrowColor: rgbSchema.default("#357ABD"),
+  conveyorColor: rgbSchema.default('#4a90e2'),
+  conveyorArrowColor: rgbSchema.default('#357ABD'),
   conveyorDirection: Vec2Schema.default(new Vector2(1, 0)),
   conveyorSpeed: positiveNumberSchema.default(7.5),
   conveyorAccel: positiveNumberSchema.default(0.2),
@@ -30,10 +30,10 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
 
     const size = 25 * ARROW_UPSCALE; // Base size of the arrow pattern
     // Create a temporary canvas to draw the arrow pattern
-    const tempCanvas = document.createElement("canvas");
+    const tempCanvas = document.createElement('canvas');
     tempCanvas.width = size;
     tempCanvas.height = size;
-    const ctx = tempCanvas.getContext("2d")!;
+    const ctx = tempCanvas.getContext('2d')!;
     ctx.fillStyle = color;
 
     // Draw an arrow pointing in the direction of the conveyor
@@ -54,7 +54,7 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
     }
     ctx.fill();
 
-    const pattern = ctx.createPattern(tempCanvas, "repeat")!;
+    const pattern = ctx.createPattern(tempCanvas, 'repeat')!;
     return pattern;
   }
 
@@ -70,7 +70,7 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
     return {
       outlineLayer: -1,
       fillLayer: LAYERS.OBJECTS_1,
-      outlineColor: "#00000000",
+      outlineColor: '#00000000',
       fillColor: this.data.conveyorColor,
       height: 0,
       shadow: WALL_CONFIG.shadow,
@@ -83,7 +83,7 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
     const { tickWithInterp } = info;
 
     // Draw animated directional arrows using pattern
-    yield pass(LAYERS.OBJECTS_3, (ctx) => {
+    yield pass(LAYERS.OBJECTS_3, ctx => {
       const path = this.getPath();
       const direction = this.data.conveyorDirection.normalize();
       const pattern = ConveyorBelt.getArrowPattern(
@@ -131,12 +131,12 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
 
   override editorRotateShapeCCW(): void {
     super.editorRotateShapeCCW();
-    this.set("conveyorDirection", this.data.conveyorDirection.cw90());
+    this.set('conveyorDirection', this.data.conveyorDirection.cw90());
   }
 
   override editorRotateShapeCW(): void {
     super.editorRotateShapeCW();
-    this.set("conveyorDirection", this.data.conveyorDirection.ccw90());
+    this.set('conveyorDirection', this.data.conveyorDirection.ccw90());
   }
 }
-registerLevelObject("conveyorBelt", ConveyorBelt);
+registerLevelObject('conveyorBelt', ConveyorBelt);

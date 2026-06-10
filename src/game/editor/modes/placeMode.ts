@@ -1,14 +1,14 @@
-import type { InteractionMode } from "./interactionMode";
-import type { PointerInfo } from "@/render/pointerEvents";
-import type { EditManager } from "../editManager";
-import { Vector2 } from "@/utils/vec";
-import { AABB } from "@/utils/aabb";
-import type { Placeable } from "../placeables";
-import { LevelObject } from "@/game/objects/levelObject";
-import { Portal } from "@/game/objects/portal";
-import { $selectedPlaceable } from "../state";
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { LAYERS } from "@/game/levelConfig";
+import type { EditManager } from '../editManager';
+import type { Placeable } from '../placeables';
+import { $selectedPlaceable } from '../state';
+import type { InteractionMode } from './interactionMode';
+import { LAYERS } from '@/game/levelConfig';
+import { LevelObject } from '@/game/objects/levelObject';
+import { Portal } from '@/game/objects/portal';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import type { PointerInfo } from '@/render/pointerEvents';
+import { AABB } from '@/utils/aabb';
+import { Vector2 } from '@/utils/vec';
 
 export class PlaceMode implements InteractionMode {
   private isPlacingSize = false;
@@ -24,10 +24,10 @@ export class PlaceMode implements InteractionMode {
           object instanceof Portal && object !== newPortal,
       );
 
-    if (!previousPortal || previousPortal.get("pairedPortalId")) return;
+    if (!previousPortal || previousPortal.get('pairedPortalId')) return;
 
-    previousPortal.set("pairedPortalId", newPortal.id);
-    newPortal.set("pairedPortalId", previousPortal.id);
+    previousPortal.set('pairedPortalId', newPortal.id);
+    newPortal.set('pairedPortalId', previousPortal.id);
   }
 
   constructor(private editManager: EditManager) {}
@@ -37,10 +37,10 @@ export class PlaceMode implements InteractionMode {
     const selectionRegion = this.editManager.getSelectionRegionAABB();
     if (!selectionRegion) return;
 
-    yield pass(LAYERS.EDITOR, (ctx) => {
+    yield pass(LAYERS.EDITOR, ctx => {
       ctx.save();
-      ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
-      ctx.strokeStyle = "#FFFFFF";
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.strokeStyle = '#FFFFFF';
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 4]);
       ctx.fillRect(
@@ -89,7 +89,7 @@ export class PlaceMode implements InteractionMode {
 
     const placeable = $selectedPlaceable.get();
     if (!placeable) {
-      console.warn("No placeable selected");
+      console.warn('No placeable selected');
       this.isPlacingSize = false;
       return;
     }
@@ -129,7 +129,7 @@ export class PlaceMode implements InteractionMode {
     const placeable = $selectedPlaceable.get();
 
     if (!placeable) {
-      console.warn("No placeable selected");
+      console.warn('No placeable selected');
       return;
     }
 
@@ -157,6 +157,6 @@ export class PlaceMode implements InteractionMode {
 
     // Snap to grid
     newObj.editorSnapToGrid(scene.editorGrid.gridSize);
-    newObj.set("position", newObj.pos);
+    newObj.set('position', newObj.pos);
   }
 }

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
-import { useStore } from "@nanostores/react";
-import { $fpsTickCounter } from "@/stores/fpsChart";
+import { $fpsTickCounter } from '@/stores/fpsChart';
+import { useStore } from '@nanostores/react';
+import { useEffect, useRef } from 'react';
 
 type FpsChartProps = {
   className?: string;
@@ -26,7 +26,7 @@ export function FpsChart({
   latestTickCounterRef.current = fpsTickCounter;
 
   const drawChart = (canvas: HTMLCanvasElement) => {
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const width = canvas.clientWidth;
@@ -50,13 +50,13 @@ export function FpsChart({
     const chartWidth = width - padding * 2;
     const barWidth = chartWidth / historySize;
 
-    ctx.fillStyle = "rgba(0,0,0,0.65)";
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
     ctx.fillRect(0, 0, width, height);
 
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.45)";
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
     ctx.lineWidth = 0.5;
-    tickMarkers.current.forEach((markerIndex) => {
+    tickMarkers.current.forEach(markerIndex => {
       if (markerIndex < 0 || markerIndex >= history.length) return;
       const x = padding + markerIndex * barWidth;
       ctx.beginPath();
@@ -71,7 +71,7 @@ export function FpsChart({
     const max = Math.max(...history);
     const avg = history.reduce((sum, fps) => sum + fps, 0) / history.length;
 
-    ctx.strokeStyle = "#22c55e";
+    ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 2;
     ctx.beginPath();
 
@@ -85,9 +85,9 @@ export function FpsChart({
 
     ctx.stroke();
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "12px ui-sans-serif, system-ui";
-    ctx.textBaseline = "top";
+    ctx.fillStyle = '#fff';
+    ctx.font = '12px ui-sans-serif, system-ui';
+    ctx.textBaseline = 'top';
     ctx.fillText(`${latest.toFixed(1)} FPS`, padding, padding);
     ctx.fillText(`avg ${avg.toFixed(1)}`, padding, padding + 14);
     ctx.fillText(`min ${min.toFixed(1)}`, padding + 72, padding + 14);
@@ -108,8 +108,8 @@ export function FpsChart({
         if (history.length > historySize) {
           history.shift();
           tickMarkers.current = tickMarkers.current
-            .map((marker) => marker - 1)
-            .filter((marker) => marker >= 0);
+            .map(marker => marker - 1)
+            .filter(marker => marker >= 0);
         }
       }
 
@@ -141,13 +141,13 @@ export function FpsChart({
     <div
       className={className}
       style={{
-        position: "relative",
-        width: "240px",
-        height: "120px",
-        pointerEvents: "none",
+        position: 'relative',
+        width: '240px',
+        height: '120px',
+        pointerEvents: 'none',
       }}
     >
-      <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} />
+      <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
     </div>
   );
 }

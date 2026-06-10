@@ -1,8 +1,8 @@
-import type { InteractionMode } from "./interactionMode";
-import type { PointerInfo } from "@/render/pointerEvents";
-import { Vector2 } from "@/utils/vec";
-import { AABB } from "@/utils/aabb";
-import type { EditManager } from "../editManager";
+import type { EditManager } from '../editManager';
+import type { InteractionMode } from './interactionMode';
+import type { PointerInfo } from '@/render/pointerEvents';
+import { AABB } from '@/utils/aabb';
+import { Vector2 } from '@/utils/vec';
 
 export class ResizeMode implements InteractionMode {
   constructor(private editManager: EditManager) {}
@@ -18,13 +18,13 @@ export class ResizeMode implements InteractionMode {
 
     if (
       this.editManager.selectedObjects.size === 1 &&
-      "doesntScale" in this.editManager.selectedObjects.values().next().value!
+      'doesntScale' in this.editManager.selectedObjects.values().next().value!
     )
       return;
 
     const hasScale =
       this.editManager.selectedObjects.size > 1 ||
-      "scale" in
+      'scale' in
         this.editManager.selectedObjects.values().next().value!.getData();
 
     const minSize = 1;
@@ -68,7 +68,7 @@ export class ResizeMode implements InteractionMode {
     }
 
     for (const obj of this.editManager.selectedObjects) {
-      obj.set("position", obj.pos);
+      obj.set('position', obj.pos);
       obj.stopDragging();
     }
 

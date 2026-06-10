@@ -1,12 +1,12 @@
-import z from "zod";
-import { LAYERS, WALL_CONFIG } from "../levelConfig";
-import { PolyObject, PolyObjectSchema } from "./polyObject";
-import type { PathInfo } from "./levelObject";
-import type { RigidBody } from "./rigidBody";
-import { blendColors } from "@/utils/colorUtils";
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { registerLevelObject } from "../levelObjectRegistry";
-import { numberSchema } from "@/utils/data";
+import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { registerLevelObject } from '../levelObjectRegistry';
+import type { PathInfo } from './levelObject';
+import { PolyObject, PolyObjectSchema } from './polyObject';
+import type { RigidBody } from './rigidBody';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import { blendColors } from '@/utils/colorUtils';
+import { numberSchema } from '@/utils/data';
+import z from 'zod';
 
 export const BoostSchema = PolyObjectSchema.extend({
   speed: numberSchema.default(60),
@@ -14,8 +14,8 @@ export const BoostSchema = PolyObjectSchema.extend({
 // TODO: put these in a better place
 export const BOOST_EFFECT_TIME = 10; // frames
 
-const C1 = "#66FF00";
-const C2 = "#FFFF00";
+const C1 = '#66FF00';
+const C2 = '#FFFF00';
 
 export class Boost extends PolyObject<typeof BoostSchema> {
   static override schema = BoostSchema;
@@ -38,7 +38,7 @@ export class Boost extends PolyObject<typeof BoostSchema> {
 
   override *render(info: RenderInfo): Iterable<RenderPass> {
     yield* this.polyRender(info);
-    yield pass(LAYERS.OBJECTS_3, (ctx) => {
+    yield pass(LAYERS.OBJECTS_3, ctx => {
       const { tickWithInterp } = info;
       const path = this.getPath();
       const gradient = ctx.createRadialGradient(
@@ -52,7 +52,7 @@ export class Boost extends PolyObject<typeof BoostSchema> {
 
       const t = tickWithInterp / 15;
 
-      const c1 = blendColors(C1 + "00", C2, this.boostTime / BOOST_EFFECT_TIME);
+      const c1 = blendColors(C1 + '00', C2, this.boostTime / BOOST_EFFECT_TIME);
 
       gradient.addColorStop(
         0,
@@ -75,7 +75,7 @@ export class Boost extends PolyObject<typeof BoostSchema> {
       heightLayer: 0,
       outlineLayer: LAYERS.OBJECTS_1,
       fillLayer: LAYERS.OBJECTS_2,
-      outlineColor: "#00FF00",
+      outlineColor: '#00FF00',
       fillColor: blendColors(C1, C2, this.boostTime / BOOST_EFFECT_TIME),
       height: 0,
       outline: WALL_CONFIG.outline,
@@ -94,4 +94,4 @@ export class Boost extends PolyObject<typeof BoostSchema> {
     this.boostTime = 0;
   }
 }
-registerLevelObject("boost", Boost);
+registerLevelObject('boost', Boost);

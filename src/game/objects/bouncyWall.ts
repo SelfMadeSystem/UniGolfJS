@@ -1,18 +1,18 @@
-import z from "zod";
-import { LAYERS, WALL_CONFIG } from "../levelConfig";
-import { PolyObject, PolyObjectSchema, type CollisionInfo } from "./polyObject";
-import type { PathInfo } from "./levelObject";
-import { numberSchema, rgbSchema } from "@/utils/data";
-import { registerLevelObject } from "../levelObjectRegistry";
-import type { RigidBody } from "./rigidBody";
-import type { Vector2 } from "@/utils/vec";
-import type { RenderInfo, RenderPass } from "@/render/drawable";
-import { blendColors } from "@/utils/colorUtils";
+import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { registerLevelObject } from '../levelObjectRegistry';
+import type { PathInfo } from './levelObject';
+import { type CollisionInfo, PolyObject, PolyObjectSchema } from './polyObject';
+import type { RigidBody } from './rigidBody';
+import type { RenderInfo, RenderPass } from '@/render/drawable';
+import { blendColors } from '@/utils/colorUtils';
+import { numberSchema, rgbSchema } from '@/utils/data';
+import type { Vector2 } from '@/utils/vec';
+import z from 'zod';
 
 export const BouncyWallSchema = PolyObjectSchema.extend({
-  bouncyWallColor: rgbSchema.default("#ff6b6b"),
-  bouncyWallBoostColor: rgbSchema.default("#ff8787"),
-  bouncyWallOutlineColor: rgbSchema.default("#cc5555"),
+  bouncyWallColor: rgbSchema.default('#ff6b6b'),
+  bouncyWallBoostColor: rgbSchema.default('#ff8787'),
+  bouncyWallOutlineColor: rgbSchema.default('#cc5555'),
   speed: numberSchema.default(60),
 });
 
@@ -57,14 +57,11 @@ export class BouncyWall extends PolyObject<typeof BouncyWallSchema> {
     };
   }
 
-  override onCollision(
-    rigidBody: RigidBody,
-  ) {
-    if (rigidBody.velocity.length() === 0)
-      return;
+  override onCollision(rigidBody: RigidBody) {
+    if (rigidBody.velocity.length() === 0) return;
 
     this.boostTime = BOOST_EFFECT_TIME;
     rigidBody.velocity = rigidBody.velocity.setLength(this.data.speed);
   }
 }
-registerLevelObject("bouncyWall", BouncyWall);
+registerLevelObject('bouncyWall', BouncyWall);

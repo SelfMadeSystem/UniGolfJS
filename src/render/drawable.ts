@@ -1,4 +1,4 @@
-import type { AABB } from "@/utils/aabb";
+import type { AABB } from '@/utils/aabb';
 
 export type RenderPass = {
   layer: number;

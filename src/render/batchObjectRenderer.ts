@@ -1,8 +1,8 @@
-import { unionPolygons } from "@/utils/shapeUtils";
-import { ClusteredRBush, type Cluster } from "@/utils/spatialUtils";
-import type { PolyObject } from "@/game/objects/polyObject";
-import type { AABB } from "@/utils/aabb";
-import type { Vector2 } from "@/utils/vec";
+import type { PolyObject } from '@/game/objects/polyObject';
+import type { AABB } from '@/utils/aabb';
+import { unionPolygons } from '@/utils/shapeUtils';
+import { type Cluster, ClusteredRBush } from '@/utils/spatialUtils';
+import type { Vector2 } from '@/utils/vec';
 
 export class BatchObjectRenderer<T extends PolyObject<any>> {
   public rbushes: Map<string, ClusteredRBush<T>> = new Map();
@@ -10,7 +10,7 @@ export class BatchObjectRenderer<T extends PolyObject<any>> {
     new Map();
   public objToColor: Map<T, string> = new Map();
 
-  constructor(public colorFunc: (obj: T) => string = () => "\0") {}
+  constructor(public colorFunc: (obj: T) => string = () => '\0') {}
 
   public addObject(obj: T) {
     const color = this.colorFunc(obj);
@@ -76,7 +76,7 @@ function* getPathsImpl<T extends PolyObject<any>>(
     if (cache) {
       yield cache;
     } else {
-      const polygons = Array.from(cluster.items, (floor) => floor.getPoints());
+      const polygons = Array.from(cluster.items, floor => floor.getPoints());
       const union = unionPolygons(polygons);
       const path = new Path2D();
       for (const polygon of union) {

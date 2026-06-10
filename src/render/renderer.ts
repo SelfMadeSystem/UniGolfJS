@@ -1,8 +1,8 @@
-import { $scene } from "@/scenes/state";
-import type { CanvasRenderInfo } from "./drawable";
-import { Vector2 } from "@/utils/vec";
-import { atom } from "nanostores";
-import type { PointerInfo } from "./pointerEvents";
+import type { CanvasRenderInfo } from './drawable';
+import type { PointerInfo } from './pointerEvents';
+import { $scene } from '@/scenes/state';
+import { Vector2 } from '@/utils/vec';
+import { atom } from 'nanostores';
 
 export const $renderer = atom<Renderer | null>(null);
 
@@ -18,12 +18,12 @@ export class Renderer {
   public lastRenderInfo: CanvasRenderInfo | null = null;
 
   constructor(public readonly canvas: HTMLCanvasElement) {
-    this.ctx = canvas.getContext("2d")!;
+    this.ctx = canvas.getContext('2d')!;
     if (!this.ctx) {
-      throw new Error("Failed to get 2D context");
+      throw new Error('Failed to get 2D context');
     }
     if ($renderer.get()) {
-      console.warn("Multiple renderers created, this may cause problems");
+      console.warn('Multiple renderers created, this may cause problems');
     }
     $renderer.set(this);
   }
@@ -87,24 +87,24 @@ export class Renderer {
         ctrl: e.ctrlKey,
         alt: e.altKey,
         event: e,
-        eventType: "pointerwheel",
+        eventType: 'pointerwheel',
       });
     };
 
-    window.addEventListener("pointerdown", pointerDownHandler);
-    window.addEventListener("pointermove", pointerMoveHandler);
-    window.addEventListener("pointerup", pointerUpHandler);
-    window.addEventListener("keydown", keyDownHandler);
+    window.addEventListener('pointerdown', pointerDownHandler);
+    window.addEventListener('pointermove', pointerMoveHandler);
+    window.addEventListener('pointerup', pointerUpHandler);
+    window.addEventListener('keydown', keyDownHandler);
     // wheel on canvas for zoom towards pointer
-    this.ctx.canvas.addEventListener("wheel", wheelHandler, { passive: false });
+    this.ctx.canvas.addEventListener('wheel', wheelHandler, { passive: false });
 
     this.stopCbs.push(() => {
-      window.removeEventListener("pointerdown", pointerDownHandler);
-      window.removeEventListener("pointermove", pointerMoveHandler);
-      window.removeEventListener("pointerup", pointerUpHandler);
-      window.removeEventListener("keydown", keyDownHandler);
+      window.removeEventListener('pointerdown', pointerDownHandler);
+      window.removeEventListener('pointermove', pointerMoveHandler);
+      window.removeEventListener('pointerup', pointerUpHandler);
+      window.removeEventListener('keydown', keyDownHandler);
       this.ctx.canvas.removeEventListener(
-        "wheel",
+        'wheel',
         wheelHandler as EventListener,
       );
     });
@@ -155,7 +155,7 @@ export class Renderer {
       ctrl: event.ctrlKey,
       alt: event.altKey,
       event,
-      eventType: event.type as "pointerdown" | "pointermove" | "pointerup",
+      eventType: event.type as 'pointerdown' | 'pointermove' | 'pointerup',
     };
   }
 

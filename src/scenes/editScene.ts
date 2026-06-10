@@ -1,12 +1,12 @@
-import type { Level } from "@/game/levelConfig";
-import { LevelScene } from "./levelScene";
-import { EditMenu } from "@/ui/EditMenu";
-import { EditManager } from "@/game/editor/editManager";
-import { EditorGrid } from "@/game/editor/editorGrid";
-import type { PointerInfo } from "@/render/pointerEvents";
-import { $selectedPlaceable } from "@/game/editor/state";
-import { defaultPlaceable } from "@/game/editor/placeables";
-import { Vector2 } from "@/utils/vec";
+import { LevelScene } from './levelScene';
+import { EditManager } from '@/game/editor/editManager';
+import { EditorGrid } from '@/game/editor/editorGrid';
+import { defaultPlaceable } from '@/game/editor/placeables';
+import { $selectedPlaceable } from '@/game/editor/state';
+import type { Level } from '@/game/levelConfig';
+import type { PointerInfo } from '@/render/pointerEvents';
+import { EditMenu } from '@/ui/EditMenu';
+import { Vector2 } from '@/utils/vec';
 
 export class EditScene extends LevelScene {
   public editManager: EditManager = new EditManager(this);
@@ -31,7 +31,7 @@ export class EditScene extends LevelScene {
   }
 
   override pointermove(info: PointerInfo<PointerEvent>): void {
-    if (info.event.pointerType === "touch") {
+    if (info.event.pointerType === 'touch') {
       // Ignore touch move events for pointers that never received pointerdown
       // (e.g. browser scrolling inside a scrollable container).
       if (!this.activeTouchPointers.has(info.event.pointerId)) {
@@ -89,7 +89,7 @@ export class EditScene extends LevelScene {
   }
 
   override pointerdown(info: PointerInfo<PointerEvent>): void {
-    if (info.event.pointerType === "touch") {
+    if (info.event.pointerType === 'touch') {
       this.activeTouchPointers.set(info.event.pointerId, info.pos);
 
       if (this.activeTouchPointers.size <= 1) {
@@ -106,7 +106,7 @@ export class EditScene extends LevelScene {
   }
 
   override pointerup(info: PointerInfo<PointerEvent>): void {
-    if (info.event.pointerType === "touch") {
+    if (info.event.pointerType === 'touch') {
       // Ignore touch end events for pointers that never started in-scene.
       if (!this.activeTouchPointers.has(info.event.pointerId)) {
         return;

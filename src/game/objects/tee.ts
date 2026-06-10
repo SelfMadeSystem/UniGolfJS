@@ -1,23 +1,23 @@
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { Vector2 } from "@/utils/vec";
-import { LevelObject, LevelObjectSchema } from "./levelObject";
-import z from "zod";
-import { LAYERS } from "../levelConfig";
-import { getLevelScene } from "@/scenes/state";
-import { AABB } from "@/utils/aabb";
-import { PlayerBall } from "./playerBall";
+import { LAYERS } from '../levelConfig';
+import { registerLevelObject } from '../levelObjectRegistry';
+import { LevelObject, LevelObjectSchema } from './levelObject';
+import { PlayerBall } from './playerBall';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import type { PointerInfo } from '@/render/pointerEvents';
+import type { LevelScene } from '@/scenes/levelScene';
+import { getLevelScene } from '@/scenes/state';
+import { AABB } from '@/utils/aabb';
 import {
+  Vec2Schema,
   booleanSchema,
   positiveNumberSchema,
   rgbSchema,
-  Vec2Schema,
-} from "@/utils/data";
-import { registerLevelObject } from "../levelObjectRegistry";
-import type { LevelScene } from "@/scenes/levelScene";
-import type { PointerInfo } from "@/render/pointerEvents";
+} from '@/utils/data';
+import { Vector2 } from '@/utils/vec';
+import z from 'zod';
 
 const TeeSchema = LevelObjectSchema.extend({
-  teeColor: rgbSchema.default("#f79d60"),
+  teeColor: rgbSchema.default('#f79d60'),
   radius: positiveNumberSchema.default(9),
   active: booleanSchema.default(false),
   cameraZoom: positiveNumberSchema.default(1),
@@ -96,7 +96,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   }
 
   override *render(info: RenderInfo): Iterable<RenderPass> {
-    yield pass(LAYERS.TEE, (ctx) => {
+    yield pass(LAYERS.TEE, ctx => {
       const { teeColor } = this.data;
       ctx.fillStyle = teeColor;
       this.getAABB().fillRect(ctx);
@@ -104,7 +104,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
 
     const scene = getLevelScene();
     if (scene && scene.activeTee === this && !this.ball) {
-      yield pass(LAYERS.TEE, (ctx) => {
+      yield pass(LAYERS.TEE, ctx => {
         ctx.fillStyle = `rgba(0, 0, 0, ${Math.sin(info.tickWithInterp * 0.1) * 0.1 + 0.2})`;
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.data.radius, 0, Math.PI * 2);
@@ -112,10 +112,10 @@ export class Tee extends LevelObject<typeof TeeSchema> {
       });
     }
 
-    yield pass(LAYERS.INDICATORS, (ctx) => {
+    yield pass(LAYERS.INDICATORS, ctx => {
       if (!this.driverPos || !this.ball) return;
-      ctx.strokeStyle = "#444";
-      ctx.fillStyle = "#bbb";
+      ctx.strokeStyle = '#444';
+      ctx.fillStyle = '#bbb';
       ctx.lineWidth = 1;
       ctx.save();
       ctx.translate(...this.driverPos.a);
@@ -160,7 +160,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     this.driverPos = null;
     this.shot = true;
 
-    if (sceneReset && this.get("active")) {
+    if (sceneReset && this.get('active')) {
       this.activate(scene);
       this.focusCamera(true, scene);
     }
@@ -186,4 +186,4 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     // no op for the tee
   }
 }
-registerLevelObject("tee", Tee);
+registerLevelObject('tee', Tee);

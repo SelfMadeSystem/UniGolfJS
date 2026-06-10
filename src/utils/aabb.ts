@@ -1,5 +1,5 @@
-import { lineLineIntersection } from "./line";
-import { Vector2, type VecLike } from "./vec";
+import { lineLineIntersection } from './line';
+import { type VecLike, Vector2 } from './vec';
 
 export class AABB {
   public readonly tl: Vector2;

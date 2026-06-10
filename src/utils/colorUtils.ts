@@ -4,7 +4,7 @@ export type RGBA = {
   g: number;
   b: number;
   a: number;
-}
+};
 
 export function hexToRGBA(hex: HexColor): RGBA {
   if (hex.length === 4) {
@@ -30,13 +30,13 @@ export function hexToRGBA(hex: HexColor): RGBA {
     const a = parseInt(hex.slice(7, 9), 16);
     return { r, g, b, a };
   } else {
-    throw new Error("Invalid hex color format");
+    throw new Error('Invalid hex color format');
   }
 }
 
 export function rgbaToHex({ r, g, b, a }: RGBA): HexColor {
-  const alphaHex = a.toString(16).padStart(2, "0");
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}${alphaHex}`;
+  const alphaHex = a.toString(16).padStart(2, '0');
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}${alphaHex}`;
 }
 
 export function blendColors(

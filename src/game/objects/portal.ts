@@ -1,20 +1,20 @@
-import z from "zod";
-import { LAYERS, WALL_CONFIG } from "../levelConfig";
-import type { PathInfo } from "./levelObject";
-import type { RigidBody } from "./rigidBody";
-import { CircleObject, CircleObjectSchema } from "./circleObject";
-import { objectIdSchema, positiveNumberSchema, rgbSchema } from "@/utils/data";
-import { registerLevelObject } from "../levelObjectRegistry";
-import { getLevelScene } from "@/scenes/state";
-import { blendColors } from "@/utils/colorUtils";
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
+import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { registerLevelObject } from '../levelObjectRegistry';
+import { CircleObject, CircleObjectSchema } from './circleObject';
+import type { PathInfo } from './levelObject';
+import type { RigidBody } from './rigidBody';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import { getLevelScene } from '@/scenes/state';
+import { blendColors } from '@/utils/colorUtils';
+import { objectIdSchema, positiveNumberSchema, rgbSchema } from '@/utils/data';
+import z from 'zod';
 
 export const PortalSchema = CircleObjectSchema.extend({
-  portalColor: rgbSchema.default("#a855f7"),
-  portalOutlineColor: rgbSchema.default("#7c3aed"),
-  portalAccentColor: rgbSchema.default("#e9d5ff"),
+  portalColor: rgbSchema.default('#a855f7'),
+  portalOutlineColor: rgbSchema.default('#7c3aed'),
+  portalAccentColor: rgbSchema.default('#e9d5ff'),
   radius: positiveNumberSchema.default(25),
-  pairedPortalId: objectIdSchema.optional().meta({ ofType: "portal" }),
+  pairedPortalId: objectIdSchema.optional().meta({ ofType: 'portal' }),
 });
 
 export const EFFECT_TIME = 10; // frames
@@ -63,7 +63,7 @@ export class Portal extends CircleObject<typeof PortalSchema> {
     const { tickWithInterp } = info;
 
     // Add animated portal effect
-    yield pass(LAYERS.OBJECTS_3, (ctx) => {
+    yield pass(LAYERS.OBJECTS_3, ctx => {
       const gradient = ctx.createRadialGradient(
         this.pos.x,
         this.pos.y,
@@ -76,7 +76,7 @@ export class Portal extends CircleObject<typeof PortalSchema> {
       const t = tickWithInterp / 15;
       const c2 = this.data.portalAccentColor;
       const c1 = blendColors(
-        this.data.portalColor + "00",
+        this.data.portalColor + '00',
         c2,
         this.effectTime / EFFECT_TIME,
       );
@@ -132,10 +132,7 @@ export class Portal extends CircleObject<typeof PortalSchema> {
 
     // Teleport the rigid body to the paired portal
     rigidBody.pos = pairedPortal.pos.add(
-      rigidBody.pos
-        .sub(this.pos)
-        .div(this.radius)
-        .mult(pairedPortal.radius),
+      rigidBody.pos.sub(this.pos).div(this.radius).mult(pairedPortal.radius),
     );
     rigidBody.prevPos = rigidBody.pos;
 
@@ -150,4 +147,4 @@ export class Portal extends CircleObject<typeof PortalSchema> {
     this.teleportedBodies.clear();
   }
 }
-registerLevelObject("portal", Portal);
+registerLevelObject('portal', Portal);

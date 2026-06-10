@@ -1,5 +1,5 @@
-import type { LevelObject } from "@/game/objects/levelObject";
-import RBush, { type BBox } from "rbush";
+import type { LevelObject } from '@/game/objects/levelObject';
+import RBush, { type BBox } from 'rbush';
 
 /**
  * A cluster of spatially adjacent items.
@@ -67,7 +67,7 @@ export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
   override load(items: readonly T[]): RBush<T> {
     for (const item of items) {
       if (this.itemAabbCache.has(item)) {
-        console.warn("Loading item that already exists in RBush:", item);
+        console.warn('Loading item that already exists in RBush:', item);
       }
       this.itemAabbCache.set(item, item.getAABB());
     }
@@ -76,7 +76,7 @@ export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
 
   override insert(item: T): RBush<T> {
     if (this.itemAabbCache.has(item)) {
-      console.warn("Inserting item that already exists in RBush:", item);
+      console.warn('Inserting item that already exists in RBush:', item);
     }
     this.itemAabbCache.set(item, item.getAABB());
     return super.insert(item);

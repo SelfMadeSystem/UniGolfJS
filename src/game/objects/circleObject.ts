@@ -1,11 +1,11 @@
-import z from "zod";
-import { Vector2 } from "@/utils/vec";
-import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
-import { LAYERS } from "../levelConfig";
-import type { RigidBody } from "./rigidBody";
-import { AABB } from "@/utils/aabb";
-import { positiveNumberSchema } from "@/utils/data";
+import { LAYERS } from '../levelConfig';
+import { LevelObject, LevelObjectSchema, type PathInfo } from './levelObject';
+import type { RigidBody } from './rigidBody';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import { AABB } from '@/utils/aabb';
+import { positiveNumberSchema } from '@/utils/data';
+import { Vector2 } from '@/utils/vec';
+import z from 'zod';
 
 export const CircleObjectSchema = LevelObjectSchema.extend({
   radius: positiveNumberSchema.default(10),
@@ -24,7 +24,7 @@ export abstract class CircleObject<
   constructor(options: z.input<SchemaType>) {
     super(options);
     //@ts-expect-error abstract classes don't work well with generic schemas
-    this.on("radius", () => {
+    this.on('radius', () => {
       this.emitAabbChange();
     });
   }
@@ -96,8 +96,8 @@ export abstract class CircleObject<
     });
 
     if (this.data.debug) {
-      yield pass(LAYERS.DEBUG, (ctx) => {
-        ctx.strokeStyle = "#f00";
+      yield pass(LAYERS.DEBUG, ctx => {
+        ctx.strokeStyle = '#f00';
         ctx.lineWidth = 0.5;
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.data.radius, 0, Math.PI * 2);
@@ -119,6 +119,6 @@ export abstract class CircleObject<
 
   override editorScale(scale: Vector2): void {
     // @ts-expect-error abstract classes don't work well with generic schemas
-    this.set("radius", (this.radius * (scale.x + scale.y)) / 2);
+    this.set('radius', (this.radius * (scale.x + scale.y)) / 2);
   }
 }

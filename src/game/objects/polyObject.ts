@@ -1,11 +1,11 @@
-import z from "zod";
-import { Vector2 } from "@/utils/vec";
-import { LevelObject, LevelObjectSchema, type PathInfo } from "./levelObject";
-import type { RenderInfo, RenderPass } from "@/render/drawable";
-import { Segment } from "@/utils/line";
-import type { RigidBody } from "./rigidBody";
-import { rotationSchema, shapeSchema, Vec2Schema } from "@/utils/data";
-import { AABB } from "@/utils/aabb";
+import { LevelObject, LevelObjectSchema, type PathInfo } from './levelObject';
+import type { RigidBody } from './rigidBody';
+import type { RenderInfo, RenderPass } from '@/render/drawable';
+import { AABB } from '@/utils/aabb';
+import { Vec2Schema, rotationSchema, shapeSchema } from '@/utils/data';
+import { Segment } from '@/utils/line';
+import { Vector2 } from '@/utils/vec';
+import z from 'zod';
 
 export type CollisionInfo = {
   hit: Vector2;
@@ -17,22 +17,22 @@ export type CollisionInfo = {
 
 export const PolyObjectSchema = LevelObjectSchema.extend({
   scale: Vec2Schema.default(new Vector2(40, 40)),
-  shape: shapeSchema.default("rectangle"),
+  shape: shapeSchema.default('rectangle'),
   rotation: rotationSchema.default(0),
 });
 
 const CCW_ROT_TABLE = {
-  "0": 90,
-  "90": 180,
-  "180": 270,
-  "270": 0,
+  '0': 90,
+  '90': 180,
+  '180': 270,
+  '270': 0,
 } as const;
 
 const CW_ROT_TABLE = {
-  "0": 270,
-  "90": 0,
-  "180": 90,
-  "270": 180,
+  '0': 270,
+  '90': 0,
+  '180': 90,
+  '270': 180,
 } as const;
 
 const baseQuarterCirclePoints = Array.from({ length: 16 }, (_, i) => {
@@ -71,7 +71,7 @@ export abstract class PolyObject<
   constructor(options: z.input<SchemaType>) {
     super(options);
     //@ts-expect-error abstract classes don't work well with generic schemas
-    this.on("scale", () => {
+    this.on('scale', () => {
       this.emitAabbChange();
     });
   }
@@ -91,7 +91,7 @@ export abstract class PolyObject<
   getPoints(): Vector2[] {
     const { shape, rotation } = this.data;
     const basePoints = SHAPE_POINTS[shape];
-    return basePoints.map((p) =>
+    return basePoints.map(p =>
       p.rot90(rotation).mult(this.scale).add(this.pos),
     );
   }
@@ -330,30 +330,30 @@ export abstract class PolyObject<
 
   override editorScale(scale: Vector2): void {
     // @ts-expect-error abstract classes don't work well with generic schemas
-    this.set("scale", this.scale.mult(scale));
+    this.set('scale', this.scale.mult(scale));
   }
 
   override editorRotateCW(): void {
     this.editorRotateShapeCW();
     // @ts-expect-error abstract classes don't work well with generic schemas
-    this.set("scale", this.scale.yx);
+    this.set('scale', this.scale.yx);
   }
 
   override editorRotateCCW(): void {
     this.editorRotateShapeCCW();
     // @ts-expect-error abstract classes don't work well with generic schemas
-    this.set("scale", this.scale.yx);
+    this.set('scale', this.scale.yx);
   }
 
   override editorRotateShapeCCW(): void {
     const newRotation = CCW_ROT_TABLE[this.data.rotation];
     // @ts-expect-error abstract classes don't work well with generic schemas
-    this.set("rotation", newRotation);
+    this.set('rotation', newRotation);
   }
 
   override editorRotateShapeCW(): void {
     const newRotation = CW_ROT_TABLE[this.data.rotation];
     // @ts-expect-error abstract classes don't work well with generic schemas
-    this.set("rotation", newRotation);
+    this.set('rotation', newRotation);
   }
 }

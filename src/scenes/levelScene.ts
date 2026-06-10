@@ -1,18 +1,18 @@
+import { Scene } from './scene';
+import { type Level } from '@/game/levelConfig';
+import { LevelObjectCollection } from '@/game/levelObjectCollection';
+import { LevelObject } from '@/game/objects/levelObject';
+import type { Tee } from '@/game/objects/tee';
+import { Water } from '@/game/objects/water';
 import {
-  renderDrawables,
   type CanvasRenderInfo,
   type Drawable,
-} from "@/render/drawable";
-import { Scene } from "./scene";
-import { type Level } from "@/game/levelConfig";
-import { $renderer } from "@/render/renderer";
-import { LevelObject } from "@/game/objects/levelObject";
-import { Vector2 } from "@/utils/vec";
-import { AABB } from "@/utils/aabb";
-import type { PointerInfo } from "@/render/pointerEvents";
-import { LevelObjectCollection } from "@/game/levelObjectCollection";
-import type { Tee } from "@/game/objects/tee";
-import { Water } from "@/game/objects/water";
+  renderDrawables,
+} from '@/render/drawable';
+import type { PointerInfo } from '@/render/pointerEvents';
+import { $renderer } from '@/render/renderer';
+import { AABB } from '@/utils/aabb';
+import { Vector2 } from '@/utils/vec';
 
 export abstract class LevelScene extends Scene {
   public objects: LevelObjectCollection = new LevelObjectCollection();
@@ -41,7 +41,7 @@ export abstract class LevelScene extends Scene {
   public getVisibleAABB(): AABB {
     const renderer = $renderer.get();
     if (!renderer) {
-      throw new Error("Renderer not initialized");
+      throw new Error('Renderer not initialized');
     }
     const canvas = renderer.canvas;
     const topLeft = this.screenToWorld(

@@ -1,9 +1,9 @@
-import { $copiedObjectProperties, $selectedObjects } from "@/game/editor/state";
-import { useStore } from "@nanostores/react";
-import { ObjectPropertyEditor } from "./ObjectPropertyEditor";
-import { LevelObject } from "@/game/objects/levelObject";
-import { Vector2 } from "@/utils/vec";
-import { useCallback } from "react";
+import { ObjectPropertyEditor } from './ObjectPropertyEditor';
+import { $copiedObjectProperties, $selectedObjects } from '@/game/editor/state';
+import { LevelObject } from '@/game/objects/levelObject';
+import { Vector2 } from '@/utils/vec';
+import { useStore } from '@nanostores/react';
+import { useCallback } from 'react';
 
 export function SelectionStatus() {
   const selectedObjects = useStore($selectedObjects);
@@ -17,7 +17,7 @@ export function SelectionStatus() {
 
       const shape = obj.schema.shape ?? {};
       for (const [key, value] of Object.entries(copiedObjectProperties)) {
-        if (key === "id" || !(key in shape)) continue;
+        if (key === 'id' || !(key in shape)) continue;
         // TODO: validate value against field schema
         obj.set(key as any, clonePropertyValue(value));
       }
@@ -49,7 +49,7 @@ function clonePropertyValue<T>(value: T): T {
     return value.clone() as T;
   }
 
-  if (value && typeof value === "object") {
+  if (value && typeof value === 'object') {
     return structuredClone(value);
   }
 

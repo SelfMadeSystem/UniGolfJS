@@ -1,17 +1,17 @@
-import z from "zod";
-import { LAYERS, WALL_CONFIG } from "../levelConfig";
-import { PolyObject, PolyObjectSchema } from "./polyObject";
-import type { PathInfo } from "./levelObject";
-import type { RigidBody } from "./rigidBody";
-import { Vector2 } from "@/utils/vec";
-import { positiveNumberSchema, Vec2Schema } from "@/utils/data";
-import { registerLevelObject } from "../levelObjectRegistry";
-import { rgbSchema } from "@/utils/data";
-import { pass, type RenderInfo, type RenderPass } from "@/render/drawable";
+import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { registerLevelObject } from '../levelObjectRegistry';
+import type { PathInfo } from './levelObject';
+import { PolyObject, PolyObjectSchema } from './polyObject';
+import type { RigidBody } from './rigidBody';
+import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import { Vec2Schema, positiveNumberSchema } from '@/utils/data';
+import { rgbSchema } from '@/utils/data';
+import { Vector2 } from '@/utils/vec';
+import z from 'zod';
 
 export const SlopeSchema = PolyObjectSchema.extend({
-  slopeColor: rgbSchema.default("#a67857"),
-  slopeArrowColor: rgbSchema.default("#7c4a31"),
+  slopeColor: rgbSchema.default('#a67857'),
+  slopeArrowColor: rgbSchema.default('#7c4a31'),
   slopeDirection: Vec2Schema.default(new Vector2(0, 1)),
   slopeForce: positiveNumberSchema.default(2.5),
 });
@@ -30,10 +30,10 @@ export class Slope extends PolyObject<typeof SlopeSchema> {
 
     const size = 25 * ARROW_UPSCALE; // Base size of the arrow pattern
     // Create a temporary canvas to draw the arrow pattern
-    const tempCanvas = document.createElement("canvas");
+    const tempCanvas = document.createElement('canvas');
     tempCanvas.width = size;
     tempCanvas.height = size;
-    const ctx = tempCanvas.getContext("2d")!;
+    const ctx = tempCanvas.getContext('2d')!;
     ctx.fillStyle = color;
 
     // Draw an arrow pointing in the direction of the slope
@@ -54,7 +54,7 @@ export class Slope extends PolyObject<typeof SlopeSchema> {
     }
     ctx.fill();
 
-    const pattern = ctx.createPattern(tempCanvas, "repeat")!;
+    const pattern = ctx.createPattern(tempCanvas, 'repeat')!;
     this.arrowPatterns.set(key, pattern);
     return pattern;
   }
@@ -70,7 +70,7 @@ export class Slope extends PolyObject<typeof SlopeSchema> {
   override *render(info: RenderInfo): Iterable<RenderPass> {
     yield* this.polyRender(info);
     // Draw slope direction arrow
-    yield pass(LAYERS.OBJECTS_3, (ctx) => {
+    yield pass(LAYERS.OBJECTS_3, ctx => {
       const path = this.getPath();
       const pattern = Slope.getArrowPattern(
         this.data.slopeDirection,
@@ -90,7 +90,7 @@ export class Slope extends PolyObject<typeof SlopeSchema> {
     return {
       outlineLayer: -1,
       fillLayer: LAYERS.OBJECTS_1,
-      outlineColor: "#00000000",
+      outlineColor: '#00000000',
       fillColor: this.data.slopeColor,
       height: 0,
       shadow: WALL_CONFIG.shadow,
@@ -105,12 +105,12 @@ export class Slope extends PolyObject<typeof SlopeSchema> {
 
   override editorRotateShapeCCW(): void {
     super.editorRotateShapeCCW();
-    this.set("slopeDirection", this.data.slopeDirection.cw90());
+    this.set('slopeDirection', this.data.slopeDirection.cw90());
   }
 
   override editorRotateShapeCW(): void {
     super.editorRotateShapeCW();
-    this.set("slopeDirection", this.data.slopeDirection.ccw90());
+    this.set('slopeDirection', this.data.slopeDirection.ccw90());
   }
 }
-registerLevelObject("slope", Slope);
+registerLevelObject('slope', Slope);

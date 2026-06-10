@@ -1,17 +1,17 @@
-import type z from "zod";
-import { GameObject, GameObjectSchema } from "./gameObject";
-import { LAYERS } from "../levelConfig";
-import { type RenderPass, pass } from "@/render/drawable";
-import { generatePathsFromPoints } from "@/utils/pathUtils";
-import { Vector2 } from "@/utils/vec";
-import { AABB } from "@/utils/aabb";
-import { getLevelConfig, getLevelScene } from "@/scenes/state";
+import { LAYERS } from '../levelConfig';
 import {
   deserializeLevelObject,
   serializeLevelObject,
-} from "../levelObjectRegistry";
-import { nanoid } from "nanoid";
-import type { LevelScene } from "@/scenes/levelScene";
+} from '../levelObjectRegistry';
+import { GameObject, GameObjectSchema } from './gameObject';
+import { type RenderPass, pass } from '@/render/drawable';
+import type { LevelScene } from '@/scenes/levelScene';
+import { getLevelConfig, getLevelScene } from '@/scenes/state';
+import { AABB } from '@/utils/aabb';
+import { generatePathsFromPoints } from '@/utils/pathUtils';
+import { Vector2 } from '@/utils/vec';
+import { nanoid } from 'nanoid';
+import type z from 'zod';
 
 export const LevelObjectSchema = GameObjectSchema.extend({});
 
@@ -48,7 +48,7 @@ export abstract class LevelObject<
 
   constructor(options: z.input<SchemaType>) {
     super(options);
-    this.on("position", () => {
+    this.on('position', () => {
       this.emitAabbChange();
     });
   }
@@ -102,11 +102,11 @@ export abstract class LevelObject<
     waterWallPath?: Path2D;
   } & PathInfo): Iterable<RenderPass> {
     if (outlineLayer !== undefined && outlineColor)
-      yield pass(outlineLayer, (ctx) => {
+      yield pass(outlineLayer, ctx => {
         ctx.fillStyle = outlineColor;
         ctx.fill(outlinePath);
       });
-    yield pass(fillLayer, (ctx) => {
+    yield pass(fillLayer, ctx => {
       ctx.fillStyle = fillColor;
       ctx.strokeStyle = fillColor;
       ctx.lineWidth = 0.25;
@@ -119,22 +119,22 @@ export abstract class LevelObject<
       heightLayer !== undefined &&
       outlineColor
     ) {
-      yield pass(heightLayer, (ctx) => {
+      yield pass(heightLayer, ctx => {
         ctx.fillStyle = outlineColor;
         ctx.fill(heightPath);
       });
     }
     if (shadowPath && shadow && shadowLayer !== undefined) {
-      yield pass(shadowLayer, (ctx) => {
+      yield pass(shadowLayer, ctx => {
         const shadowColor = getLevelConfig().shadowColor;
         ctx.strokeStyle = shadowColor;
         ctx.lineWidth = shadow;
-        ctx.lineJoin = "round";
+        ctx.lineJoin = 'round';
         ctx.stroke(shadowPath);
       });
     }
     if (waterWallPath) {
-      yield pass(LAYERS.WATER_WALL_FILL, (ctx) => {
+      yield pass(LAYERS.WATER_WALL_FILL, ctx => {
         ctx.fillStyle = getLevelConfig().waterWallColor;
         ctx.fill(waterWallPath);
       });
@@ -185,8 +185,8 @@ export abstract class LevelObject<
     });
 
     if (debug) {
-      yield pass(LAYERS.DEBUG, (ctx) => {
-        ctx.strokeStyle = "#0f0";
+      yield pass(LAYERS.DEBUG, ctx => {
+        ctx.strokeStyle = '#0f0';
         ctx.lineWidth = 0.5;
         ctx.beginPath();
         for (let i = 0; i < points.length; i++) {

@@ -1,8 +1,8 @@
-import type z from "zod";
-import { Ball, BallSchema } from "./ball";
-import { getLevelScene } from "@/scenes/state";
-import { Tee } from "./tee";
-import { Vector2 } from "@/utils/vec";
+import { Ball, BallSchema } from './ball';
+import { Tee } from './tee';
+import { getLevelScene } from '@/scenes/state';
+import { Vector2 } from '@/utils/vec';
+import type z from 'zod';
 
 export const PlayerBallSchema = BallSchema;
 

@@ -1,7 +1,7 @@
-import type { Drawable } from "@/render/drawable";
-import { LevelObjectRBush } from "@/utils/spatialUtils";
-import type { LevelObject } from "./objects/levelObject";
-import type { AABB } from "@/utils/aabb";
+import type { LevelObject } from './objects/levelObject';
+import type { Drawable } from '@/render/drawable';
+import type { AABB } from '@/utils/aabb';
+import { LevelObjectRBush } from '@/utils/spatialUtils';
 
 /**
  * Central ownership for game objects.
@@ -38,8 +38,8 @@ export class LevelObjectCollection implements Iterable<T> {
   drawableStatic(): Iterable<Drawable> {
     return this.byType
       .keys()
-      .filter((type) => type.hasStaticRender())
-      .map((type) => type.staticDrawable());
+      .filter(type => type.hasStaticRender())
+      .map(type => type.staticDrawable());
   }
 
   addType(type: tT): void {
@@ -86,7 +86,7 @@ export class LevelObjectCollection implements Iterable<T> {
   remove(object: T): boolean {
     const index = this.items.indexOf(object);
     if (index === -1) {
-      console.warn("Object not found:", object)
+      console.warn('Object not found:', object);
       return false;
     }
 
@@ -108,7 +108,7 @@ export class LevelObjectCollection implements Iterable<T> {
       this.add(object, true);
     }
     this.spatialGrid.load([...objects]);
-    this.renderSpatialGrid.load([...objects].filter((obj) => obj.hasRender()));
+    this.renderSpatialGrid.load([...objects].filter(obj => obj.hasRender()));
   }
 
   queryByAABB(aabb: AABB): Iterable<T> {

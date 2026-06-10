@@ -1,4 +1,4 @@
-declare module "*.wasm" {
+declare module '*.wasm' {
   const value: string;
   export default value;
 }

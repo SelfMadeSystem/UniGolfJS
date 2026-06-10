@@ -1,6 +1,6 @@
-import type { InteractionMode } from "./interactionMode";
-import type { PointerInfo } from "@/render/pointerEvents";
-import type { EditManager } from "../editManager";
+import type { EditManager } from '../editManager';
+import type { InteractionMode } from './interactionMode';
+import type { PointerInfo } from '@/render/pointerEvents';
 
 export class PanMode implements InteractionMode {
   constructor(private editManager: EditManager) {}

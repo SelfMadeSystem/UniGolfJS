@@ -1,7 +1,7 @@
-import { LevelObject } from "@/game/objects/levelObject";
-import type { PointerInfo } from "@/render/pointerEvents";
-import type { EditManager } from "../editManager";
-import type { InteractionMode } from "./interactionMode";
+import type { EditManager } from '../editManager';
+import type { InteractionMode } from './interactionMode';
+import { LevelObject } from '@/game/objects/levelObject';
+import type { PointerInfo } from '@/render/pointerEvents';
 
 export class SelectObjectMode implements InteractionMode {
   constructor(
