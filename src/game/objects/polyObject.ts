@@ -2,23 +2,21 @@ import { LevelObject, LevelObjectSchema, type PathInfo } from './levelObject';
 import type { RigidBody } from './rigidBody';
 import type { RenderInfo, RenderPass } from '@/render/drawable';
 import { AABB } from '@/utils/aabb';
-import { Vec2Schema, rotationSchema, shapeSchema } from '@/utils/data';
+import {
+  Vec2Schema,
+  numberSchema,
+  rotationSchema,
+  shapeSchema,
+} from '@/utils/data';
 import { Segment } from '@/utils/line';
 import { Vector2 } from '@/utils/vec';
 import z from 'zod';
-
-export type CollisionInfo = {
-  hit: Vector2;
-  normal: Vector2;
-  newVelocity: Vector2;
-  time: number;
-  object: PolyObject;
-};
 
 export const PolyObjectSchema = LevelObjectSchema.extend({
   scale: Vec2Schema.default(new Vector2(40, 40)),
   shape: shapeSchema.default('rectangle'),
   rotation: rotationSchema.default(0),
+  bounciness: numberSchema.default(1),
 });
 
 const CCW_ROT_TABLE = {
@@ -82,6 +80,10 @@ export abstract class PolyObject<
 
   get scale(): Vector2 {
     return this.data.scale;
+  }
+
+  get bounciness(): number {
+    return this.data.bounciness;
   }
 
   override getAABB(): AABB {
@@ -150,41 +152,6 @@ export abstract class PolyObject<
       ...pathInfo,
       debug: this.data.debug,
     });
-  }
-
-  getCollision(
-    pos: Vector2,
-    radius: number,
-    velocity: Vector2,
-  ): CollisionInfo | null {
-    const segments = this.getSegments();
-    let earliestCollision: {
-      hit: Vector2;
-      normal: Vector2;
-      time: number;
-    } | null = null;
-
-    for (const segment of segments) {
-      const collision = this.circleSegmentCollision(
-        pos,
-        radius,
-        velocity,
-        segment,
-      );
-      if (
-        collision &&
-        (!earliestCollision || collision.time < earliestCollision.time)
-      ) {
-        earliestCollision = collision;
-      }
-    }
-
-    if (!earliestCollision) return null;
-
-    const { hit, normal, time } = earliestCollision;
-    // Simple reflection for new velocity
-    const newVelocity = velocity.sub(normal.mult(2 * velocity.dot(normal)));
-    return { hit, normal, newVelocity, time, object: this };
   }
 
   /**

@@ -1,9 +1,8 @@
 import { LAYERS } from '../levelConfig';
 import { CircleObject } from './circleObject';
 import { LevelObject, LevelObjectSchema, type PathInfo } from './levelObject';
-import { type CollisionInfo, PolyObject } from './polyObject';
+import { PolyObject } from './polyObject';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
-import { LevelScene } from '@/scenes/levelScene';
 import { getLevelScene } from '@/scenes/state';
 import { AABB } from '@/utils/aabb';
 import { Vec2Schema, positiveNumberSchema } from '@/utils/data';

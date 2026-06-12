@@ -257,7 +257,9 @@ export function resolveCollision(collision: ObjectCollision): void {
     const velAlongNormal = body.velocity.dot(normal);
     if (velAlongNormal > 0) return;
 
-    body.velocity = body.velocity.sub(normal.mult(2 * velAlongNormal));
+    body.velocity = body.velocity.sub(
+      normal.mult((1 + object.bounciness) * velAlongNormal),
+    );
     object.onCollision(body);
   }
 }

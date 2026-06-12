@@ -1,12 +1,11 @@
 import { LAYERS, WALL_CONFIG } from '../levelConfig';
 import { registerLevelObject } from '../levelObjectRegistry';
 import type { PathInfo } from './levelObject';
-import { type CollisionInfo, PolyObject, PolyObjectSchema } from './polyObject';
+import { PolyObject, PolyObjectSchema } from './polyObject';
 import type { RigidBody } from './rigidBody';
 import type { RenderInfo, RenderPass } from '@/render/drawable';
 import { blendColors } from '@/utils/colorUtils';
 import { numberSchema, rgbSchema } from '@/utils/data';
-import type { Vector2 } from '@/utils/vec';
 import z from 'zod';
 
 export const BouncyWallSchema = PolyObjectSchema.extend({
