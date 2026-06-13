@@ -260,7 +260,7 @@ export function resolveCollision(collision: ObjectCollision): void {
     body.velocity = body.velocity.sub(
       normal.mult((1 + object.bounciness) * velAlongNormal),
     );
-    object.onCollision(body);
+    if (!body.getConstraint()) object.onCollision(body);
   }
 }
 
@@ -271,8 +271,8 @@ export function stepPhysics(level: LevelScene): void {
   while (timeRemaining > 0) {
     let earliestCollision: ObjectCollision | null = null;
 
-    for (const obj of level.objects) {
-      if (obj instanceof RigidBody && obj.velocity.lenSq() > 0) {
+    for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
+      if (obj.velocity.lenSq() > 0) {
         const collision = getCollision(obj, level);
         if (
           collision &&
@@ -286,20 +286,16 @@ export function stepPhysics(level: LevelScene): void {
 
     if (!earliestCollision) {
       // No collisions, move all objects by their full velocity
-      for (const obj of level.objects) {
-        if (obj instanceof RigidBody) {
-          obj.pos = obj.pos.add(obj.velocity.mult(timeRemaining));
-        }
+      for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
+        obj.pos = obj.pos.add(obj.velocity.mult(timeRemaining));
       }
       break;
     }
 
     // Move all objects up to the point of collision
     const step = earliestCollision.step;
-    for (const obj of level.objects) {
-      if (obj instanceof RigidBody) {
-        obj.pos = obj.pos.add(obj.velocity.mult(step));
-      }
+    for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
+      obj.pos = obj.pos.add(obj.velocity.mult(step));
     }
 
     // Resolve the collision
@@ -313,5 +309,9 @@ export function stepPhysics(level: LevelScene): void {
       // );
       break;
     }
+  }
+
+  for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
+    obj.postPhysics();
   }
 }

@@ -14,10 +14,10 @@ export class PlayScene extends LevelScene {
   }
 
   override tick(): void {
-    stepPhysics(this);
     for (const obj of this.objects) {
       obj.tick();
     }
+    stepPhysics(this);
     markFpsTick();
 
     super.tick();

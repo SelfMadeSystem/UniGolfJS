@@ -121,23 +121,25 @@ export abstract class RigidBody<
       return;
     }
 
-    for (const obj of scene.objects.queryByAABB(this.getBaseAABB())) {
-      if (
-        obj instanceof PolyObject &&
-        !obj.isSolid &&
-        obj.intersectsRigidBody(this)
-      ) {
-        obj.onIntersects(this);
-      }
-      if (obj instanceof CircleObject && obj.intersectsRigidBody(this)) {
-        obj.onIntersects(this);
+    if (!this.constraint) {
+      for (const obj of scene.objects.queryByAABB(this.getBaseAABB())) {
+        if (
+          obj instanceof PolyObject &&
+          !obj.isSolid &&
+          obj.intersectsRigidBody(this)
+        ) {
+          obj.onIntersects(this);
+        }
+        if (obj instanceof CircleObject && obj.intersectsRigidBody(this)) {
+          obj.onIntersects(this);
+        }
       }
     }
 
     if (this.inWater) return;
+  }
 
-    this.resolveConstraint();
-
+  postPhysics(): void {
     this.velocity = this.velocity.mult(DRAG_COEFFICIENT);
     const lenSq = this.velocity.lenSq();
     if (lenSq > FRICTION_FORCE) {
@@ -147,9 +149,10 @@ export abstract class RigidBody<
     } else {
       this.velocity = this.velocity.mult(1 - FRICTION_FORCE);
     }
+    this.resolveConstraint();
   }
 
-  private resolveConstraint(): void {
+  resolveConstraint(): void {
     if (!this.constraint) return;
     const delta = this.pos.sub(this.constraint.pos);
     const distSq = delta.lenSq();
