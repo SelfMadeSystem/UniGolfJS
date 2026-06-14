@@ -17,6 +17,7 @@ export const ConveyorBeltSchema = PolyObjectSchema.extend({
 });
 
 const ARROW_UPSCALE = 10;
+const ARROW_SIZE = 25;
 
 export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
   static override schema = ConveyorBeltSchema;
@@ -28,7 +29,7 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
       return this.arrowPatterns.get(key)!;
     }
 
-    const size = 25 * ARROW_UPSCALE; // Base size of the arrow pattern
+    const size = ARROW_SIZE * ARROW_UPSCALE; // Base size of the arrow pattern
     // Create a temporary canvas to draw the arrow pattern
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = size;
@@ -95,15 +96,18 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
       ctx.clip(path);
 
       // Apply animation offset by translating
-      const arrowPatternSize = 25 * ARROW_UPSCALE;
-      const offset =
-        (tickWithInterp * this.data.conveyorSpeed * ARROW_UPSCALE) %
-        arrowPatternSize;
+      const arrowPatternSize = ARROW_SIZE * ARROW_UPSCALE;
+      const offset = tickWithInterp * this.data.conveyorSpeed * ARROW_UPSCALE;
       ctx.scale(1 / ARROW_UPSCALE, 1 / ARROW_UPSCALE);
       const aabb = this.getAABB().scale(ARROW_UPSCALE).expand(arrowPatternSize); // Expand AABB to ensure arrows cover the entire area
-      ctx.translate(...direction.mult(offset).add(aabb.center).a);
+      ctx.translate(
+        ...direction
+          .mult(offset)
+          .mod([arrowPatternSize, arrowPatternSize])
+          .add(aabb.center.round(arrowPatternSize)).a,
+      );
       ctx.fillStyle = pattern;
-      ctx.fillRect(-aabb.width / 2, -aabb.height / 2, aabb.width, aabb.height);
+      ctx.fillRect(-aabb.width, -aabb.height, aabb.width * 2, aabb.height * 2);
 
       ctx.restore();
     });
