@@ -44,6 +44,13 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     return AABB.fromCenterSize(this.pos, TEE_SIZE);
   }
 
+  override setAABB(aabb: AABB): void {
+    if (!aabb.size.equals(TEE_SIZE)) {
+      console.warn('Tee: aabb != TEE_SIZE');
+    }
+    this.set('position', aabb.center);
+  }
+
   override getPath(): Path2D {
     const path = new Path2D();
     this.getAABB().pathRect(path);

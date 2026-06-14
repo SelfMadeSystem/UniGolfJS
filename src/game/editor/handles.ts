@@ -118,7 +118,25 @@ export class HandlesManager {
         'rotate-left',
         '#FFFFFF',
         'pointer',
-        m => m.rotateSelectionCCW(),
+        m => {
+          const selected = m.selectedObjects;
+          m.rotateSelectionCCW();
+          m.history.push({
+            name: 'Rotate CCW',
+            redo() {
+              const tmp = m.selectedObjects;
+              m.selectedObjects = selected;
+              m.rotateSelectionCCW();
+              m.selectedObjects = tmp;
+            },
+            undo() {
+              const tmp = m.selectedObjects;
+              m.selectedObjects = selected;
+              m.rotateSelectionCW();
+              m.selectedObjects = tmp;
+            },
+          });
+        },
       ),
       new EditorHandle(
         scene,

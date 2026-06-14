@@ -1,10 +1,12 @@
 import type { EditManager } from '../editManager';
 import type { InteractionMode } from './interactionMode';
+import { LevelObject } from '@/game/objects/levelObject';
 import type { PointerInfo } from '@/render/pointerEvents';
 import { AABB } from '@/utils/aabb';
 import { Vector2 } from '@/utils/vec';
 
 export class ResizeMode implements InteractionMode {
+  public ogState: Map<LevelObject, AABB> = new Map();
   constructor(private editManager: EditManager) {}
 
   pointermove(info: PointerInfo): void {
@@ -67,19 +69,40 @@ export class ResizeMode implements InteractionMode {
       this.editManager.transformSelectionAABB(currentAABB, targetAABB);
     }
 
+    const newState = new Map<LevelObject, AABB>();
+
     for (const obj of this.editManager.selectedObjects) {
       obj.set('position', obj.pos);
       obj.stopDragging();
+      newState.set(obj, obj.getAABB());
     }
 
     this.editManager.startPointer = null;
     this.editManager.updateHighlight(info);
     this.editManager.setMode('select');
+
+    const oldState = this.ogState;
+
+    this.editManager.history.push({
+      name: `Resized ${this.editManager.selectedObjects.size} objects`,
+      redo() {
+        for (const [obj, aabb] of newState) {
+          obj.setAABB(aabb);
+        }
+      },
+      undo() {
+        for (const [obj, aabb] of oldState) {
+          obj.setAABB(aabb);
+        }
+      },
+    });
   }
 
   pointerdown(info: PointerInfo): void {
+    this.ogState = new Map();
     for (const obj of this.editManager.selectedObjects) {
       obj.startDragging();
+      this.ogState.set(obj, obj.getAABB());
     }
   }
 }

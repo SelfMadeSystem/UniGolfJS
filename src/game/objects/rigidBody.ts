@@ -65,7 +65,17 @@ export abstract class RigidBody<
   }
 
   override getAABB(): AABB {
-    return this.getMovementAABB();
+    return this.getBaseAABB();
+  }
+
+  override setAABB(aabb: AABB): void {
+    if (aabb.width !== aabb.height) {
+      console.warn('RigidBody: aabb.width and aabb.height not same.', aabb);
+    }
+    //@ts-expect-error abstract classes don't work well with generic schemas
+    this.set('radius', aabb.width / 2);
+    //@ts-expect-error abstract classes don't work well with generic schemas
+    this.set('position', aabb.center);
   }
 
   getMovementAABB(): AABB {

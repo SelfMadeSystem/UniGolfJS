@@ -1,4 +1,6 @@
+import type { AABB } from './aabb';
 import type { LevelObject } from '@/game/objects/levelObject';
+import type { RigidBody } from '@/game/objects/rigidBody';
 import RBush, { type BBox } from 'rbush';
 
 /**
@@ -37,6 +39,11 @@ export class Cluster<T extends LevelObject<any>> {
   }
 }
 
+function getAABB(l: LevelObject<any>): AABB {
+  if ('getMovementAABB' in l) return (l as RigidBody<any>).getMovementAABB();
+  return l.getAABB();
+}
+
 export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
   // cache the AABBs because otherwise, removing items from the RBush doesn't
   // remove the old AABB if the item's position has changed since it was inserted
@@ -53,7 +60,7 @@ export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
     if (this.itemAabbCache.has(item)) {
       return this.itemAabbCache.get(item)!;
     }
-    return item.getAABB();
+    return getAABB(item);
   }
 
   override compareMinX(a: T, b: T): number {
@@ -69,7 +76,7 @@ export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
       if (this.itemAabbCache.has(item)) {
         console.warn('Loading item that already exists in RBush:', item);
       }
-      this.itemAabbCache.set(item, item.getAABB());
+      this.itemAabbCache.set(item, getAABB(item));
     }
     return super.load(items);
   }
@@ -78,7 +85,7 @@ export class LevelObjectRBush<T extends LevelObject<any>> extends RBush<T> {
     if (this.itemAabbCache.has(item)) {
       console.warn('Inserting item that already exists in RBush:', item);
     }
-    this.itemAabbCache.set(item, item.getAABB());
+    this.itemAabbCache.set(item, getAABB(item));
     return super.insert(item);
   }
 

@@ -90,6 +90,13 @@ export abstract class PolyObject<
     return AABB.fromCenterSize(this.pos, this.scale);
   }
 
+  override setAABB(aabb: AABB): void {
+    //@ts-expect-error abstract classes don't work well with generic schemas
+    this.set('position', aabb.center);
+    //@ts-expect-error abstract classes don't work well with generic schemas
+    this.set('scale', aabb.size);
+  }
+
   getPoints(): Vector2[] {
     const { shape, rotation } = this.data;
     const basePoints = SHAPE_POINTS[shape];

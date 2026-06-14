@@ -31,6 +31,7 @@ export class EditManager implements Drawable, PointerEventHandler {
   public startPointer: Vector2 | null = null;
   public selectionPointer: Vector2 | null = null;
   public readonly handles: HandlesManager;
+  public readonly history: HistoryManager = new HistoryManager();
 
   public selectedTool: Tool = 'select';
 
@@ -70,10 +71,21 @@ export class EditManager implements Drawable, PointerEventHandler {
     this.keybinds.register({ key: 'd', meta: true }, () => {
       this.duplicateSelectedObjects();
     });
+    // history
+    this.keybinds.register({ key: 'z', shift: false, ctrl: true }, () => {
+      this.history.undo();
+    });
+    this.keybinds.register({ key: 'z', shift: true, ctrl: true }, () => {
+      this.history.redo();
+    });
   }
 
   public get selectedObjects(): Set<LevelObject> {
     return new Set(this.selectedObjectsInternal);
+  }
+
+  public set selectedObjects(set: Set<LevelObject>) {
+    this.selectedObjectsInternal = set;
   }
 
   private syncSelectedObjects(): void {
@@ -107,6 +119,7 @@ export class EditManager implements Drawable, PointerEventHandler {
   public clearSelection(): void {
     this.selectedObjectsInternal.clear();
     this.syncSelectedObjects();
+    this.highlightedObject = null;
   }
 
   // ===== Mode Management =====
@@ -405,10 +418,24 @@ export class EditManager implements Drawable, PointerEventHandler {
   }
 
   public deleteSelectedObjects() {
+    const selected = this.selectedObjects;
     for (const obj of this.selectedObjectsInternal) {
       obj.delete(true);
     }
     this.clearSelection();
-    this.highlightedObject = null;
+    this.history.push({
+      name: 'Deleted',
+      redo: () => {
+        for (const s of selected) {
+          s.delete(true);
+        }
+        this.clearSelection();
+      },
+      undo: () => {
+        for (const s of selected) {
+          this.scene.addObjectToLevel(s);
+        }
+      },
+    });
   }
 }

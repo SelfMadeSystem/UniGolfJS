@@ -37,6 +37,16 @@ export abstract class CircleObject<
     return AABB.fromCenterSize(this.pos, [this.radius * 2, this.radius * 2]);
   }
 
+  override setAABB(aabb: AABB): void {
+    if (aabb.width !== aabb.height) {
+      console.warn('Circle: aabb.width and aabb.height not same.', aabb);
+    }
+    //@ts-expect-error abstract classes don't work well with generic schemas
+    this.set('radius', aabb.width / 2);
+    //@ts-expect-error abstract classes don't work well with generic schemas
+    this.set('position', aabb.center);
+  }
+
   override getPath(): Path2D {
     const path = new Path2D();
     path.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);

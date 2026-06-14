@@ -104,6 +104,19 @@ export class PlaceMode implements InteractionMode {
     this.editManager.selectObject(newObj, false);
 
     this.isPlacingSize = false;
+
+    this.editManager.history.push({
+      name: 'Place object',
+      redo: () => {
+        scene.addObjectToLevel(newObj);
+        this.editManager.deselectAll();
+        this.editManager.selectObject(newObj, false);
+      },
+      undo: () => {
+        newObj.delete(true);
+        this.editManager.clearSelection();
+      },
+    });
   }
 
   pointerdown(info: PointerInfo): void {
@@ -140,7 +153,7 @@ export class PlaceMode implements InteractionMode {
 
     // Place a new object
     // @ts-expect-error can't be arsed to type this properly. can't initialize abstract classes but this'll never be an abstract class so whatever
-    const newObj = new placeable.clazz({
+    const newObj: LevelObject<any> = new placeable.clazz({
       ...placeable.props,
       position: pointerPos,
     });
@@ -154,5 +167,18 @@ export class PlaceMode implements InteractionMode {
     // Snap to grid
     newObj.editorSnapToGrid(scene.editorGrid.gridSize);
     newObj.set('position', newObj.pos);
+
+    this.editManager.history.push({
+      name: 'Place object',
+      redo: () => {
+        scene.addObjectToLevel(newObj);
+        this.editManager.deselectAll();
+        this.editManager.selectObject(newObj, false);
+      },
+      undo: () => {
+        newObj.delete(true);
+        this.editManager.clearSelection();
+      },
+    });
   }
 }

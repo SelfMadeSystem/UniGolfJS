@@ -31,6 +31,15 @@ export class Hole extends CircleObject<typeof HoleSchema> {
     return AABB.fromCenterSize(this.pos, [totalRadius * 2, totalRadius * 2]);
   }
 
+  override setAABB(aabb: AABB): void {
+    if (aabb.width !== aabb.height) {
+      console.warn('Hole: aabb.width and aabb.height not same.', aabb);
+    }
+    const radius = aabb.width / 2 - HOLE_OUTLINE_WIDTH;
+    this.set('position', aabb.center);
+    this.set('radius', radius);
+  }
+
   override getPathInfo(): PathInfo {
     return {
       shadowLayer: 0,
