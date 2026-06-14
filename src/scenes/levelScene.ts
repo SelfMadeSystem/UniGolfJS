@@ -1,5 +1,6 @@
 import { Scene } from './scene';
-import { type Level } from '@/game/levelConfig';
+import { getLevelConfig } from './state';
+import { LAYERS, type Level, WALL_CONFIG } from '@/game/levelConfig';
 import { LevelObjectCollection } from '@/game/levelObjectCollection';
 import { LevelObject } from '@/game/objects/levelObject';
 import type { Tee } from '@/game/objects/tee';
@@ -7,6 +8,8 @@ import { Water } from '@/game/objects/water';
 import {
   type CanvasRenderInfo,
   type Drawable,
+  type RenderPass,
+  pass,
   renderDrawables,
 } from '@/render/drawable';
 import type { PointerInfo } from '@/render/pointerEvents';
@@ -24,8 +27,9 @@ export abstract class LevelScene extends Scene {
   private cameraLerpAmount: number = 0.15;
   private cameraZoomLerpAmount: number = 0.15;
   public tickPointers: PointerInfo<PointerEvent>[] = [];
-  public clipPath: Path2D = new Path2D();
+  public shadowPath: Path2D = new Path2D();
   public activeTee: Tee | null = null;
+  public passes: RenderPass[] = [];
 
   constructor(public level: Level) {
     super();
@@ -36,6 +40,16 @@ export abstract class LevelScene extends Scene {
     this.resetAllObjects(true);
     // make sure water's rendering logic is always active, even if there are no water objects in the level
     this.objects.addType(Water);
+
+    this.passes.push(
+      pass(LAYERS.WALL_SHADOW_DRAW, ctx => {
+        const shadowColor = getLevelConfig().shadowColor;
+        ctx.strokeStyle = shadowColor;
+        ctx.lineWidth = WALL_CONFIG.shadow;
+        ctx.lineJoin = 'round';
+        ctx.stroke(this.shadowPath);
+      }),
+    );
   }
 
   public getVisibleAABB(): AABB {
@@ -62,6 +76,8 @@ export abstract class LevelScene extends Scene {
 
     const visibleArea = this.getVisibleAABB();
 
+    this.shadowPath = new Path2D();
+
     ctx.save();
     ctx.scale(this.cameraZoom, this.cameraZoom);
     ctx.translate(-this.cameraPos.x, -this.cameraPos.y);
@@ -76,6 +92,7 @@ export abstract class LevelScene extends Scene {
         visibleArea,
       },
       ctx,
+      this.passes,
     );
     ctx.restore();
   }

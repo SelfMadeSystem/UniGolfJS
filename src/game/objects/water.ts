@@ -5,7 +5,7 @@ import { PolyObject, PolyObjectSchema } from './polyObject';
 import type { RigidBody } from './rigidBody';
 import { BatchObjectRenderer } from '@/render/batchObjectRenderer';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
-import { getLevelConfig } from '@/scenes/state';
+import { getLevelConfig, getLevelScene } from '@/scenes/state';
 import { generatePathsFromPoints } from '@/utils/pathUtils';
 import z from 'zod';
 
@@ -77,11 +77,8 @@ export class Water extends PolyObject<typeof WaterSchema> {
         ctx.fillStyle = waterFillColor;
         ctx.fill(path);
       });
-      yield pass(LAYERS.WALL_SHADOW, ctx => {
-        ctx.strokeStyle = shadowColor;
-        ctx.lineWidth = WALL_CONFIG.shadow;
-        ctx.lineJoin = 'round';
-        ctx.stroke(path);
+      yield pass(LAYERS.WALL_SHADOW, () => {
+        getLevelScene()!.shadowPath.addPath(path);
       });
       clipPath.addPath(path);
     }
@@ -89,7 +86,7 @@ export class Water extends PolyObject<typeof WaterSchema> {
       ctx.save();
     });
     // water will add to the clipPath in WATER_WALL_CLIP_REGIONS
-    const { waterFillColor, waterWallColor, shadowColor } = getLevelConfig();
+    const { waterFillColor, waterWallColor } = getLevelConfig();
     const pathsIter = Water.batchRenderer.getPaths(info.visibleArea);
     for (const [, paths] of pathsIter) {
       for (const [path, points] of paths) {
@@ -97,11 +94,8 @@ export class Water extends PolyObject<typeof WaterSchema> {
           ctx.fillStyle = waterFillColor;
           ctx.fill(path);
         });
-        yield pass(LAYERS.WALL_SHADOW, ctx => {
-          ctx.strokeStyle = shadowColor;
-          ctx.lineWidth = WALL_CONFIG.shadow;
-          ctx.lineJoin = 'round';
-          ctx.stroke(path);
+        yield pass(LAYERS.WALL_SHADOW, () => {
+          getLevelScene()!.shadowPath.addPath(path);
         });
         clipPath.addPath(path);
         for (const pts of points) {

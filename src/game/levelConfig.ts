@@ -24,6 +24,7 @@ export const PHYSICS_CONFIG = {
 export enum LAYERS {
   FLOOR,
   WALL_SHADOW,
+  WALL_SHADOW_DRAW,
   WATER_WALL_PRE,
   WATER_WALL_CLIP_REGIONS,
   WATER_WALL_CLIP,
@@ -50,7 +51,7 @@ export enum LAYERS {
 export const levelConfigSchema = z.object({
   waterFillColor: z.string().default('#40A0FF'),
   waterWallColor: z.string().default('#779977'),
-  shadowColor: z.string().default('#76b97e'),
+  shadowColor: z.string().default('#00000019'),
 });
 export const defaultLevelConfig = levelConfigSchema.parse({});
 export type LevelConfig = z.infer<typeof levelConfigSchema>;

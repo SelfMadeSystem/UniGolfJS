@@ -129,12 +129,8 @@ export abstract class LevelObject<
       });
     }
     if (shadowPath && shadow && shadowLayer !== undefined) {
-      yield pass(shadowLayer, ctx => {
-        const shadowColor = getLevelConfig().shadowColor;
-        ctx.strokeStyle = shadowColor;
-        ctx.lineWidth = shadow;
-        ctx.lineJoin = 'round';
-        ctx.stroke(shadowPath);
+      yield pass(shadowLayer, () => {
+        getLevelScene()!.shadowPath.addPath(shadowPath);
       });
     }
     if (waterWallPath) {
