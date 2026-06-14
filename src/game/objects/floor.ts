@@ -1,14 +1,16 @@
-import { LAYERS } from '../levelConfig';
+import { LAYERS, PHYSICS_CONFIG } from '../levelConfig';
 import { registerLevelObject } from '../levelObjectRegistry';
 import type { PathInfo } from './levelObject';
 import { PolyObject, PolyObjectSchema } from './polyObject';
 import { BatchObjectRenderer } from '@/render/batchObjectRenderer';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
-import { rgbSchema } from '@/utils/data';
+import { numberSchema, rgbSchema } from '@/utils/data';
 import z from 'zod';
 
 export const FloorSchema = PolyObjectSchema.extend({
   floorColor: rgbSchema.default('#79b87b'),
+  dragCoefficient: numberSchema.default(PHYSICS_CONFIG.dragCoefficient),
+  frictionForce: numberSchema.default(PHYSICS_CONFIG.frictionForce),
 });
 
 export class Floor extends PolyObject<typeof FloorSchema> {
@@ -20,6 +22,14 @@ export class Floor extends PolyObject<typeof FloorSchema> {
 
   override get isSolid(): boolean {
     return false;
+  }
+
+  get dragCoefficient(): number {
+    return this.data.dragCoefficient;
+  }
+
+  get frictionForce(): number {
+    return this.data.frictionForce;
   }
 
   constructor(options: z.input<typeof FloorSchema>) {

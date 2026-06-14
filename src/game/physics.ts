@@ -189,7 +189,7 @@ export function getCollision(
     radius: body.radius,
   };
 
-  for (const obj of level.objects.queryByAABB(aabb)) {
+  for (const obj of level.objects.queryByBBox(aabb)) {
     if (obj === body) continue;
 
     let collision: ObjectCollision | null = null;

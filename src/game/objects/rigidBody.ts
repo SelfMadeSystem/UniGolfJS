@@ -1,5 +1,6 @@
-import { LAYERS } from '../levelConfig';
+import { LAYERS, PHYSICS_CONFIG } from '../levelConfig';
 import { CircleObject } from './circleObject';
+import { Floor } from './floor';
 import { LevelObject, LevelObjectSchema, type PathInfo } from './levelObject';
 import { PolyObject } from './polyObject';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
@@ -16,9 +17,6 @@ export const RigidBodySchema = LevelObjectSchema.extend({
   velocity: Vec2Schema.default(new Vector2(0, 0)),
 });
 
-const DRAG_COEFFICIENT = 0.99;
-const FRICTION_FORCE = 0.35;
-const CONSTRAINED_DRAG_MULTIPLIER = 0.9;
 const WATER_ANIMATION_TIME = 10;
 const WATER_ANIMATION_SPEED_INFLUENCE = 0.5;
 
@@ -132,7 +130,7 @@ export abstract class RigidBody<
     }
 
     if (!this.constraint) {
-      for (const obj of scene.objects.queryByAABB(this.getBaseAABB())) {
+      for (const obj of scene.objects.queryByBBox(this.getBaseAABB())) {
         if (
           obj instanceof PolyObject &&
           !obj.isSolid &&
@@ -149,15 +147,32 @@ export abstract class RigidBody<
     if (this.inWater) return;
   }
 
+  getPhysicsConfig(): {
+    dragCoefficient: number;
+    frictionForce: number;
+  } {
+    const scene = getLevelScene()!;
+    const objects = scene.getObjectsAtPoint(this.pos);
+    for (const obj of objects) {
+      if (obj instanceof Floor) {
+        return {
+          dragCoefficient: obj.dragCoefficient,
+          frictionForce: obj.frictionForce,
+        };
+      }
+    }
+    return PHYSICS_CONFIG;
+  }
+
   postPhysics(): void {
-    this.velocity = this.velocity.mult(DRAG_COEFFICIENT);
+    const { dragCoefficient, frictionForce } = this.getPhysicsConfig();
+
+    this.velocity = this.velocity.mult(dragCoefficient);
     const lenSq = this.velocity.lenSq();
-    if (lenSq > FRICTION_FORCE) {
-      this.velocity = this.velocity.sub(
-        this.velocity.setLength(FRICTION_FORCE),
-      );
+    if (lenSq > frictionForce) {
+      this.velocity = this.velocity.sub(this.velocity.setLength(frictionForce));
     } else {
-      this.velocity = this.velocity.mult(1 - FRICTION_FORCE);
+      this.velocity = this.velocity.mult(1 - frictionForce);
     }
     this.resolveConstraint();
   }
@@ -189,7 +204,7 @@ export abstract class RigidBody<
     const springForce = desiredPos.sub(this.pos).mult(SPRING_STRENGTH);
     this.velocity = this.velocity
       .add(springForce)
-      .mult(CONSTRAINED_DRAG_MULTIPLIER);
+      .mult(PHYSICS_CONFIG.constrainedDragMultiplier);
   }
 
   override *render({ tickInterp }: RenderInfo): Iterable<RenderPass> {

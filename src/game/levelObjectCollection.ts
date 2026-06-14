@@ -2,6 +2,7 @@ import type { LevelObject } from './objects/levelObject';
 import type { Drawable } from '@/render/drawable';
 import type { AABB } from '@/utils/aabb';
 import { LevelObjectRBush } from '@/utils/spatialUtils';
+import type { BBox } from 'rbush';
 
 /**
  * Central ownership for game objects.
@@ -111,7 +112,7 @@ export class LevelObjectCollection implements Iterable<T> {
     this.renderSpatialGrid.load([...objects].filter(obj => obj.hasRender()));
   }
 
-  queryByAABB(aabb: AABB): Iterable<T> {
+  queryByBBox(aabb: BBox): Iterable<T> {
     return this.spatialGrid.search(aabb);
   }
 

@@ -14,6 +14,12 @@ export const WALL_CONFIG = {
   waterWallHeight: 8,
 } as const;
 
+export const PHYSICS_CONFIG = {
+  dragCoefficient: 0.99,
+  frictionForce: 0.35,
+  constrainedDragMultiplier: 0.9,
+};
+
 // TODO: put these in a more sensible place
 export enum LAYERS {
   FLOOR,

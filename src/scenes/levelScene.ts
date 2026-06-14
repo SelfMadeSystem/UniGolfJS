@@ -178,9 +178,21 @@ export abstract class LevelScene extends Scene {
     if (!pointer) return null;
     const worldPos = this.screenToWorld(pointer.pos);
     for (const obj of this.objects.toReversed()) {
-      if (obj instanceof LevelObject && obj.isPointInside(worldPos)) return obj;
+      if (obj.isPointInside(worldPos)) return obj;
     }
     return null;
+  }
+
+  getObjectsAtPoint(point: Vector2): LevelObject<any>[] {
+    const objects: LevelObject<any>[] = [];
+
+    for (const obj of this.objects.queryByBBox(point)) {
+      if (obj.isPointInside(point)) {
+        objects.push(obj);
+      }
+    }
+
+    return objects;
   }
 
   removeObject(obj: LevelObject<any>): void {
