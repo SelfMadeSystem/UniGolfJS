@@ -42,7 +42,6 @@ export class Hole extends CircleObject<typeof HoleSchema> {
 
   override getPathInfo(): PathInfo {
     return {
-      shadowLayer: 0,
       heightLayer: 0,
       outlineLayer: LAYERS.HOLE_OUTLINE,
       fillLayer: LAYERS.HOLE_FILL,

@@ -18,7 +18,6 @@ export class Ball extends RigidBody<typeof BallSchema> {
 
   getPathInfo(): PathInfo {
     return {
-      shadowLayer: LAYERS.BALL,
       outlineLayer: LAYERS.BALL,
       fillLayer: LAYERS.BALL,
       outlineColor: '#000',

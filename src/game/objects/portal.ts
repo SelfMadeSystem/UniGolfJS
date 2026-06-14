@@ -1,10 +1,10 @@
-import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { LAYERS } from '../levelConfig';
 import { registerLevelObject } from '../levelObjectRegistry';
 import { CircleObject, CircleObjectSchema } from './circleObject';
 import type { PathInfo } from './levelObject';
 import type { RigidBody } from './rigidBody';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
-import { getLevelScene } from '@/scenes/state';
+import { getLevelConfig, getLevelScene } from '@/scenes/state';
 import { blendColors } from '@/utils/colorUtils';
 import { objectIdSchema, positiveNumberSchema, rgbSchema } from '@/utils/data';
 import z from 'zod';
@@ -46,14 +46,13 @@ export class Portal extends CircleObject<typeof PortalSchema> {
 
   override getPathInfo(): PathInfo {
     return {
-      shadowLayer: 0,
       heightLayer: 0,
       outlineLayer: LAYERS.OBJECTS_1,
       fillLayer: LAYERS.OBJECTS_2,
       outlineColor: this.data.portalOutlineColor,
       fillColor: this.data.portalColor,
       height: 0,
-      outline: WALL_CONFIG.outline,
+      outline: getLevelConfig().outlineWidth,
     };
   }
 

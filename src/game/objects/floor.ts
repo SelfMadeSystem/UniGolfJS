@@ -1,4 +1,4 @@
-import { LAYERS, PHYSICS_CONFIG } from '../levelConfig';
+import { LAYERS, defaultLevelConfig } from '../levelConfig';
 import { registerLevelObject } from '../levelObjectRegistry';
 import type { PathInfo } from './levelObject';
 import { PolyObject, PolyObjectSchema } from './polyObject';
@@ -9,8 +9,8 @@ import z from 'zod';
 
 export const FloorSchema = PolyObjectSchema.extend({
   floorColor: rgbSchema.default('#79b87b'),
-  dragCoefficient: numberSchema.default(PHYSICS_CONFIG.dragCoefficient),
-  frictionForce: numberSchema.default(PHYSICS_CONFIG.frictionForce),
+  dragCoefficient: numberSchema.default(defaultLevelConfig.dragCoefficient),
+  frictionForce: numberSchema.default(defaultLevelConfig.frictionForce),
 });
 
 export class Floor extends PolyObject<typeof FloorSchema> {

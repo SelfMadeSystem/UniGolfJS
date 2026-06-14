@@ -16,14 +16,13 @@ import type z from 'zod';
 export const LevelObjectSchema = GameObjectSchema.extend({});
 
 export type PathInfo = {
-  shadowLayer?: number;
   outlineLayer?: number;
   heightLayer?: number;
   fillLayer: number;
   outlineColor?: string;
   fillColor: string;
   height?: number;
-  shadow?: number;
+  shadow?: boolean;
   outline?: number;
   waterWallHeight?: number;
 };
@@ -90,7 +89,6 @@ export abstract class LevelObject<
     outlinePath,
     fillPath,
     waterWallPath,
-    shadowLayer,
     heightLayer,
     outlineLayer,
     fillLayer,
@@ -128,8 +126,8 @@ export abstract class LevelObject<
         ctx.fill(heightPath);
       });
     }
-    if (shadowPath && shadow && shadowLayer !== undefined) {
-      yield pass(shadowLayer, () => {
+    if (shadow && shadowPath) {
+      yield pass(LAYERS.WALL_SHADOW, () => {
         getLevelScene()!.shadowPath.addPath(shadowPath);
       });
     }
@@ -143,7 +141,6 @@ export abstract class LevelObject<
 
   static *renderPoints({
     points,
-    shadowLayer,
     outlineLayer,
     heightLayer,
     fillLayer,
@@ -172,7 +169,6 @@ export abstract class LevelObject<
       outlinePath,
       fillPath,
       waterWallPath,
-      shadowLayer,
       heightLayer,
       outlineLayer,
       fillLayer,

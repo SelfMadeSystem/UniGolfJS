@@ -1,9 +1,10 @@
-import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { LAYERS } from '../levelConfig';
 import { registerLevelObject } from '../levelObjectRegistry';
 import type { PathInfo } from './levelObject';
 import { PolyObject, PolyObjectSchema } from './polyObject';
 import type { RigidBody } from './rigidBody';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import { getLevelConfig } from '@/scenes/state';
 import { blendColors } from '@/utils/colorUtils';
 import { numberSchema } from '@/utils/data';
 import z from 'zod';
@@ -71,14 +72,13 @@ export class Boost extends PolyObject<typeof BoostSchema> {
 
   override getPathInfo(): PathInfo {
     return {
-      shadowLayer: 0,
       heightLayer: 0,
       outlineLayer: LAYERS.OBJECTS_1,
       fillLayer: LAYERS.OBJECTS_2,
       outlineColor: '#00FF00',
       fillColor: blendColors(C1, C2, this.boostTime / BOOST_EFFECT_TIME),
       height: 0,
-      outline: WALL_CONFIG.outline,
+      outline: getLevelConfig().outlineWidth,
     };
   }
 

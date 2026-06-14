@@ -1,9 +1,10 @@
-import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { LAYERS } from '../levelConfig';
 import { registerLevelObject } from '../levelObjectRegistry';
 import type { PathInfo } from './levelObject';
 import { PolyObject, PolyObjectSchema } from './polyObject';
 import type { RigidBody } from './rigidBody';
 import type { RenderInfo, RenderPass } from '@/render/drawable';
+import { getLevelConfig } from '@/scenes/state';
 import { numberSchema, rgbSchema } from '@/utils/data';
 import z from 'zod';
 
@@ -27,16 +28,16 @@ export class BreakableWall extends PolyObject<typeof WallSchema> {
   }
 
   override getPathInfo(): PathInfo {
+    const { wallHeight, outlineWidth } = getLevelConfig();
     return {
-      shadowLayer: LAYERS.WALL_SHADOW,
       heightLayer: LAYERS.WALL_HEIGHT,
       outlineLayer: LAYERS.WALL_OUTLINE,
       fillLayer: LAYERS.WALL_FILL,
       outlineColor: this.data.wallOutlineColor,
       fillColor: this.data.wallColor,
-      height: WALL_CONFIG.height,
-      shadow: WALL_CONFIG.shadow,
-      outline: -WALL_CONFIG.outline,
+      height: wallHeight,
+      shadow: true,
+      outline: -outlineWidth,
     };
   }
 

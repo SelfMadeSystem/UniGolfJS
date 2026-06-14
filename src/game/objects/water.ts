@@ -1,4 +1,4 @@
-import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { LAYERS } from '../levelConfig';
 import { registerLevelObject } from '../levelObjectRegistry';
 import type { PathInfo } from './levelObject';
 import { PolyObject, PolyObjectSchema } from './polyObject';
@@ -49,7 +49,6 @@ export class Water extends PolyObject<typeof WaterSchema> {
 
   override getPathInfo(): PathInfo {
     return {
-      shadowLayer: LAYERS.WALL_SHADOW,
       heightLayer: 0,
       outlineLayer: 0,
       fillLayer: LAYERS.WATER_FILL,
@@ -57,7 +56,7 @@ export class Water extends PolyObject<typeof WaterSchema> {
       fillColor: 'transparent',
       height: 0,
       outline: 0,
-      shadow: WALL_CONFIG.shadow,
+      shadow: true,
     };
   }
 
@@ -70,6 +69,8 @@ export class Water extends PolyObject<typeof WaterSchema> {
   }
 
   static override *staticRender(info: RenderInfo): Iterable<RenderPass> {
+    const { waterFillColor, waterWallColor, waterWallHeight } =
+      getLevelConfig();
     const clipPath = new Path2D();
     for (const water of this.draggingWaters) {
       const path = water.getPath();
@@ -86,7 +87,6 @@ export class Water extends PolyObject<typeof WaterSchema> {
       ctx.save();
     });
     // water will add to the clipPath in WATER_WALL_CLIP_REGIONS
-    const { waterFillColor, waterWallColor } = getLevelConfig();
     const pathsIter = Water.batchRenderer.getPaths(info.visibleArea);
     for (const [, paths] of pathsIter) {
       for (const [path, points] of paths) {
@@ -99,12 +99,7 @@ export class Water extends PolyObject<typeof WaterSchema> {
         });
         clipPath.addPath(path);
         for (const pts of points) {
-          const gened = generatePathsFromPoints(
-            pts,
-            0,
-            0,
-            WALL_CONFIG.waterWallHeight,
-          );
+          const gened = generatePathsFromPoints(pts, 0, 0, waterWallHeight);
           yield pass(LAYERS.WATER_WALL_FILL, ctx => {
             ctx.fillStyle = waterWallColor;
             ctx.fill(gened.waterWallPath);

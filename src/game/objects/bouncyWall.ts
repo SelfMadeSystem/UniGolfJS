@@ -1,9 +1,10 @@
-import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { LAYERS } from '../levelConfig';
 import { registerLevelObject } from '../levelObjectRegistry';
 import type { PathInfo } from './levelObject';
 import { PolyObject, PolyObjectSchema } from './polyObject';
 import type { RigidBody } from './rigidBody';
 import type { RenderInfo, RenderPass } from '@/render/drawable';
+import { getLevelConfig } from '@/scenes/state';
 import { blendColors } from '@/utils/colorUtils';
 import { numberSchema, rgbSchema } from '@/utils/data';
 import z from 'zod';
@@ -38,8 +39,8 @@ export class BouncyWall extends PolyObject<typeof BouncyWallSchema> {
   }
 
   override getPathInfo(info: RenderInfo): PathInfo {
+    const { wallHeight, outlineWidth, waterWallHeight } = getLevelConfig();
     return {
-      shadowLayer: LAYERS.WALL_SHADOW,
       heightLayer: LAYERS.WALL_HEIGHT,
       outlineLayer: LAYERS.WALL_OUTLINE,
       fillLayer: LAYERS.WALL_FILL,
@@ -49,10 +50,10 @@ export class BouncyWall extends PolyObject<typeof BouncyWallSchema> {
         this.data.bouncyWallBoostColor,
         this.boostTime / BOOST_EFFECT_TIME,
       ),
-      height: WALL_CONFIG.height,
-      shadow: WALL_CONFIG.shadow,
-      outline: WALL_CONFIG.outline,
-      waterWallHeight: WALL_CONFIG.waterWallHeight - WALL_CONFIG.outline,
+      height: wallHeight,
+      shadow: true,
+      outline: outlineWidth,
+      waterWallHeight: waterWallHeight - outlineWidth,
     };
   }
 

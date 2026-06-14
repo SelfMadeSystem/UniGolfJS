@@ -1,6 +1,6 @@
 import { Scene } from './scene';
 import { getLevelConfig } from './state';
-import { LAYERS, type Level, WALL_CONFIG } from '@/game/levelConfig';
+import { LAYERS, type Level } from '@/game/levelConfig';
 import { LevelObjectCollection } from '@/game/levelObjectCollection';
 import { LevelObject } from '@/game/objects/levelObject';
 import type { Tee } from '@/game/objects/tee';
@@ -43,9 +43,9 @@ export abstract class LevelScene extends Scene {
 
     this.passes.push(
       pass(LAYERS.WALL_SHADOW_DRAW, ctx => {
-        const shadowColor = getLevelConfig().shadowColor;
+        const { shadowColor, shadowWidth } = getLevelConfig();
         ctx.strokeStyle = shadowColor;
-        ctx.lineWidth = WALL_CONFIG.shadow;
+        ctx.lineWidth = shadowWidth;
         ctx.lineJoin = 'round';
         ctx.stroke(this.shadowPath);
       }),

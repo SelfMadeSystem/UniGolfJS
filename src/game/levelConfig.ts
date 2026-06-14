@@ -4,21 +4,8 @@ import {
   serializedLevelObject,
 } from './levelObjectRegistry';
 import { LevelObject } from './objects/levelObject';
+import { positiveNumberSchema, stringSchema } from '@/utils/data';
 import z from 'zod';
-
-// TODO: put these in a more sensible place
-export const WALL_CONFIG = {
-  outline: 2,
-  shadow: 4,
-  height: 4,
-  waterWallHeight: 8,
-} as const;
-
-export const PHYSICS_CONFIG = {
-  dragCoefficient: 0.99,
-  frictionForce: 0.35,
-  constrainedDragMultiplier: 0.9,
-};
 
 // TODO: put these in a more sensible place
 export enum LAYERS {
@@ -49,9 +36,16 @@ export enum LAYERS {
 }
 
 export const levelConfigSchema = z.object({
-  waterFillColor: z.string().default('#40A0FF'),
-  waterWallColor: z.string().default('#779977'),
-  shadowColor: z.string().default('#00000019'),
+  waterFillColor: stringSchema.default('#40A0FF'),
+  waterWallColor: stringSchema.default('#779977'),
+  shadowColor: stringSchema.default('#00000019'),
+  outlineWidth: positiveNumberSchema.default(2),
+  wallHeight: positiveNumberSchema.default(4),
+  shadowWidth: positiveNumberSchema.default(4),
+  waterWallHeight: positiveNumberSchema.default(8),
+  dragCoefficient: positiveNumberSchema.default(0.99),
+  frictionForce: positiveNumberSchema.default(0.35),
+  constrainedDragMultiplier: positiveNumberSchema.default(0.9),
 });
 export const defaultLevelConfig = levelConfigSchema.parse({});
 export type LevelConfig = z.infer<typeof levelConfigSchema>;

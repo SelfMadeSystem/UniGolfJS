@@ -1,4 +1,4 @@
-import { LAYERS, WALL_CONFIG } from '../levelConfig';
+import { LAYERS } from '../levelConfig';
 import { registerLevelObject } from '../levelObjectRegistry';
 import type { PathInfo } from './levelObject';
 import { PolyObject, PolyObjectSchema } from './polyObject';
@@ -93,7 +93,7 @@ export class Slope extends PolyObject<typeof SlopeSchema> {
       outlineColor: '#00000000',
       fillColor: this.data.slopeColor,
       height: 0,
-      shadow: WALL_CONFIG.shadow,
+      shadow: true,
       outline: 0,
     };
   }

@@ -1,10 +1,10 @@
-import { LAYERS, PHYSICS_CONFIG } from '../levelConfig';
+import { LAYERS } from '../levelConfig';
 import { CircleObject } from './circleObject';
 import { Floor } from './floor';
 import { LevelObject, LevelObjectSchema, type PathInfo } from './levelObject';
 import { PolyObject } from './polyObject';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
-import { getLevelScene } from '@/scenes/state';
+import { getLevelConfig, getLevelScene } from '@/scenes/state';
 import { AABB } from '@/utils/aabb';
 import { Vec2Schema, positiveNumberSchema } from '@/utils/data';
 import { lerp } from '@/utils/mathUtils';
@@ -161,7 +161,7 @@ export abstract class RigidBody<
         };
       }
     }
-    return PHYSICS_CONFIG;
+    return getLevelConfig();
   }
 
   postPhysics(): void {
@@ -204,7 +204,7 @@ export abstract class RigidBody<
     const springForce = desiredPos.sub(this.pos).mult(SPRING_STRENGTH);
     this.velocity = this.velocity
       .add(springForce)
-      .mult(PHYSICS_CONFIG.constrainedDragMultiplier);
+      .mult(getLevelConfig().constrainedDragMultiplier);
   }
 
   override *render({ tickInterp }: RenderInfo): Iterable<RenderPass> {
