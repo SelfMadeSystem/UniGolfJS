@@ -5,6 +5,8 @@ import {
   setCopiedObjectProperties,
 } from '@/game/editor/state';
 import { LevelObject } from '@/game/objects/levelObject';
+import { EditScene } from '@/scenes/editScene';
+import { $scene } from '@/scenes/state';
 import { Vector2 } from '@/utils/vec';
 import { useStore } from '@nanostores/react';
 import { useCallback, useState, useSyncExternalStore } from 'react';
@@ -24,12 +26,12 @@ export function ObjectPropertyEditor() {
 
 function SingleObjectPropertyEditor({ object }: { object: LevelObject }) {
   const schema = object.schema;
-  const shape = schema.shape ?? {};
+  const shape = schema.shape;
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
 
   const copySelectedFields = useCallback(() => {
     const entries = selectedFields
-      .filter(fieldKey => fieldKey in shape)
+      .filter(fieldKey => fieldKey in (shape ?? {}))
       .map(
         fieldKey =>
           [fieldKey, clonePropertyValue(object.get(fieldKey as any))] as const,
@@ -57,7 +59,7 @@ function SingleObjectPropertyEditor({ object }: { object: LevelObject }) {
           Copy
         </button>
       </div>
-      {Object.entries(shape).map(([key, fieldSchema]) => {
+      {Object.entries(shape ?? {}).map(([key, fieldSchema]) => {
         return (
           <PropertyField
             key={key}
@@ -122,9 +124,19 @@ function PropertyField({
 
   const handleChange = useCallback(
     (newValue: unknown) => {
-      // Use the object's type-safe set method
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (object.set as any)(fieldKey, newValue);
+      const oldValue = object.get(fieldKey as any);
+      object.set(fieldKey as any, newValue);
+      const scene = $scene.get();
+      if (!(scene instanceof EditScene)) return;
+      scene.editManager.history.push({
+        name: `Set ${fieldKey}`,
+        redo() {
+          object.set(fieldKey as any, newValue);
+        },
+        undo() {
+          object.set(fieldKey as any, oldValue);
+        },
+      });
     },
     [object, fieldKey],
   );
@@ -178,6 +190,8 @@ function PropertyField({
           />
           {fieldKey}
         </span>
+        {/* Lint not applicable since it's not "created" every render, just fetched */}
+        {/* eslint-disable-next-line react-hooks/static-components */}
         <FieldComp
           value={value}
           onChange={handleChange}
