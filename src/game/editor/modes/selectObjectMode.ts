@@ -36,9 +36,7 @@ export class SelectObjectMode implements InteractionMode {
   }
 
   public cancel(): void {
-    this.editManager.currentMode?.onExit?.();
     this.editManager.currentMode = this.restoreMode;
-    this.editManager.currentMode?.onEnter?.();
   }
 
   private getHoveredObject(info: PointerInfo): LevelObject<any> | null {

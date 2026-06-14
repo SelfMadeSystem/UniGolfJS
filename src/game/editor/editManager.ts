@@ -1,7 +1,9 @@
 import { LAYERS } from '../levelConfig';
 import { LevelObject } from '../objects/levelObject';
 import { HandlesManager } from './handles';
+import { HistoryManager } from './history';
 import { KeybindsManager } from './keybindsManager';
+import { DummyMode } from './modes/dummyMode';
 import type { InteractionMode } from './modes/interactionMode';
 import { MoveMode } from './modes/moveMode';
 import { PanMode } from './modes/panMode';
@@ -28,27 +30,31 @@ export class EditManager implements Drawable, PointerEventHandler {
   /** world coordinates */
   public startPointer: Vector2 | null = null;
   public selectionPointer: Vector2 | null = null;
-  public handles: HandlesManager | null = null;
+  public readonly handles: HandlesManager;
 
   public selectedTool: Tool = 'select';
 
   public overrideMode = false;
-  public currentMode: InteractionMode;
-  public selectMode: SelectMode;
-  public moveMode: MoveMode;
-  public resizeMode: ResizeMode;
-  public placeMode: PlaceMode;
-  public panMode: PanMode;
+  public readonly selectMode: SelectMode = new SelectMode(this);
+  public readonly moveMode: MoveMode = new MoveMode(this);
+  public readonly resizeMode: ResizeMode = new ResizeMode(this);
+  public readonly placeMode: PlaceMode = new PlaceMode(this);
+  public readonly panMode: PanMode = new PanMode(this);
+  public readonly dummyMode: DummyMode = new DummyMode(this);
+  private _currentMode: InteractionMode = this.selectMode;
+  public get currentMode() {
+    return this._currentMode;
+  }
+  public set currentMode(mode: InteractionMode) {
+    this._currentMode.onExit?.();
+    this._currentMode = mode;
+    this._currentMode.onEnter?.();
+  }
   private keybinds = new KeybindsManager();
 
   constructor(public scene: EditScene) {
-    this.selectMode = new SelectMode(this);
-    this.moveMode = new MoveMode(this);
-    this.resizeMode = new ResizeMode(this);
-    this.placeMode = new PlaceMode(this);
-    this.panMode = new PanMode(this);
-    this.currentMode = this.selectMode;
     syncSelectedObjects(this.selectedObjectsInternal);
+    this.handles = new HandlesManager(this.scene);
 
     // delete objects
     this.keybinds.register({ key: 'Backspace' }, () => {
@@ -68,11 +74,6 @@ export class EditManager implements Drawable, PointerEventHandler {
 
   public get selectedObjects(): Set<LevelObject> {
     return new Set(this.selectedObjectsInternal);
-  }
-
-  initHandles(): HandlesManager {
-    if (!this.handles) this.handles = new HandlesManager(this.scene);
-    return this.handles;
   }
 
   private syncSelectedObjects(): void {
@@ -110,21 +111,13 @@ export class EditManager implements Drawable, PointerEventHandler {
 
   // ===== Mode Management =====
   public setMode(mode: 'select' | 'move' | 'resize' | 'place' | 'pan'): void {
-    this.setInteractionMode(
-      {
-        select: this.selectMode,
-        move: this.moveMode,
-        resize: this.resizeMode,
-        place: this.placeMode,
-        pan: this.panMode,
-      }[mode],
-    );
-  }
-
-  public setInteractionMode(mode: InteractionMode): void {
-    this.currentMode?.onExit?.();
-    this.currentMode = mode;
-    this.currentMode?.onEnter?.();
+    this.currentMode = {
+      select: this.selectMode,
+      move: this.moveMode,
+      resize: this.resizeMode,
+      place: this.placeMode,
+      pan: this.panMode,
+    }[mode];
   }
 
   public handleKeyDown(event: KeyboardEvent): boolean {
@@ -254,8 +247,7 @@ export class EditManager implements Drawable, PointerEventHandler {
         }
       });
       // draw handles via the handles helper
-      const handles = this.handles ?? this.initHandles();
-      yield* handles.render(aabb, info);
+      yield* this.handles.render(aabb, info);
     }
 
     if (this.currentMode.render) {
@@ -278,8 +270,7 @@ export class EditManager implements Drawable, PointerEventHandler {
     const pointerPos = this.scene.screenToWorld(info.pos);
     const selectedAABB = this.getSelectedAABB();
     if (selectedAABB) {
-      const handles = this.handles ?? this.initHandles();
-      const hit = handles.hitTest(pointerPos, selectedAABB);
+      const hit = this.handles.hitTest(pointerPos, selectedAABB);
       if (hit) {
         this.highlightedObject = null;
         return;
@@ -301,6 +292,8 @@ export class EditManager implements Drawable, PointerEventHandler {
 
   pointerup(info: PointerInfo): void {
     this.currentMode.pointerup(info);
+    this.startPointer = null;
+    this.selectionPointer = null;
   }
 
   pointerdown(info: PointerInfo): void {
@@ -311,83 +304,56 @@ export class EditManager implements Drawable, PointerEventHandler {
 
     const pointerPos = this.scene.screenToWorld(info.pos);
 
+    this.startPointer = pointerPos;
+    this.selectionPointer = pointerPos;
+    this.highlightedObject = null;
+
     // Check for handle hits first
     const selectedAABB = this.getSelectedAABB();
     if (selectedAABB) {
-      const handles = this.handles ?? this.initHandles();
-      const hit = handles.hitTest(pointerPos, selectedAABB);
+      const hit = this.handles.hitTest(pointerPos, selectedAABB);
       if (hit) {
-        const act = hit.action();
-        switch (act) {
-          case 'delete':
-            this.deleteSelectedObjects();
-            return;
-          case 'copy': {
-            this.duplicateSelectedObjects();
-            this.highlightedObject = null;
-            this.startPointer = pointerPos;
-            this.setMode('move');
-            this.currentMode.pointerdown(info);
-            return;
+        this.currentMode = this.dummyMode;
+        hit.execute(this, info);
+        return;
+      }
+    }
+
+    switch (this.selectedTool) {
+      case 'select':
+        // Check for object selection
+        const obj = this.scene.getObjectAtPointer(info);
+        if (obj instanceof LevelObject) {
+          if (info.shift) {
+            if (this.selectedObjectsInternal.has(obj)) {
+              this.deselectObject(obj);
+            } else {
+              this.selectObject(obj, true);
+            }
+          } else {
+            this.selectObject(obj, false);
           }
-          case 'rotateCCW':
-            this.rotateSelectionCCW();
-            return;
-          case 'rotateCW':
-            this.rotateSelectionCW();
-            return;
-          case 'resize':
-            this.startPointer = pointerPos;
-            this.setMode('resize');
-            this.currentMode.pointerdown(info);
-            return;
-          default:
-            console.warn('Unknown handle action:', act);
-            return;
-        }
-      }
-    }
 
-    if (this.selectedTool === 'place') {
-      this.currentMode = this.placeMode;
-      this.startPointer = pointerPos;
-      this.selectionPointer = pointerPos;
-      this.currentMode.pointerdown(info);
-      return;
-    }
-
-    if (this.selectedTool === 'pan') {
-      this.currentMode = this.panMode;
-      this.startPointer = pointerPos;
-      this.currentMode.pointerdown(info);
-      return;
-    }
-
-    // Check for object selection
-    const obj = this.scene.getObjectAtPointer(info);
-    if (obj instanceof LevelObject) {
-      if (info.shift) {
-        if (this.selectedObjectsInternal.has(obj)) {
-          this.deselectObject(obj);
+          this.currentMode = this.moveMode;
         } else {
-          this.selectObject(obj, true);
+          // Empty space - start selection drag
+          this.currentMode = this.selectMode;
         }
-      } else {
-        this.selectObject(obj, false);
-      }
 
-      this.setMode('move');
-      this.currentMode.pointerdown(info);
-    } else {
-      // Empty space - start selection drag
-      this.setMode('select');
-      this.currentMode.pointerdown(info);
+        this.currentMode.pointerdown(info);
+        break;
+      case 'place':
+        this.currentMode = this.placeMode;
+        this.currentMode.pointerdown(info);
+        break;
+      case 'pan':
+        this.currentMode = this.panMode;
+        this.currentMode.pointerdown(info);
+        break;
     }
-
-    this.currentMode.pointerdown(info);
   }
 
-  private duplicateSelectedObjects() {
+  public duplicateSelectedObjects() {
     const originals: LevelObject[] = [...this.selectedObjectsInternal];
     const duplicates: LevelObject[] = [];
 
@@ -438,7 +404,7 @@ export class EditManager implements Drawable, PointerEventHandler {
     this.syncSelectedObjects();
   }
 
-  private deleteSelectedObjects() {
+  public deleteSelectedObjects() {
     for (const obj of this.selectedObjectsInternal) {
       obj.delete(true);
     }

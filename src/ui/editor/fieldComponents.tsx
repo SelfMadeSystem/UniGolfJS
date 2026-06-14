@@ -196,7 +196,7 @@ function ObjectIdField({
       restoreMode,
     );
 
-    editManager.setInteractionMode(som);
+    editManager.currentMode = som;
     editManager.overrideMode = true;
 
     setIsPicking(true);

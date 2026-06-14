@@ -74,6 +74,7 @@ export class ResizeMode implements InteractionMode {
 
     this.editManager.startPointer = null;
     this.editManager.updateHighlight(info);
+    this.editManager.setMode('select');
   }
 
   pointerdown(info: PointerInfo): void {

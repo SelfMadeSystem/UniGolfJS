@@ -9,7 +9,6 @@ export class SelectMode implements InteractionMode {
   constructor(private editManager: EditManager) {}
 
   onEnter(): void {
-    this.editManager.handles = null;
     this.editManager.startPointer = null;
     this.editManager.selectionPointer = null;
   }
@@ -67,7 +66,6 @@ export class SelectMode implements InteractionMode {
 
     this.editManager.startPointer = null;
     this.editManager.selectionPointer = null;
-    this.editManager.updateHighlight(info);
   }
 
   pointerdown(info: PointerInfo): void {

@@ -1,5 +1,4 @@
 import type { EditManager } from '../editManager';
-import type { Placeable } from '../placeables';
 import { $selectedPlaceable } from '../state';
 import type { InteractionMode } from './interactionMode';
 import { LAYERS } from '@/game/levelConfig';
@@ -7,8 +6,6 @@ import { LevelObject } from '@/game/objects/levelObject';
 import { Portal } from '@/game/objects/portal';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
 import type { PointerInfo } from '@/render/pointerEvents';
-import { AABB } from '@/utils/aabb';
-import { Vector2 } from '@/utils/vec';
 
 export class PlaceMode implements InteractionMode {
   private isPlacingSize = false;
@@ -138,7 +135,6 @@ export class PlaceMode implements InteractionMode {
       this.isPlacingSize = true;
       this.editManager.startPointer = snappedPointer;
       this.editManager.selectionPointer = snappedPointer;
-      this.editManager.updateHighlight(info);
       return;
     }
 

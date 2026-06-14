@@ -26,6 +26,7 @@ export class MoveMode implements InteractionMode {
 
     this.editManager.startPointer = null;
     this.editManager.updateHighlight(info);
+    this.editManager.setMode('select');
 
     for (const obj of this.editManager.selectedObjects) {
       obj.stopDragging();

@@ -1,5 +1,7 @@
 import { LAYERS } from '../levelConfig';
+import type { EditManager } from './editManager';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import type { PointerInfo } from '@/render/pointerEvents';
 import type { EditScene } from '@/scenes/editScene';
 import { AABB } from '@/utils/aabb';
 import { Vector2 } from '@/utils/vec';
@@ -57,7 +59,7 @@ class EditorHandle {
     private iconName: IconName,
     private fillColor: string,
     private cursorStyle: string,
-    private handleAction: HandleAction,
+    public execute: (e: EditManager, info: PointerInfo) => void,
   ) {}
 
   private getAABB(selectionAABB: AABB) {
@@ -91,10 +93,6 @@ class EditorHandle {
   cursor() {
     return this.cursorStyle;
   }
-
-  action(): HandleAction {
-    return this.handleAction;
-  }
 }
 
 export class HandlesManager {
@@ -108,7 +106,10 @@ export class HandlesManager {
         'arrow-top-left-bottom-right',
         '#FFFFFF',
         'nwse-resize',
-        'resize',
+        (m, info) => {
+          m.setMode('resize');
+          m.currentMode.pointerdown(info);
+        },
       ),
       new EditorHandle(
         scene,
@@ -117,7 +118,7 @@ export class HandlesManager {
         'rotate-left',
         '#FFFFFF',
         'pointer',
-        'rotateCCW',
+        m => m.rotateSelectionCCW(),
       ),
       new EditorHandle(
         scene,
@@ -126,7 +127,12 @@ export class HandlesManager {
         'content-copy',
         '#FFFFFF',
         'pointer',
-        'copy',
+        (m, info) => {
+          m.duplicateSelectedObjects();
+          m.highlightedObject = null;
+          m.setMode('move');
+          m.currentMode.pointerdown(info);
+        },
       ),
       new EditorHandle(
         scene,
@@ -134,7 +140,7 @@ export class HandlesManager {
         'close',
         '#FF5555',
         'pointer',
-        'delete',
+        m => m.deleteSelectedObjects(),
       ),
     ];
   }
