@@ -1,6 +1,8 @@
 import { ObjectPropertyEditor } from './ObjectPropertyEditor';
 import { $copiedObjectProperties, $selectedObjects } from '@/game/editor/state';
 import { LevelObject } from '@/game/objects/levelObject';
+import { EditScene } from '@/scenes/editScene';
+import { $scene } from '@/scenes/state';
 import { Vector2 } from '@/utils/vec';
 import { useStore } from '@nanostores/react';
 import { useCallback } from 'react';
@@ -11,17 +13,48 @@ export function SelectionStatus() {
 
   const pasteProperties = useCallback(() => {
     if (!copiedObjectProperties) return;
+    const seldObjs = [...selectedObjects];
 
-    for (const obj of selectedObjects) {
+    const oldValues = new Map<LevelObject, Map<string, any>>();
+    const entries = Object.entries(copiedObjectProperties);
+
+    for (const obj of seldObjs) {
       if (!(obj instanceof LevelObject)) continue;
+      const map = new Map<string, any>();
 
       const shape = obj.schema.shape ?? {};
-      for (const [key, value] of Object.entries(copiedObjectProperties)) {
+      for (const [key, value] of entries) {
         if (key === 'id' || !(key in shape)) continue;
+        map.set(key, obj.get(key as any));
         // TODO: validate value against field schema
         obj.set(key as any, clonePropertyValue(value));
       }
+
+      oldValues.set(obj, map);
     }
+
+    const scene = $scene.get();
+    if (!(scene instanceof EditScene)) return;
+    scene.editManager.history.push({
+      name: `Paste values`,
+      redo() {
+        for (const obj of seldObjs) {
+          if (!(obj instanceof LevelObject)) continue;
+          const shape = obj.schema.shape ?? {};
+          for (const [key, value] of entries) {
+            if (key === 'id' || !(key in shape)) continue;
+            obj.set(key as any, clonePropertyValue(value));
+          }
+        }
+      },
+      undo() {
+        for (const [obj, map] of oldValues) {
+          for (const [k, v] of map) {
+            obj.set(k as any, v);
+          }
+        }
+      },
+    });
   }, [copiedObjectProperties, selectedObjects]);
 
   return (
