@@ -1,5 +1,6 @@
 import './fieldComponents';
 import { getSchemaComponent } from './schemaRegistry';
+import type { HistoryState } from '@/game/editor/history';
 import {
   $selectedObjects,
   setCopiedObjectProperties,
@@ -106,6 +107,12 @@ function useObjectData(object: LevelObject, fieldKey: string) {
   );
 }
 
+type PropertyHistoryState = HistoryState & {
+  time: number;
+  key: string;
+  object: LevelObject<any>;
+};
+
 function PropertyField({
   fieldKey,
   fieldSchema,
@@ -128,15 +135,40 @@ function PropertyField({
       object.set(fieldKey as any, newValue);
       const scene = $scene.get();
       if (!(scene instanceof EditScene)) return;
-      scene.editManager.history.push({
+      const now = Date.now();
+      const latestHistory = scene.editManager.history.latest;
+      out: if (
+        latestHistory &&
+        'time' in latestHistory &&
+        'key' in latestHistory &&
+        'object' in latestHistory
+      ) {
+        const prev = latestHistory as PropertyHistoryState;
+        if (
+          now - prev.time > 1000 ||
+          prev.key !== fieldKey ||
+          prev.object !== object
+        )
+          break out;
+        prev.time = now;
+        prev.redo = () => {
+          object.set(fieldKey as any, newValue);
+        };
+        return;
+      }
+      const state: PropertyHistoryState = {
         name: `Set ${fieldKey}`,
+        time: now,
+        key: fieldKey,
+        object,
         redo() {
           object.set(fieldKey as any, newValue);
         },
         undo() {
           object.set(fieldKey as any, oldValue);
         },
-      });
+      };
+      scene.editManager.history.push(state);
     },
     [object, fieldKey],
   );

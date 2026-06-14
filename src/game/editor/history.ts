@@ -8,6 +8,11 @@ export class HistoryManager {
   public readonly undoStack: HistoryState[] = [];
   public readonly redoStack: HistoryState[] = [];
 
+  public get latest(): HistoryState | null {
+    if (this.redoStack.length > 0) return null;
+    return this.undoStack.at(-1) ?? null;
+  }
+
   public push(state: HistoryState) {
     this.undoStack.push(state);
     this.redoStack.length = 0;
