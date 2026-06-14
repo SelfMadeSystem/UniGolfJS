@@ -366,7 +366,7 @@ export class EditManager implements Drawable, PointerEventHandler {
     }
   }
 
-  public duplicateSelectedObjects() {
+  public duplicateSelectedObjects(): LevelObject[] {
     const originals: LevelObject[] = [...this.selectedObjectsInternal];
     const duplicates: LevelObject[] = [];
 
@@ -415,6 +415,7 @@ export class EditManager implements Drawable, PointerEventHandler {
       this.scene.moveObjectToTop(d);
     }
     this.syncSelectedObjects();
+    return duplicates;
   }
 
   public deleteSelectedObjects() {

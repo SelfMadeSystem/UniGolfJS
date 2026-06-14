@@ -146,10 +146,24 @@ export class HandlesManager {
         '#FFFFFF',
         'pointer',
         (m, info) => {
-          m.duplicateSelectedObjects();
+          const dupes = m.duplicateSelectedObjects();
           m.highlightedObject = null;
           m.setMode('move');
           m.currentMode.pointerdown(info);
+          m.history.push({
+            name: 'Copy objects',
+            redo() {
+              for (const dupe of dupes) {
+                m.scene.addObjectToLevel(dupe);
+              }
+            },
+            undo() {
+              for (const dupe of dupes) {
+                dupe.delete(true);
+              }
+              m.clearSelection();
+            },
+          });
         },
       ),
       new EditorHandle(
