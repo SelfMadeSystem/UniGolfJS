@@ -13,6 +13,7 @@ import {
   positiveNumberSchema,
   rgbSchema,
 } from '@/utils/data';
+import { clamp } from '@/utils/mathUtils';
 import { Vector2 } from '@/utils/vec';
 import z from 'zod';
 
@@ -21,8 +22,17 @@ const TeeSchema = LevelObjectSchema.extend({
   radius: positiveNumberSchema.default(9),
   ballActive: booleanSchema.default(true),
   active: booleanSchema.default(false),
-  cameraZoom: positiveNumberSchema.default(1),
-  cameraOffset: Vec2Schema.default(new Vector2(0, 0)),
+  cameraMinZoom: positiveNumberSchema.default(0),
+  cameraMaxZoom: positiveNumberSchema.default(1),
+  cameraTl: Vec2Schema.default(new Vector2(-200, -500)).meta({
+    showInEditor: true,
+    relativeTo: 'pos',
+  }),
+  cameraBr: Vec2Schema.default(new Vector2(200, 100)).meta({
+    showInEditor: true,
+    relativeTo: 'pos',
+  }),
+  cameraPadding: positiveNumberSchema.default(50),
 });
 
 const TEE_SIZE = new Vector2(75, 50);
@@ -178,12 +188,22 @@ export class Tee extends LevelObject<typeof TeeSchema> {
 
   focusCamera(forceCamera = false, scene = getLevelScene()): void {
     if (!scene) return;
+    const zoom = clamp(
+      scene.getNecessaryZoom(
+        this.data.cameraBr,
+        this.data.cameraTl,
+        this.data.cameraPadding,
+      ),
+      this.data.cameraMinZoom,
+      this.data.cameraMaxZoom,
+    );
+    const center = this.data.cameraBr.avg(this.data.cameraTl).add(this.pos);
     if (forceCamera) {
-      scene.snapCameraTo(this.pos.add(this.data.cameraOffset));
-      scene.snapCameraZoomTo(this.data.cameraZoom);
+      scene.snapCameraTo(center);
+      scene.snapCameraZoomTo(zoom);
     } else {
-      scene.moveCameraTo(this.pos.add(this.data.cameraOffset));
-      scene.zoomCameraTo(this.data.cameraZoom);
+      scene.moveCameraTo(center);
+      scene.zoomCameraTo(zoom);
     }
   }
 

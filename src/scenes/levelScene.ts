@@ -191,6 +191,23 @@ export abstract class LevelScene extends Scene {
     this.cameraZoomTarget = null;
   }
 
+  /**
+   * Gets the necessary zoom level to contain two points with a certain amount of padding
+   */
+  getNecessaryZoom(a: Vector2, b: Vector2, padding: number = 0) {
+    const aabb = new AABB(a, b);
+    try {
+      const renderer = $renderer.get();
+      if (!renderer) return 1;
+      const canvas = renderer.canvas;
+      const zoomX = (canvas.clientWidth - padding) / aabb.width;
+      const zoomY = (canvas.clientHeight - padding) / aabb.height;
+      return Math.min(zoomX, zoomY);
+    } catch (e) {
+      return 1;
+    }
+  }
+
   getObjectAtPointer(pointer: PointerInfo | null): LevelObject<any> | null {
     if (!pointer) return null;
     const worldPos = this.screenToWorld(pointer.pos);

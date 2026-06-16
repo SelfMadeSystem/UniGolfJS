@@ -30,6 +30,7 @@ export class EditManager implements Drawable, PointerEventHandler {
   /** world coordinates */
   public startPointer: Vector2 | null = null;
   public selectionPointer: Vector2 | null = null;
+  public readonly specialDrawables: Map<any, Drawable> = new Map();
   public readonly handles: HandlesManager;
   public readonly history: HistoryManager = new HistoryManager();
 
@@ -276,6 +277,10 @@ export class EditManager implements Drawable, PointerEventHandler {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.fill(path);
       });
+    }
+
+    for (const d of this.specialDrawables.values()) {
+      yield* d.render(info);
     }
   }
 

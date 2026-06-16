@@ -3,8 +3,11 @@ import {
   registerSchemaComponent,
 } from './schemaRegistry';
 import { SelectObjectMode } from '@/game/editor/modes/selectObjectMode';
+import { Vec2PosMode } from '@/game/editor/modes/vec2PosMode';
+import { LAYERS } from '@/game/levelConfig';
 import { getLevelObjectClass } from '@/game/levelObjectRegistry';
 import type { LevelObject } from '@/game/objects/levelObject';
+import { pass } from '@/render/drawable';
 import { EditScene } from '@/scenes/editScene';
 import { getLevelScene } from '@/scenes/state';
 import {
@@ -21,7 +24,19 @@ import {
 import { Vector2 } from '@/utils/vec';
 import { useCallback, useEffect, useState } from 'react';
 
-function Vec2Field({ value, onChange }: FieldComponentProps<Vector2>) {
+// showInEditor meta: when true, display a picker button to set Vec2 from scene
+// relativeTo meta: when set, the picker will be relative to the specified object's value
+function Vec2Field({
+  value,
+  onChange,
+  schema,
+  object,
+}: FieldComponentProps<Vector2>) {
+  const meta = schema.meta?.();
+  const showPicker = meta?.showInEditor === true;
+  const relativeTo = meta?.relativeTo as string | undefined;
+  const [isPicking, setIsPicking] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const setX = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
       onChange(new Vector2(Number(e.target.value), value.y)),
@@ -33,20 +48,110 @@ function Vec2Field({ value, onChange }: FieldComponentProps<Vector2>) {
     [onChange, value],
   );
 
+  useEffect(() => {
+    if (!isHovered) return;
+
+    const levelScene = getLevelScene();
+    if (!(levelScene instanceof EditScene)) return;
+
+    const vec = value.add(
+      (object as any)[relativeTo as string] ?? new Vector2(0, 0),
+    );
+    levelScene.editManager.specialDrawables.set('Vec2FieldPreview', {
+      render: function* () {
+        yield pass(LAYERS.EDITOR, ctx => {
+          ctx.fillStyle = 'rgba(0, 255, 0, 0.9)';
+          ctx.beginPath();
+          ctx.arc(vec.x, vec.y, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#000000';
+          ctx.stroke();
+        });
+      },
+    });
+
+    return () => {
+      levelScene.editManager.specialDrawables.delete('Vec2FieldPreview');
+    };
+  }, [isHovered, object, relativeTo, value]);
+
+  const startPicker = useCallback(() => {
+    const levelScene = getLevelScene();
+    if (!(levelScene instanceof EditScene)) return;
+
+    const editManager = levelScene.editManager;
+    const restoreMode = editManager.currentMode;
+
+    // if already in a Vec2PosMode, cancel it
+    if (editManager.currentMode instanceof Vec2PosMode) {
+      editManager.currentMode.cancel();
+      return;
+    }
+
+    const mode = new Vec2PosMode(
+      editManager,
+      value,
+      (object as any)[relativeTo as string] ?? new Vector2(0, 0),
+      pos => onChange(pos),
+      () => {
+        setIsPicking(false);
+        editManager.overrideMode = false;
+      },
+      restoreMode,
+    );
+
+    editManager.currentMode = mode;
+    editManager.overrideMode = true;
+    setIsPicking(true);
+  }, [onChange, object, relativeTo, value]);
+
+  if (!showPicker)
+    return (
+      <div className="flex gap-2">
+        <input
+          className="w-20 rounded bg-gray-800 px-2 text-white"
+          type="number"
+          value={value.x}
+          onChange={setX}
+        />
+        <input
+          className="w-20 rounded bg-gray-800 px-2 text-white"
+          type="number"
+          value={value.y}
+          onChange={setY}
+        />
+      </div>
+    );
+
   return (
-    <div className="flex gap-2">
-      <input
-        className="w-20 rounded bg-gray-800 px-2 text-white"
-        type="number"
-        value={value.x}
-        onChange={setX}
-      />
-      <input
-        className="w-20 rounded bg-gray-800 px-2 text-white"
-        type="number"
-        value={value.y}
-        onChange={setY}
-      />
+    <div className="flex items-center gap-2">
+      <div className="flex gap-2">
+        <input
+          className="w-20 rounded bg-gray-800 px-2 text-white"
+          type="number"
+          value={value.x}
+          onChange={setX}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        />
+        <input
+          className="w-20 rounded bg-gray-800 px-2 text-white"
+          type="number"
+          value={value.y}
+          onChange={setY}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        />
+      </div>
+      <button
+        type="button"
+        className="rounded bg-gray-700 px-2 py-1 text-white disabled:cursor-not-allowed disabled:bg-gray-800"
+        onClick={startPicker}
+        title={isPicking ? 'Cancel picking' : 'Pick position'}
+      >
+        {isPicking ? 'Cancel' : 'Pick'}
+      </button>
     </div>
   );
 }

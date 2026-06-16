@@ -1,13 +1,34 @@
 import { lineLineIntersection } from './line';
 import { type VecLike, Vector2 } from './vec';
 
+export type AABBLike =
+  | {
+      tl: VecLike;
+      br: VecLike;
+    }
+  | [VecLike, VecLike];
+
 export class AABB {
   public readonly tl: Vector2;
   public readonly br: Vector2;
 
-  constructor(a: VecLike, b: VecLike) {
-    const vecA = new Vector2(a);
-    const vecB = new Vector2(b);
+  constructor(a: AABBLike);
+  constructor(a: VecLike, b: VecLike);
+  constructor(...a: [VecLike, VecLike] | [AABBLike]) {
+    let vecA: Vector2;
+    let vecB: Vector2;
+    if (a.length === 1) {
+      if ('tl' in a[0]) {
+        vecA = new Vector2(a[0].tl);
+        vecB = new Vector2(a[0].br);
+      } else {
+        vecA = new Vector2(a[0][0]);
+        vecB = new Vector2(a[0][1]);
+      }
+    } else {
+      vecA = new Vector2(a[0]);
+      vecB = new Vector2(a[1]);
+    }
     this.tl = new Vector2(Math.min(vecA.x, vecB.x), Math.min(vecA.y, vecB.y));
     this.br = new Vector2(Math.max(vecA.x, vecB.x), Math.max(vecA.y, vecB.y));
   }
@@ -81,6 +102,22 @@ export class AABB {
       [this.br, this.bl],
       [this.bl, this.tl],
     ] as const;
+  }
+
+  withTop(top: number): AABB {
+    return new AABB(new Vector2(this.tl.x, top), this.br);
+  }
+
+  withBottom(bottom: number): AABB {
+    return new AABB(this.tl, new Vector2(this.br.x, bottom));
+  }
+
+  withLeft(left: number): AABB {
+    return new AABB(new Vector2(left, this.tl.y), this.br);
+  }
+
+  withRight(right: number): AABB {
+    return new AABB(this.tl, new Vector2(right, this.br.y));
   }
 
   intersects(other: AABB): boolean {
