@@ -131,6 +131,7 @@ function PropertyField({
 
   const handleChange = useCallback(
     (newValue: unknown) => {
+      if (fieldSchema.safeParse(newValue).success === false) return;
       const oldValue = object.get(fieldKey as any);
       object.set(fieldKey as any, newValue);
       const scene = $scene.get();
@@ -170,7 +171,7 @@ function PropertyField({
       };
       scene.editManager.history.push(state);
     },
-    [object, fieldKey],
+    [fieldSchema, object, fieldKey],
   );
 
   const copyId = useCallback(async () => {
