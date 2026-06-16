@@ -99,12 +99,9 @@ export abstract class RigidBody<
   }
 
   canCollide(other: RigidBody): boolean {
-    if (other.constraint === this.constraint) {
-      return true;
-    }
-    if (!other.constraint || !this.constraint) {
-      return false;
-    }
+    if (this.inWater || other.inWater) return false;
+    if (other.constraint === this.constraint) return true;
+    if (!other.constraint || !this.constraint) return false;
 
     return (
       other.constraint.radius === this.constraint.radius &&
