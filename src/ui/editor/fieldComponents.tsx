@@ -171,6 +171,14 @@ function NormalVec2Field({ value, onChange }: FieldComponentProps<Vector2>) {
     [onChange],
   );
 
+  const rotateCw = useCallback(() => {
+    onChange(value.ccw90());
+  }, [value, onChange]);
+
+  const rotateCcw = useCallback(() => {
+    onChange(value.cw90());
+  }, [value, onChange]);
+
   return (
     <div className="flex items-center gap-2">
       <input
@@ -181,7 +189,22 @@ function NormalVec2Field({ value, onChange }: FieldComponentProps<Vector2>) {
         max={180}
         onChange={setAngle}
       />
-      <span className="text-gray-500">°</span>
+      <button
+        type="button"
+        className="rounded bg-gray-700 px-2 py-1 text-white disabled:cursor-not-allowed disabled:bg-gray-800"
+        onClick={rotateCw}
+        title="Rotate clockwise"
+      >
+        CW
+      </button>
+      <button
+        type="button"
+        className="rounded bg-gray-700 px-2 py-1 text-white disabled:cursor-not-allowed disabled:bg-gray-800"
+        onClick={rotateCcw}
+        title="Rotate counter-clockwise"
+      >
+        CCW
+      </button>
     </div>
   );
 }

@@ -20,7 +20,24 @@ export const Vec2Schema = z.codec(
   },
 );
 
-export const NormalVec2Schema = Vec2Schema.transform(v => v.normalize());
+export const NormalVec2Schema = z.codec(
+  z.union([
+    z.object({
+      x: z.number(),
+      y: z.number(),
+    }),
+    z.tuple([z.number(), z.number()]),
+  ]),
+  z.instanceof(Vector2),
+  {
+    decode(input) {
+      return new Vector2(input).normalize();
+    },
+    encode(vec: Vector2) {
+      return { x: vec.x, y: vec.y };
+    },
+  },
+);
 
 // TODO: Make a proper color component
 export const rgbSchema = z.string();

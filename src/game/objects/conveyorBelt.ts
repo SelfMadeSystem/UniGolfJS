@@ -16,8 +16,8 @@ export const ConveyorBeltSchema = PolyObjectSchema.extend({
   conveyorColor: rgbSchema.default('#4a90e2'),
   conveyorArrowColor: rgbSchema.default('#357ABD'),
   conveyorDirection: NormalVec2Schema.default(new Vector2(1, 0)),
-  conveyorSpeed: positiveNumberSchema.default(7.5),
-  conveyorAccel: positiveNumberSchema.default(0.2),
+  conveyorSpeed: positiveNumberSchema.default(10),
+  conveyorAccel: positiveNumberSchema.default(0.75),
 });
 
 const ARROW_UPSCALE = 10;

@@ -95,7 +95,7 @@ export function PlaceMenu({
       />
       <div className="pointer-events-auto absolute inset-4 overflow-auto rounded bg-black/80 p-4 shadow">
         <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
+          className="absolute top-4 right-4 cursor-pointer text-gray-400 hover:text-gray-200"
           onClick={onClose}
         >
           <Icon icon="mdi:close" width={24} height={24} />
