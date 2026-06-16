@@ -14,7 +14,6 @@ import {
   objectIdSchema,
   positiveNumberSchema,
   rgbSchema,
-  rgbaSchema,
   rotationSchema,
   shapeSchema,
   stringSchema,
@@ -233,7 +232,6 @@ function ObjectIdField({
 
 registerSchemaComponent(Vec2Schema, Vec2Field);
 registerSchemaComponent(rgbSchema, ColorField);
-registerSchemaComponent(rgbaSchema, ColorField);
 registerSchemaComponent(shapeSchema, ShapeField);
 registerSchemaComponent(rotationSchema, RotationField);
 registerSchemaComponent(numberSchema, NumberField);

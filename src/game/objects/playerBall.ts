@@ -12,12 +12,14 @@ export class PlayerBall extends Ball {
   constructor(
     options: z.input<typeof PlayerBallSchema>,
     public tee: Tee,
+    public active: boolean,
   ) {
     super(options);
   }
 
   override tick(): void {
-    super.tick();
+    if (this.active) super.tick();
+    else this.prevPos = this.pos;
     if (this.inWater) return;
 
     const scene = getLevelScene();

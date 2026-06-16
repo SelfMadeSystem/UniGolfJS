@@ -70,11 +70,10 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
   override getPathInfo(): PathInfo {
     return {
       outlineLayer: -1,
-      fillLayer: LAYERS.OBJECTS_1,
+      fillLayer: LAYERS.FLOOR_OBJECTS_1,
       outlineColor: '#00000000',
       fillColor: this.data.conveyorColor,
       height: 0,
-      shadow: true,
       outline: 0,
     };
   }
@@ -84,7 +83,7 @@ export class ConveyorBelt extends PolyObject<typeof ConveyorBeltSchema> {
     const { tickWithInterp } = info;
 
     // Draw animated directional arrows using pattern
-    yield pass(LAYERS.OBJECTS_3, ctx => {
+    yield pass(LAYERS.FLOOR_OBJECTS_3, ctx => {
       const path = this.getPath();
       const direction = this.data.conveyorDirection.normalize();
       const pattern = ConveyorBelt.getArrowPattern(

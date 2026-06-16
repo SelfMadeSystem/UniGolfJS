@@ -70,7 +70,7 @@ export class Slope extends PolyObject<typeof SlopeSchema> {
   override *render(info: RenderInfo): Iterable<RenderPass> {
     yield* this.polyRender(info);
     // Draw slope direction arrow
-    yield pass(LAYERS.OBJECTS_3, ctx => {
+    yield pass(LAYERS.FLOOR_OBJECTS_3, ctx => {
       const path = this.getPath();
       const pattern = Slope.getArrowPattern(
         this.data.slopeDirection,
@@ -89,11 +89,10 @@ export class Slope extends PolyObject<typeof SlopeSchema> {
   override getPathInfo(): PathInfo {
     return {
       outlineLayer: -1,
-      fillLayer: LAYERS.OBJECTS_1,
+      fillLayer: LAYERS.FLOOR_OBJECTS_1,
       outlineColor: '#00000000',
       fillColor: this.data.slopeColor,
       height: 0,
-      shadow: true,
       outline: 0,
     };
   }

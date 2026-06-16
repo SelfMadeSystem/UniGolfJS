@@ -73,8 +73,8 @@ export class Boost extends PolyObject<typeof BoostSchema> {
   override getPathInfo(): PathInfo {
     return {
       heightLayer: 0,
-      outlineLayer: LAYERS.OBJECTS_1,
-      fillLayer: LAYERS.OBJECTS_2,
+      outlineLayer: LAYERS.FLOOR_OBJECTS_1,
+      fillLayer: LAYERS.FLOOR_OBJECTS_2,
       outlineColor: '#00FF00',
       fillColor: blendColors(C1, C2, this.boostTime / BOOST_EFFECT_TIME),
       height: 0,

@@ -19,6 +19,7 @@ import z from 'zod';
 const TeeSchema = LevelObjectSchema.extend({
   teeColor: rgbSchema.default('#f79d60'),
   radius: positiveNumberSchema.default(9),
+  ballActive: booleanSchema.default(true),
   active: booleanSchema.default(false),
   cameraZoom: positiveNumberSchema.default(1),
   cameraOffset: Vec2Schema.default(new Vector2(0, 0)),
@@ -76,6 +77,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
         radius: this.data.radius,
       },
       this,
+      this.data.ballActive,
     );
     scene.addObject(newBall);
     this.ball = newBall;
@@ -97,6 +99,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
       if (this.ball) {
         this.shot = true;
         this.ball.velocity = velocity;
+        this.ball.active = true;
       }
     }
     this.driverPos = null;

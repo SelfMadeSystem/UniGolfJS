@@ -10,6 +10,9 @@ import z from 'zod';
 // TODO: put these in a more sensible place
 export enum LAYERS {
   FLOOR,
+  FLOOR_OBJECTS_1,
+  FLOOR_OBJECTS_2,
+  FLOOR_OBJECTS_3,
   WALL_SHADOW,
   WALL_SHADOW_DRAW,
   WATER_WALL_PRE,
