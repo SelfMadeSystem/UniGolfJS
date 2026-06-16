@@ -14,7 +14,11 @@ import z from 'zod';
 export const RigidBodySchema = LevelObjectSchema.extend({
   radius: positiveNumberSchema.default(12.5),
   mass: positiveNumberSchema.default(1),
-  velocity: Vec2Schema.default(new Vector2(0, 0)),
+  velocity: Vec2Schema.default(new Vector2(0, 0)).meta({
+    showInEditor: true,
+    relativeTo: 'pos',
+    multiplier: 10,
+  }),
 });
 
 const WATER_ANIMATION_TIME = 10;
