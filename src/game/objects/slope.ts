@@ -4,7 +4,7 @@ import type { PathInfo } from './levelObject';
 import { PolyObject, PolyObjectSchema } from './polyObject';
 import type { RigidBody } from './rigidBody';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
-import { Vec2Schema, positiveNumberSchema } from '@/utils/data';
+import { NormalVec2Schema, positiveNumberSchema } from '@/utils/data';
 import { rgbSchema } from '@/utils/data';
 import { Vector2 } from '@/utils/vec';
 import z from 'zod';
@@ -12,7 +12,7 @@ import z from 'zod';
 export const SlopeSchema = PolyObjectSchema.extend({
   slopeColor: rgbSchema.default('#a67857'),
   slopeArrowColor: rgbSchema.default('#7c4a31'),
-  slopeDirection: Vec2Schema.default(new Vector2(0, 1)),
+  slopeDirection: NormalVec2Schema.default(new Vector2(0, 1)),
   slopeForce: positiveNumberSchema.default(2.5),
 });
 

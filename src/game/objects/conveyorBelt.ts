@@ -4,14 +4,18 @@ import type { PathInfo } from './levelObject';
 import { PolyObject, PolyObjectSchema } from './polyObject';
 import type { RigidBody } from './rigidBody';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
-import { Vec2Schema, positiveNumberSchema, rgbSchema } from '@/utils/data';
+import {
+  NormalVec2Schema,
+  positiveNumberSchema,
+  rgbSchema,
+} from '@/utils/data';
 import { Vector2 } from '@/utils/vec';
 import z from 'zod';
 
 export const ConveyorBeltSchema = PolyObjectSchema.extend({
   conveyorColor: rgbSchema.default('#4a90e2'),
   conveyorArrowColor: rgbSchema.default('#357ABD'),
-  conveyorDirection: Vec2Schema.default(new Vector2(1, 0)),
+  conveyorDirection: NormalVec2Schema.default(new Vector2(1, 0)),
   conveyorSpeed: positiveNumberSchema.default(7.5),
   conveyorAccel: positiveNumberSchema.default(0.2),
 });

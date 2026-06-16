@@ -20,6 +20,8 @@ export const Vec2Schema = z.codec(
   },
 );
 
+export const NormalVec2Schema = Vec2Schema.transform(v => v.normalize());
+
 export const rgbSchema = z
   .string()
   .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/);

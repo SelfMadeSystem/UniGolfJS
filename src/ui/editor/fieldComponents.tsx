@@ -11,6 +11,7 @@ import { pass } from '@/render/drawable';
 import { EditScene } from '@/scenes/editScene';
 import { getLevelScene } from '@/scenes/state';
 import {
+  NormalVec2Schema,
   Vec2Schema,
   booleanSchema,
   numberSchema,
@@ -155,6 +156,32 @@ function Vec2Field({
       >
         {isPicking ? 'Cancel' : 'Pick'}
       </button>
+    </div>
+  );
+}
+
+function NormalVec2Field({ value, onChange }: FieldComponentProps<Vector2>) {
+  const angle = Math.round((value.angle() * 180) / Math.PI);
+
+  const setAngle = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newAngle = (Number(e.target.value) * Math.PI) / 180;
+      onChange(Vector2.fromAngle(newAngle));
+    },
+    [onChange],
+  );
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        className="w-20 rounded bg-gray-800 px-2 text-white"
+        type="number"
+        value={angle}
+        min={-180}
+        max={180}
+        onChange={setAngle}
+      />
+      <span className="text-gray-500">°</span>
     </div>
   );
 }
@@ -339,6 +366,7 @@ function ObjectIdField({
 }
 
 registerSchemaComponent(Vec2Schema, Vec2Field);
+registerSchemaComponent(NormalVec2Schema, NormalVec2Field);
 registerSchemaComponent(rgbSchema, ColorField);
 registerSchemaComponent(shapeSchema, ShapeField);
 registerSchemaComponent(rotationSchema, RotationField);
