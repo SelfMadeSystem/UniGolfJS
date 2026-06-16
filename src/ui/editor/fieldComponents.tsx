@@ -26,6 +26,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 // showInEditor meta: when true, display a picker button to set Vec2 from scene
 // relativeTo meta: when set, the picker will be relative to the specified object's value
+// multiplier meta: when set, multiplies the value by that amount in the picker
 function Vec2Field({
   value,
   onChange,
@@ -35,6 +36,7 @@ function Vec2Field({
   const meta = schema.meta?.();
   const showPicker = meta?.showInEditor === true;
   const relativeTo = meta?.relativeTo as string | undefined;
+  const multiplier = (meta?.multiplier as number) ?? 1;
   const [isPicking, setIsPicking] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const setX = useCallback(
@@ -54,9 +56,9 @@ function Vec2Field({
     const levelScene = getLevelScene();
     if (!(levelScene instanceof EditScene)) return;
 
-    const vec = value.add(
-      (object as any)[relativeTo as string] ?? new Vector2(0, 0),
-    );
+    const vec = value
+      .mult(multiplier)
+      .add((object as any)[relativeTo as string] ?? new Vector2(0, 0));
     levelScene.editManager.specialDrawables.set('Vec2FieldPreview', {
       render: function* () {
         yield pass(LAYERS.EDITOR, ctx => {
@@ -74,7 +76,7 @@ function Vec2Field({
     return () => {
       levelScene.editManager.specialDrawables.delete('Vec2FieldPreview');
     };
-  }, [isHovered, object, relativeTo, value]);
+  }, [isHovered, multiplier, object, relativeTo, value]);
 
   const startPicker = useCallback(() => {
     const levelScene = getLevelScene();
@@ -93,6 +95,7 @@ function Vec2Field({
       editManager,
       value,
       (object as any)[relativeTo as string] ?? new Vector2(0, 0),
+      multiplier,
       pos => onChange(pos),
       () => {
         setIsPicking(false);
@@ -104,7 +107,7 @@ function Vec2Field({
     editManager.currentMode = mode;
     editManager.overrideMode = true;
     setIsPicking(true);
-  }, [onChange, object, relativeTo, value]);
+  }, [value, multiplier, object, relativeTo, onChange]);
 
   if (!showPicker)
     return (

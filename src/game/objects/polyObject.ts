@@ -13,7 +13,11 @@ import { Vector2 } from '@/utils/vec';
 import z from 'zod';
 
 export const PolyObjectSchema = LevelObjectSchema.extend({
-  scale: Vec2Schema.default(new Vector2(40, 40)),
+  scale: Vec2Schema.default(new Vector2(40, 40)).meta({
+    showInEditor: true,
+    relativeTo: 'pos',
+    multiplier: 0.5,
+  }),
   shape: shapeSchema.default('rectangle'),
   rotation: rotationSchema.default(0),
   bounciness: numberSchema.default(1),

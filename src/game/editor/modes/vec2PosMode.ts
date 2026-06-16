@@ -12,6 +12,7 @@ export class Vec2PosMode implements InteractionMode {
     private editManager: EditManager,
     public readonly currentPos: Vector2,
     public readonly relativeTo: Vector2,
+    public readonly multiplier: number,
     private readonly selectCb: (pos: Vector2) => void,
     private readonly exitCb: () => void,
     private readonly restoreMode: InteractionMode,
@@ -40,7 +41,7 @@ export class Vec2PosMode implements InteractionMode {
 
     if (!info.alt) worldPos = this.editManager.getSnappedPoint(worldPos);
 
-    this.selectCb(worldPos.sub(this.relativeTo));
+    this.selectCb(worldPos.sub(this.relativeTo).div(this.multiplier));
     this.cancel();
   }
 
@@ -49,7 +50,7 @@ export class Vec2PosMode implements InteractionMode {
   }
 
   *render(info: any): Iterable<RenderPass> {
-    const cur = this.currentPos.add(this.relativeTo);
+    const cur = this.currentPos.mult(this.multiplier).add(this.relativeTo);
     const pointer = this.lastPointer;
 
     yield pass(LAYERS.EDITOR, (ctx: CanvasRenderingContext2D) => {

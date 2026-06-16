@@ -9,7 +9,7 @@ export const GameObjectSchema = z.object({
   /** IDs should be unique */
   id: z.nanoid().default(nanoid),
   /** The center position of the object. */
-  position: Vec2Schema.default(new Vector2(0, 0)),
+  position: Vec2Schema.default(new Vector2(0, 0)).meta({ showInEditor: true }),
   debug: booleanSchema.default(false),
 });
 
