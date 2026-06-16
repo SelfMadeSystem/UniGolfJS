@@ -18,10 +18,17 @@ import { Vector2 } from '@/utils/vec';
 import z from 'zod';
 
 const TeeSchema = LevelObjectSchema.extend({
+  size: Vec2Schema.default(new Vector2(75, 50)).meta({
+    showInEditor: true,
+    relativeTo: 'pos',
+    multiplier: 0.5,
+  }),
   teeColor: rgbSchema.default('#f79d60'),
   radius: positiveNumberSchema.default(9),
   ballActive: booleanSchema.default(true),
   active: booleanSchema.default(false),
+  maxDriverDistance: positiveNumberSchema.default(150),
+  driverPowerMultiplier: positiveNumberSchema.default(0.3),
   cameraMinZoom: positiveNumberSchema.default(0),
   cameraMaxZoom: positiveNumberSchema.default(1),
   cameraTl: Vec2Schema.default(new Vector2(-200, -500)).meta({
@@ -35,11 +42,6 @@ const TeeSchema = LevelObjectSchema.extend({
   cameraPadding: positiveNumberSchema.default(50),
 });
 
-const TEE_SIZE = new Vector2(75, 50);
-
-const MAX_DRIVER_DISTANCE = 150;
-const DRIVER_POWER_MULTIPLIER = 0.3;
-
 export class Tee extends LevelObject<typeof TeeSchema> {
   static override schema = TeeSchema;
   public ball: PlayerBall | null = null;
@@ -47,18 +49,20 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   public shot = true;
   public doesntScale = true;
 
+  public get size(): Vector2 {
+    return this.data.size;
+  }
+
   constructor(options: z.input<typeof TeeSchema>) {
     super(options);
   }
 
   override getAABB(): AABB {
-    return AABB.fromCenterSize(this.pos, TEE_SIZE);
+    return AABB.fromCenterSize(this.pos, this.size);
   }
 
   override setAABB(aabb: AABB): void {
-    if (!aabb.size.equals(TEE_SIZE)) {
-      console.warn('Tee: aabb != TEE_SIZE');
-    }
+    this.set('size', aabb.size);
     this.set('position', aabb.center);
   }
 
@@ -104,8 +108,8 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     if (this.driverPos && this.ball) {
       const velocity = this.ball.pos
         .sub(this.driverPos)
-        .maxLength(MAX_DRIVER_DISTANCE)
-        .mult(DRIVER_POWER_MULTIPLIER);
+        .maxLength(this.data.maxDriverDistance)
+        .mult(this.data.driverPowerMultiplier);
       if (this.ball) {
         this.shot = true;
         this.ball.velocity = velocity;
@@ -157,7 +161,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
       // Arrow pointing in direction of the shot
       const arrowLength = Math.min(
         this.ball.pos.sub(this.driverPos).length(),
-        MAX_DRIVER_DISTANCE,
+        this.data.maxDriverDistance,
       );
       ctx.beginPath();
       ctx.moveTo(0, 0);
