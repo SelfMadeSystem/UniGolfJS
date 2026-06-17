@@ -10,6 +10,7 @@ import { AABB } from '@/utils/aabb';
 import {
   Vec2Schema,
   booleanSchema,
+  numberSchema,
   positiveNumberSchema,
   rgbSchema,
 } from '@/utils/data';
@@ -29,7 +30,7 @@ const TeeSchema = LevelObjectSchema.extend({
   active: booleanSchema.default(false),
   maxDriverDistance: positiveNumberSchema.default(150),
   driverPowerMultiplier: positiveNumberSchema.default(0.3),
-  cameraMinZoom: positiveNumberSchema.default(0),
+  cameraMinZoom: numberSchema.default(0),
   cameraMaxZoom: positiveNumberSchema.default(1),
   cameraTl: Vec2Schema.default(new Vector2(-200, -500)).meta({
     showInEditor: true,

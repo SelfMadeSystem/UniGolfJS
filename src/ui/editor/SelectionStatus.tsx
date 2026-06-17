@@ -72,7 +72,7 @@ export function SelectionStatus() {
           Paste
         </button>
       </div>
-      {selectedObjects.length === 1 ? <ObjectPropertyEditor /> : null}
+      <ObjectPropertyEditor />
     </div>
   );
 }

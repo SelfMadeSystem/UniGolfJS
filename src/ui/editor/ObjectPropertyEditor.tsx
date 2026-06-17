@@ -10,6 +10,7 @@ import { EditScene } from '@/scenes/editScene';
 import { $scene } from '@/scenes/state';
 import { Vector2 } from '@/utils/vec';
 import { useStore } from '@nanostores/react';
+import { atom } from 'nanostores';
 import { useCallback, useState, useSyncExternalStore } from 'react';
 import z from 'zod';
 
@@ -25,7 +26,10 @@ export function ObjectPropertyEditor() {
   return <SingleObjectPropertyEditor object={obj} />;
 }
 
+const $advancedOpen = atom(false);
+
 function SingleObjectPropertyEditor({ object }: { object: LevelObject }) {
+  const advancedOpen = useStore($advancedOpen);
   const schema = object.schema;
   const shape = schema.shape;
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
@@ -44,42 +48,53 @@ function SingleObjectPropertyEditor({ object }: { object: LevelObject }) {
   }, [object, selectedFields, shape]);
 
   return (
-    <div className="flex flex-col gap-2 text-xs">
-      <div className="flex items-center justify-between gap-2">
-        <div className="text-gray-400">
-          {selectedFields.length === 0
-            ? 'No fields selected'
-            : `${selectedFields.length} field${selectedFields.length === 1 ? '' : 's'} selected`}
+    <details
+      open={advancedOpen}
+      onToggle={e => {
+        const target = e.target as HTMLDetailsElement;
+        $advancedOpen.set(target.open);
+      }}
+    >
+      <summary className="cursor-pointer text-gray-300">
+        Advanced Options
+      </summary>
+      <div className="flex flex-col gap-2 text-xs">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-gray-400">
+            {selectedFields.length === 0
+              ? 'No fields selected'
+              : `${selectedFields.length} field${selectedFields.length === 1 ? '' : 's'} selected`}
+          </div>
+          <button
+            className="rounded bg-blue-600 px-2 py-1 text-white disabled:cursor-not-allowed disabled:bg-gray-700"
+            onClick={copySelectedFields}
+            disabled={selectedFields.length === 0}
+            title="Copy selected properties"
+          >
+            Copy
+          </button>
         </div>
-        <button
-          className="rounded bg-blue-600 px-2 py-1 text-white disabled:cursor-not-allowed disabled:bg-gray-700"
-          onClick={copySelectedFields}
-          disabled={selectedFields.length === 0}
-          title="Copy selected properties"
-        >
-          Copy
-        </button>
+        {Object.entries(shape ?? {}).map(([key, fieldSchema]) => {
+          return (
+            <PropertyField
+              key={key}
+              fieldKey={key}
+              fieldSchema={fieldSchema as z.ZodTypeAny}
+              object={object}
+              selected={selectedFields.includes(key)}
+              onToggleSelected={() => {
+                if (key === 'id') return;
+                setSelectedFields(current =>
+                  current.includes(key)
+                    ? current.filter(fieldKey => fieldKey !== key)
+                    : [...current, key],
+                );
+              }}
+            />
+          );
+        })}
       </div>
-      {Object.entries(shape ?? {}).map(([key, fieldSchema]) => {
-        return (
-          <PropertyField
-            key={key}
-            fieldKey={key}
-            fieldSchema={fieldSchema as z.ZodTypeAny}
-            object={object}
-            selected={selectedFields.includes(key)}
-            onToggleSelected={() => {
-              if (key === 'id') return;
-              setSelectedFields(current =>
-                current.includes(key)
-                  ? current.filter(fieldKey => fieldKey !== key)
-                  : [...current, key],
-              );
-            }}
-          />
-        );
-      })}
-    </div>
+    </details>
   );
 }
 
