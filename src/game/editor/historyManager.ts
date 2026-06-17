@@ -10,6 +10,11 @@ export class HistoryManager {
   public readonly undoStack: HistoryState[] = [];
   public readonly redoStack: HistoryState[] = [];
 
+  constructor() {
+    $hasUndo.set(false);
+    $hasRedo.set(false);
+  }
+
   public get latest(): HistoryState | null {
     if (this.redoStack.length > 0) return null;
     return this.undoStack.at(-1) ?? null;
