@@ -1,6 +1,6 @@
 import { $fpsTickCounter } from '@/stores/fpsChart';
 import { useStore } from '@nanostores/react';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 type FpsChartProps = {
   className?: string;
@@ -23,76 +23,80 @@ export function FpsChart({
   const lastTickCounterRef = useRef<number>(fpsTickCounter);
   const latestTickCounterRef = useRef<number>(fpsTickCounter);
 
+  // eslint-disable-next-line react-hooks/refs
   latestTickCounterRef.current = fpsTickCounter;
 
-  const drawChart = (canvas: HTMLCanvasElement) => {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const drawChart = useCallback(
+    (canvas: HTMLCanvasElement) => {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    if (width === 0 || height === 0) return;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      if (width === 0 || height === 0) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
 
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, width, height);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
 
-    const history = fpsHistory.current;
-    if (history.length === 0) return;
+      const history = fpsHistory.current;
+      if (history.length === 0) return;
 
-    const padding = 8;
-    const chartHeight = height - padding * 2;
-    const chartWidth = width - padding * 2;
-    const barWidth = chartWidth / historySize;
+      const padding = 8;
+      const chartHeight = height - padding * 2;
+      const chartWidth = width - padding * 2;
+      const barWidth = chartWidth / historySize;
 
-    ctx.fillStyle = 'rgba(0,0,0,0.65)';
-    ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.fillRect(0, 0, width, height);
 
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-    ctx.lineWidth = 0.5;
-    tickMarkers.current.forEach(markerIndex => {
-      if (markerIndex < 0 || markerIndex >= history.length) return;
-      const x = padding + markerIndex * barWidth;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+      ctx.lineWidth = 0.5;
+      tickMarkers.current.forEach(markerIndex => {
+        if (markerIndex < 0 || markerIndex >= history.length) return;
+        const x = padding + markerIndex * barWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, padding);
+        ctx.lineTo(x, padding + chartHeight);
+        ctx.stroke();
+      });
+      ctx.restore();
+
+      const latest = history[history.length - 1] ?? 0;
+      const min = Math.min(...history);
+      const max = Math.max(...history);
+      const avg = history.reduce((sum, fps) => sum + fps, 0) / history.length;
+
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(x, padding);
-      ctx.lineTo(x, padding + chartHeight);
+
+      history.forEach((fps, index) => {
+        const x = padding + index * barWidth;
+        const normalized = Math.min(fps, maxFps) / maxFps;
+        const y = padding + chartHeight - normalized * chartHeight;
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
       ctx.stroke();
-    });
-    ctx.restore();
 
-    const latest = history[history.length - 1] ?? 0;
-    const min = Math.min(...history);
-    const max = Math.max(...history);
-    const avg = history.reduce((sum, fps) => sum + fps, 0) / history.length;
-
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-
-    history.forEach((fps, index) => {
-      const x = padding + index * barWidth;
-      const normalized = Math.min(fps, maxFps) / maxFps;
-      const y = padding + chartHeight - normalized * chartHeight;
-      if (index === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-
-    ctx.stroke();
-
-    ctx.fillStyle = '#fff';
-    ctx.font = '12px ui-sans-serif, system-ui';
-    ctx.textBaseline = 'top';
-    ctx.fillText(`${latest.toFixed(1)} FPS`, padding, padding);
-    ctx.fillText(`avg ${avg.toFixed(1)}`, padding, padding + 14);
-    ctx.fillText(`min ${min.toFixed(1)}`, padding + 72, padding + 14);
-    ctx.fillText(`max ${max.toFixed(1)}`, padding + 72, padding);
-  };
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px ui-sans-serif, system-ui';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`${latest.toFixed(1)} FPS`, padding, padding);
+      ctx.fillText(`avg ${avg.toFixed(1)}`, padding, padding + 14);
+      ctx.fillText(`min ${min.toFixed(1)}`, padding + 72, padding + 14);
+      ctx.fillText(`max ${max.toFixed(1)}`, padding + 72, padding);
+    },
+    [historySize, maxFps],
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -135,7 +139,7 @@ export function FpsChart({
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
     };
-  }, [historySize, maxFps]);
+  }, [drawChart, historySize, maxFps]);
 
   return (
     <div
