@@ -83,9 +83,11 @@ function PlaceableComponent({
 export function PlaceMenu({
   placeableGroups,
   onClose,
+  onSelectClose,
 }: {
   placeableGroups: PlaceableGroup[];
   onClose: () => void;
+  onSelectClose: () => void;
 }) {
   return (
     <div className="fixed inset-0 z-50">
@@ -104,7 +106,7 @@ export function PlaceMenu({
         <div className="flex flex-row flex-wrap gap-4">
           {placeableGroups.map(group => (
             <div key={group.id} className="flex min-w-32 flex-col gap-2">
-              <PlaceableNodeComponent node={group} onSelect={onClose} />
+              <PlaceableNodeComponent node={group} onSelect={onSelectClose} />
             </div>
           ))}
         </div>

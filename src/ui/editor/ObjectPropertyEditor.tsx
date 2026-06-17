@@ -1,6 +1,6 @@
 import './fieldComponents';
 import { getSchemaComponent } from './schemaRegistry';
-import type { HistoryState } from '@/game/editor/history';
+import type { HistoryState } from '@/game/editor/historyManager';
 import {
   $selectedObjects,
   setCopiedObjectProperties,

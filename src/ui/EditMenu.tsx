@@ -7,6 +7,7 @@ import { placeableGroups } from '@/game/editor/placeables';
 import { $selectedPlaceable } from '@/game/editor/state';
 import { EditScene } from '@/scenes/editScene';
 import { getLevelScene } from '@/scenes/state';
+import { $hasRedo, $hasUndo } from '@/stores/history.ts';
 import { Icon } from '@iconify/react';
 import { useStore } from '@nanostores/react';
 import { motion } from 'motion/react';
@@ -20,6 +21,8 @@ export function EditMenu() {
     if (ls instanceof EditScene) return ls.editManager.selectedTool;
     return 'select';
   });
+  const hasUndo = useStore($hasUndo);
+  const hasRedo = useStore($hasRedo);
 
   const setTool = (tool: Tool) => {
     const levelScene = getLevelScene();
@@ -28,6 +31,18 @@ export function EditMenu() {
     em.selectedTool = tool;
     em.setMode(tool);
     setSelectedTool(tool);
+  };
+
+  const undo = () => {
+    const levelScene = getLevelScene();
+    if (!(levelScene instanceof EditScene)) return;
+    levelScene.editManager.history.undo();
+  };
+
+  const redo = () => {
+    const levelScene = getLevelScene();
+    if (!(levelScene instanceof EditScene)) return;
+    levelScene.editManager.history.redo();
   };
 
   return (
@@ -40,57 +55,83 @@ export function EditMenu() {
       <div className="pointer-events-auto absolute top-0 left-0">
         <LevelControls />
       </div>
-      <div className="absolute top-0 right-0 flex gap-2 p-2">
-        <div className="pointer-events-auto">
-          <button
-            title="Select"
-            className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 ${
-              selectedTool === 'select'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-800 text-white'
-            }`}
-            onClick={() => setTool('select')}
-          >
-            <Icon icon="mdi:cursor-default" width={18} height={18} />
-          </button>
+      <div className="absolute top-0 right-0 flex flex-col items-end justify-end gap-2 p-2">
+        <div className="flex gap-2">
+          <div className="pointer-events-auto">
+            <button
+              title="Select"
+              className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 ${
+                selectedTool === 'select'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-800 text-white'
+              }`}
+              onClick={() => setTool('select')}
+            >
+              <Icon icon="mdi:cursor-default" width={18} height={18} />
+            </button>
+          </div>
+          <div className="pointer-events-auto">
+            <button
+              title="Pan"
+              className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 ${
+                selectedTool === 'pan'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-800 text-white'
+              }`}
+              onClick={() => setTool('pan')}
+            >
+              <Icon icon="mdi:pan" width={18} height={18} />
+            </button>
+          </div>
+          <div className="pointer-events-auto flex items-center gap-1">
+            <button
+              title="Place"
+              className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 ${
+                selectedTool === 'place'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-800 text-white'
+              }`}
+              onClick={() => setTool('place')}
+            >
+              <Icon
+                icon={selectedPlaceable?.icon}
+                color={selectedPlaceable?.iconColor}
+                width={18}
+                height={18}
+              />
+            </button>
+            <button
+              title="Open place menu"
+              className="cursor-pointer rounded bg-gray-800 px-2 py-2 text-white"
+              onClick={() => {
+                setShowPlaceMenu(s => !s);
+              }}
+            >
+              <Icon icon="mdi:chevron-down" width={18} height={18} />
+            </button>
+          </div>
         </div>
-
-        <div className="pointer-events-auto">
-          <button
-            title="Pan"
-            className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 ${
-              selectedTool === 'pan'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-800 text-white'
-            }`}
-            onClick={() => setTool('pan')}
-          >
-            <Icon icon="mdi:pan" width={18} height={18} />
-          </button>
-        </div>
-
-        <div className="pointer-events-auto flex items-center gap-1">
-          <button
-            title="Place"
-            className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 ${
-              selectedTool === 'place'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-800 text-white'
-            }`}
-            onClick={() => setTool('place')}
-          >
-            <Icon icon={selectedPlaceable?.icon} width={18} height={18} />
-          </button>
-          <button
-            title="Open place menu"
-            className="cursor-pointer rounded bg-gray-800 px-2 py-2 text-white"
-            onClick={() => {
-              setShowPlaceMenu(s => !s);
-              setTool('place');
-            }}
-          >
-            <Icon icon="mdi:chevron-down" width={18} height={18} />
-          </button>
+        <div className="flex gap-2">
+          <div className="pointer-events-auto">
+            <button
+              title="Undo"
+              className="flex cursor-pointer items-center gap-2 rounded bg-gray-800 px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!hasUndo}
+              onClick={() => undo()}
+            >
+              <Icon icon="mdi:undo" width={18} height={18} />
+            </button>
+          </div>
+          <div className="pointer-events-auto">
+            <button
+              title="Redo"
+              className="flex cursor-pointer items-center gap-2 rounded bg-gray-800 px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!hasRedo}
+              onClick={() => redo()}
+            >
+              <Icon icon="mdi:redo" width={18} height={18} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -98,6 +139,10 @@ export function EditMenu() {
         <PlaceMenu
           placeableGroups={placeableGroups}
           onClose={() => setShowPlaceMenu(false)}
+          onSelectClose={() => {
+            setShowPlaceMenu(false);
+            setTool('place');
+          }}
         />
       )}
 

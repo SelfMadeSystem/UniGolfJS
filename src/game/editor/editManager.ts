@@ -1,7 +1,7 @@
 import { LAYERS } from '../levelConfig';
 import { LevelObject } from '../objects/levelObject';
 import { HandlesManager } from './handles';
-import { HistoryManager } from './history';
+import { HistoryManager } from './historyManager';
 import { KeybindsManager } from './keybindsManager';
 import { DummyMode } from './modes/dummyMode';
 import type { InteractionMode } from './modes/interactionMode';
