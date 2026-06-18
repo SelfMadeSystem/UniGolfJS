@@ -1,6 +1,7 @@
 import {
   type FieldComponentProps,
   registerSchemaComponent,
+  registerZodTypeComponent,
 } from './schemaRegistry';
 import { SelectObjectMode } from '@/game/editor/modes/selectObjectMode';
 import { Vec2PosMode } from '@/game/editor/modes/vec2PosMode';
@@ -388,6 +389,15 @@ function ObjectIdField({
   );
 }
 
+function ArrayField({
+  value,
+  onChange,
+  schema,
+}: FieldComponentProps<unknown[]>) {
+  // TODO
+  return null;
+}
+
 registerSchemaComponent(Vec2Schema, Vec2Field);
 registerSchemaComponent(NormalVec2Schema, NormalVec2Field);
 registerSchemaComponent(rgbSchema, ColorField);
@@ -398,3 +408,4 @@ registerSchemaComponent(positiveNumberSchema, PositiveNumberField);
 registerSchemaComponent(booleanSchema, BooleanField);
 registerSchemaComponent(stringSchema, StringField);
 registerSchemaComponent(objectIdSchema, ObjectIdField);
+registerZodTypeComponent('array', ArrayField);

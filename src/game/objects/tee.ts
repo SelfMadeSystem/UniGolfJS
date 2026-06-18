@@ -11,6 +11,7 @@ import {
   Vec2Schema,
   booleanSchema,
   numberSchema,
+  objectIdSchema,
   positiveNumberSchema,
   rgbSchema,
 } from '@/utils/data';
@@ -41,6 +42,7 @@ const TeeSchema = LevelObjectSchema.extend({
     relativeTo: 'pos',
   }),
   cameraPadding: positiveNumberSchema.default(50),
+  activeTees: objectIdSchema.array().default([]),
 });
 
 export class Tee extends LevelObject<typeof TeeSchema> {

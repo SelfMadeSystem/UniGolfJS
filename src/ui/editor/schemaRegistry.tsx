@@ -1,17 +1,20 @@
 import type { ComponentType } from 'react';
 import z from 'zod';
+import type { $ZodTypeDef } from 'zod/v4/core';
 
 export type FieldComponentProps<T = any> = {
   value: T;
   onChange: (v: T) => void;
-  schema: z.ZodTypeAny;
+  schema: z.ZodType;
   object: unknown;
   key: string;
 };
 
-export type FieldComponent = ComponentType<FieldComponentProps<any>>;
+export type FieldComponent = ComponentType<FieldComponentProps>;
+type ZodTypeEnum = $ZodTypeDef['type'];
 
 const componentRegistry = z.registry<{ comp: FieldComponent }>();
+const zodTypeMap = new Map<ZodTypeEnum, FieldComponent>();
 
 export function registerSchemaComponent(
   schema: z.ZodType,
@@ -21,22 +24,27 @@ export function registerSchemaComponent(
   (componentRegistry as any).add(schema, { comp });
 }
 
-function unwrapZodType<T extends z.ZodType>(schema: T): z.ZodType {
+export function registerZodTypeComponent(
+  zodType: ZodTypeEnum,
+  comp: FieldComponent,
+) {
+  zodTypeMap.set(zodType, comp);
+}
+
+export function getSchemaComponent(schema: z.ZodType): FieldComponent | null {
   const meta = schema.meta();
   if (meta && 'hidden' in meta && meta.hidden) {
     // this schema won't be in the registry, so it should stay hidden if we don't unwrap it
-    return schema;
+    return null;
+  }
+  if (componentRegistry.has(schema)) {
+    return (componentRegistry.get(schema)?.comp as FieldComponent) ?? null;
+  }
+  if (zodTypeMap.has(schema.type)) {
+    return zodTypeMap.get(schema.type) ?? null;
   }
   if ('unwrap' in schema && typeof schema.unwrap === 'function') {
-    return unwrapZodType(schema.unwrap() as z.ZodType);
+    return getSchemaComponent(schema.unwrap());
   }
-  return schema;
-}
-
-export function getSchemaComponent(
-  schema: z.ZodTypeAny,
-): FieldComponent | null {
-  const base = unwrapZodType(schema);
-  const meta = componentRegistry.get(base);
-  return (meta?.comp as FieldComponent) ?? null;
+  return null;
 }

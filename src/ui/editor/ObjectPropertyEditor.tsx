@@ -79,7 +79,7 @@ function SingleObjectPropertyEditor({ object }: { object: LevelObject }) {
             <PropertyField
               key={key}
               fieldKey={key}
-              fieldSchema={fieldSchema as z.ZodTypeAny}
+              fieldSchema={fieldSchema as z.ZodType}
               object={object}
               selected={selectedFields.includes(key)}
               onToggleSelected={() => {
@@ -136,7 +136,7 @@ function PropertyField({
   onToggleSelected,
 }: {
   fieldKey: string;
-  fieldSchema: z.ZodTypeAny;
+  fieldSchema: z.ZodType;
   object: LevelObject;
   selected: boolean;
   onToggleSelected: () => void;
