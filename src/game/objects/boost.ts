@@ -90,9 +90,16 @@ export class Boost extends PolyObject<typeof BoostSchema> {
     this.boostTime = BOOST_EFFECT_TIME;
   }
 
-  override reset(scene: LevelScene): void {
-    super.reset(scene);
-    this.boostTime = 0;
+  override getState(): Record<string, unknown> {
+    return {
+      ...super.getState(),
+      boostTime: this.boostTime,
+    };
+  }
+
+  override loadState(state: Record<string, unknown>): void {
+    super.loadState(state);
+    this.boostTime = state.boostTime as number;
   }
 }
 registerLevelObject('boost', Boost);

@@ -85,7 +85,7 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     if (scene.activeTee !== this) return;
     if (!this.shot) return;
 
-    scene.resetAllObjects();
+    scene.loadLatestState();
     this.shot = false;
     const newBall = new PlayerBall(
       {
@@ -178,23 +178,39 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     });
   }
 
-  override reset(scene: LevelScene): void {
-    super.reset(scene);
-    if (this.ball) {
-      this.ball.delete();
-      this.ball = null;
-    }
-    this.driverPos = null;
-    this.shot = true;
+  override getState(): Record<string, unknown> {
+    return {
+      ...super.getState(),
+      active: getLevelScene()?.activeTee === this,
+    };
   }
 
-  override sceneReset(scene: LevelScene): void {
-    if (this.get('active')) {
+  override loadState(state: Record<string, unknown>): void {
+    super.loadState(state);
+    if (state.active) {
+      const scene = getLevelScene();
       this.activate(scene);
       this.focusCamera(true, scene);
     }
-    super.sceneReset(scene);
   }
+
+  // override reset(scene: LevelScene): void {
+  //   super.reset(scene);
+  //   if (this.ball) {
+  //     this.ball.delete();
+  //     this.ball = null;
+  //   }
+  //   this.driverPos = null;
+  //   this.shot = true;
+  // }
+
+  // override sceneReset(scene: LevelScene): void {
+  //   if (this.get('active')) {
+  //     this.activate(scene);
+  //     this.focusCamera(true, scene);
+  //   }
+  //   super.sceneReset(scene);
+  // }
 
   focusCamera(forceCamera = false, scene = getLevelScene()): void {
     if (!scene) return;

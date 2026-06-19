@@ -5,7 +5,6 @@ import {
 } from '../levelObjectRegistry';
 import { GameObject, GameObjectSchema } from './gameObject';
 import { type RenderPass, pass } from '@/render/drawable';
-import type { LevelScene } from '@/scenes/levelScene';
 import { getLevelConfig, getLevelScene } from '@/scenes/state';
 import { AABB } from '@/utils/aabb';
 import { generatePathsFromPoints } from '@/utils/pathUtils';
@@ -251,9 +250,4 @@ export abstract class LevelObject<
    * Rotates the object's shape clockwise by 90 degrees. The object's AABB should be the same after this operation.
    */
   editorRotateShapeCW(): void {}
-
-  override reset(scene: LevelScene): void {
-    super.reset(scene);
-    this.emitAabbChange();
-  }
 }

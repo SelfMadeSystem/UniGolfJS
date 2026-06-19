@@ -1,9 +1,9 @@
 import { Scene } from './scene';
 import { getLevelConfig } from './state';
-import { LAYERS, type Level } from '@/game/levelConfig';
+import { LAYERS, type Level, type LevelState } from '@/game/levelConfig';
 import { LevelObjectCollection } from '@/game/levelObjectCollection';
 import { LevelObject } from '@/game/objects/levelObject';
-import type { Tee } from '@/game/objects/tee';
+import { Tee } from '@/game/objects/tee';
 import { Water } from '@/game/objects/water';
 import {
   type CanvasRenderInfo,
@@ -36,8 +36,13 @@ export abstract class LevelScene extends Scene {
 
     const { objects } = level;
 
+    this.activeTee =
+      (objects.findLast(
+        a => a instanceof Tee && a.get('active'),
+      ) as Tee | null) ?? null;
+
     this.objects = new LevelObjectCollection(objects);
-    this.sceneResetAllObjects();
+
     // make sure water's rendering logic is always active, even if there are no water objects in the level
     this.objects.addType(Water);
 
@@ -260,21 +265,57 @@ export abstract class LevelScene extends Scene {
     this.objects.prepend(obj);
   }
 
-  sceneResetAllObjects(): void {
+  sceneReset() {
     for (const obj of this.objects) {
       obj.sceneReset(this);
     }
   }
 
-  resetAllObjects(): void {
+  loadInitialState() {
+    const state = this.level.stateStack[0];
+    if (!state) throw new Error('No state initialized!');
+    this.loadState(state);
+  }
+
+  getCurrentState(): LevelState {
+    const state: LevelState = new Map();
+
     for (const obj of this.objects) {
-      obj.reset(this);
+      state.set(obj, obj.getState());
+    }
+
+    return state;
+  }
+
+  saveState() {
+    const state = this.getCurrentState();
+    this.level.stateStack.push(state);
+  }
+
+  loadState(loadState: LevelState) {
+    const state = new Map(loadState);
+    for (const obj of this.objects) {
+      const s = state.get(obj);
+      if (s) {
+        obj.loadState(s);
+        state.delete(obj);
+      } else obj.delete();
+    }
+    for (const [obj, s] of state) {
+      this.addObject(obj);
+      obj.loadState(s);
     }
   }
 
-  saveStateAllObjects(): void {
-    for (const obj of this.objects) {
-      obj.saveState();
-    }
+  loadLatestState() {
+    const state = this.level.stateStack.at(-1);
+    if (!state) throw new Error('No state initialized!');
+    this.loadState(state);
+  }
+
+  popState() {
+    const state = this.level.stateStack.pop();
+    if (!state) throw new Error('No state initialized!');
+    this.loadState(state);
   }
 }

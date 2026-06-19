@@ -53,7 +53,10 @@ export const levelConfigSchema = z.object({
 export const defaultLevelConfig = levelConfigSchema.parse({});
 export type LevelConfig = z.infer<typeof levelConfigSchema>;
 
+export type LevelState = Map<LevelObject<any>, Record<string, unknown>>;
+
 export type Level = {
+  stateStack: LevelState[];
   objects: LevelObject<any>[];
   config: LevelConfig;
 };
@@ -73,6 +76,7 @@ export function serializeLevel(level: Level): SerializedLevel {
 
 export function deserializeLevel(serialized: SerializedLevel): Level {
   return {
+    stateStack: [],
     objects: serialized.objects.map(obj => deserializeLevelObject(obj)),
     config: serialized.config,
   };

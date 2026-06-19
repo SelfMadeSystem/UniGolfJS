@@ -44,8 +44,6 @@ export abstract class GameObject<
     return this.data.id;
   }
 
-  public savedPos: Vector2 = new Vector2(0, 0);
-
   protected _pos: Vector2;
 
   get pos(): Vector2 {
@@ -121,30 +119,16 @@ export abstract class GameObject<
 
   delete(fromLevel = false): void {}
 
-  // TODO: Make a "state" object, saveState(): State, loadState(state: State),
-  // and implement those in the below functions instead of whatever's going on
-  // right now
-  /**
-   * Saves the state of the game object to be reset to when calling this.reset(false, level).
-   */
-  saveState(): void {
-    this.savedPos = this._pos;
+  sceneReset(scene: LevelScene) {}
+
+  getState(): Record<string, unknown> {
+    return {
+      pos: this.pos,
+    };
   }
 
-  /**
-   * Resets the object to its saved state.
-   */
-  reset(scene: LevelScene): void {
-    this._pos = this.savedPos;
-  }
-
-  /**
-   * Resets the object to its initial state.
-   */
-  sceneReset(scene: LevelScene): void {
-    this._pos = this.data.position;
-    this.saveState();
-    this.reset(scene);
+  loadState(state: Record<string, unknown>) {
+    this.pos = state.pos as Vector2;
   }
 
   hasRender(): boolean {

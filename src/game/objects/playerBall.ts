@@ -10,7 +10,7 @@ export const PlayerBallSchema = BallSchema;
 export class PlayerBall extends Ball {
   static override schema = PlayerBallSchema;
 
-  public shouldExist = false;
+  public shouldExist = true;
 
   constructor(
     options: z.input<typeof PlayerBallSchema>,
@@ -38,7 +38,8 @@ export class PlayerBall extends Ball {
       if (!tee.isPointInside(this.pos)) continue;
 
       this.setActiveTee(tee);
-      scene.saveStateAllObjects();
+      scene.saveState();
+      this.shouldExist = false;
       break;
     }
   }
@@ -53,17 +54,8 @@ export class PlayerBall extends Ball {
     tee.focusCamera();
   }
 
-  override saveState(): void {
-    super.saveState();
-    this.shouldExist = true;
-  }
-
-  override reset() {
-    if (this.shouldExist) return;
-    this.delete();
-  }
-
-  override sceneReset(scene: LevelScene): void {
-    this.delete();
+  override loadState(state: Record<string, unknown>): void {
+    this.delete(); // TODO: figure out a better way
+    if (this.tee.ball === this) this.tee.ball = null;
   }
 }

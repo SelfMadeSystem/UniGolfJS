@@ -2,7 +2,6 @@ import { type Level, defaultLevelConfig } from './levelConfig';
 import { Hole } from './objects/hole';
 import { Tee } from './objects/tee';
 import { Wall } from './objects/wall';
-import { Vec2Schema } from '@/utils/data';
 import { Vector2 } from '@/utils/vec';
 
 const width = 400;
@@ -13,6 +12,7 @@ const teeInset = 100;
 
 export function defaultLevel(): Level {
   return {
+    stateStack: [],
     objects: [
       new Wall({
         position: new Vector2(0, -height / 2 + wallThickness / 2),

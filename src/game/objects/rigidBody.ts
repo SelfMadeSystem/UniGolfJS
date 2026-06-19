@@ -40,10 +40,6 @@ export abstract class RigidBody<
   public constraint: Constraint | null = null;
   public inWater = false;
   protected waterAnimation = 0;
-  public savedVelocity = new Vector2(0);
-  public savedConstraint: Constraint | null = null;
-  public savedInWater = false;
-  public savedWaterAnimation = 0;
 
   constructor(options: z.input<SchemaType>) {
     super(options);
@@ -268,22 +264,26 @@ export abstract class RigidBody<
     }
   }
 
-  override reset(scene: LevelScene): void {
-    super.reset(scene);
-    this.velocity = this.savedVelocity;
-    this.prevPos = this.pos;
-    this.constraint = this.savedConstraint;
-    this.inWater = this.savedInWater;
-    this.waterAnimation = this.savedWaterAnimation;
+  override getState(): Record<string, unknown> {
+    const { prevPos, velocity, constraint, inWater, waterAnimation } = this;
+    return {
+      ...super.getState(),
+      prevPos,
+      velocity,
+      constraint,
+      inWater,
+      waterAnimation,
+    };
   }
 
-  override sceneReset(scene: LevelScene): void {
-    this.velocity = this.data.velocity;
-    this.prevPos = this.pos;
-    this.constraint = null;
-    this.inWater = false;
-    this.waterAnimation = 0;
-    super.sceneReset(scene);
+  override loadState(state: Record<string, unknown>): void {
+    super.loadState(state);
+    const { prevPos, velocity, constraint, inWater, waterAnimation } = state;
+    this.prevPos = prevPos as Vector2;
+    this.velocity = velocity as Vector2;
+    this.constraint = constraint as Constraint | null;
+    this.inWater = inWater as boolean;
+    this.waterAnimation = waterAnimation as number;
   }
 
   override editorScale(scale: Vector2): void {

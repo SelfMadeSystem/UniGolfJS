@@ -141,10 +141,18 @@ export class Portal extends CircleObject<typeof PortalSchema> {
     pairedPortal.teleportedBodies.add(rigidBody);
   }
 
-  override reset(scene: LevelScene): void {
-    super.reset(scene);
-    this.effectTime = 0;
-    this.teleportedBodies.clear();
+  override getState(): Record<string, unknown> {
+    return {
+      ...super.getState(),
+      effectTime: this.effectTime,
+      teleportedBodies: new Set(this.teleportedBodies),
+    };
+  }
+
+  override loadState(state: Record<string, unknown>): void {
+    super.loadState(state);
+    this.effectTime = state.effectTime as number;
+    this.teleportedBodies = state.teleportedBodies as Set<RigidBody>;
   }
 }
 registerLevelObject('portal', Portal);

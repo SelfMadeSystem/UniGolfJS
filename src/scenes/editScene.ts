@@ -21,6 +21,8 @@ export class EditScene extends LevelScene {
 
   constructor(level: Level) {
     super(level);
+    level.stateStack = [];
+    this.sceneReset();
     this.drawables.push(this.editManager);
     this.drawables.push(this.editorGrid);
     $selectedPlaceable.set(defaultPlaceable);

@@ -18,15 +18,12 @@ export const WallSchema = PolyObjectSchema.extend({
 export class BreakableWall extends PolyObject<typeof WallSchema> {
   static override schema = WallSchema;
 
-  public broken = false;
-  public savedBroken = false;
-
   constructor(options: z.input<typeof WallSchema>) {
     super(options);
   }
 
   override get isSolid() {
-    return !this.broken;
+    return true;
   }
 
   override getPathInfo(): PathInfo {
@@ -44,32 +41,14 @@ export class BreakableWall extends PolyObject<typeof WallSchema> {
   }
 
   override render(info: RenderInfo): Iterable<RenderPass> {
-    if (this.broken) {
-      return [];
-    }
     return this.polyRender(info);
   }
 
   override onCollision(rigidBody: RigidBody) {
-    this.broken = true;
+    this.delete();
     if (this.data.boost === 0 || rigidBody.velocity.lenSq() === 0) return;
 
     rigidBody.velocity = rigidBody.velocity.setLength(this.data.boost);
-  }
-
-  override saveState(): void {
-    super.saveState();
-    this.savedBroken = this.broken;
-  }
-
-  override reset(scene: LevelScene): void {
-    super.reset(scene);
-    this.broken = this.savedBroken;
-  }
-
-  override sceneReset(scene: LevelScene): void {
-    this.broken = false;
-    super.sceneReset(scene);
   }
 }
 registerLevelObject('breakableWall', BreakableWall);
