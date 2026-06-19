@@ -21,6 +21,7 @@ export class EditScene extends LevelScene {
 
   constructor(level: Level) {
     super(level);
+    if (level.stateStack.length > 0) this.loadInitialState();
     level.stateStack = [];
     this.sceneReset();
     this.drawables.push(this.editManager);
