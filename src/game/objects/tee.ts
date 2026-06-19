@@ -4,7 +4,6 @@ import { LevelObject, LevelObjectSchema } from './levelObject';
 import { PlayerBall } from './playerBall';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
 import type { PointerInfo } from '@/render/pointerEvents';
-import type { LevelScene } from '@/scenes/levelScene';
 import { getLevelScene } from '@/scenes/state';
 import { AABB } from '@/utils/aabb';
 import {
@@ -35,11 +34,9 @@ const TeeSchema = LevelObjectSchema.extend({
   cameraMaxZoom: positiveNumberSchema.default(1),
   cameraTl: Vec2Schema.default(new Vector2(0, 0)).meta({
     showInEditor: true,
-    relativeTo: 'pos',
   }),
   cameraBr: Vec2Schema.default(new Vector2(0, 0)).meta({
     showInEditor: true,
-    relativeTo: 'pos',
   }),
   cameraPadding: positiveNumberSchema.default(50),
   activeTees: objectIdSchema.array().default([]),
@@ -190,7 +187,12 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     if (state.active) {
       const scene = getLevelScene();
       this.activate(scene);
-      this.focusCamera(true, scene);
+      this.focusCamera(false, scene);
+    }
+    if (this.ball) {
+      this.ball.delete();
+      this.ball = null;
+      this.shot = true;
     }
   }
 
@@ -212,18 +214,29 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   //   super.sceneReset(scene);
   // }
 
+  customCamera(): boolean {
+    return (
+      !this.data.cameraBr.equals(new Vector2(0)) ||
+      !this.data.cameraTl.equals(new Vector2(0))
+    );
+  }
+
   focusCamera(forceCamera = false, scene = getLevelScene()): void {
     if (!scene) return;
     const zoom = clamp(
-      scene.getNecessaryZoom(
-        this.data.cameraBr,
-        this.data.cameraTl,
-        this.data.cameraPadding,
-      ),
+      this.customCamera()
+        ? scene.getNecessaryZoom(
+            this.data.cameraBr,
+            this.data.cameraTl,
+            this.data.cameraPadding,
+          )
+        : 1,
       this.data.cameraMinZoom,
       this.data.cameraMaxZoom,
     );
-    const center = this.data.cameraBr.avg(this.data.cameraTl).add(this.pos);
+    const center = this.customCamera()
+      ? this.data.cameraBr.avg(this.data.cameraTl)
+      : this.pos;
     if (forceCamera) {
       scene.snapCameraTo(center);
       scene.snapCameraZoomTo(zoom);

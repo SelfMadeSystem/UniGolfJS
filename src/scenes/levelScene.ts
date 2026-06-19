@@ -314,8 +314,12 @@ export abstract class LevelScene extends Scene {
   }
 
   popState() {
-    const state = this.level.stateStack.pop();
-    if (!state) throw new Error('No state initialized!');
-    this.loadState(state);
+    if (this.level.stateStack.length > 1) this.level.stateStack.pop();
+    this.loadLatestState();
+  }
+
+  resetState() {
+    this.loadInitialState();
+    this.level.stateStack.length = 1;
   }
 }
