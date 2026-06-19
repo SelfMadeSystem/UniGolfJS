@@ -33,11 +33,11 @@ const TeeSchema = LevelObjectSchema.extend({
   driverPowerMultiplier: positiveNumberSchema.default(0.3),
   cameraMinZoom: numberSchema.default(0),
   cameraMaxZoom: positiveNumberSchema.default(1),
-  cameraTl: Vec2Schema.default(new Vector2(-200, -500)).meta({
+  cameraTl: Vec2Schema.default(new Vector2(0, 0)).meta({
     showInEditor: true,
     relativeTo: 'pos',
   }),
-  cameraBr: Vec2Schema.default(new Vector2(200, 100)).meta({
+  cameraBr: Vec2Schema.default(new Vector2(0, 0)).meta({
     showInEditor: true,
     relativeTo: 'pos',
   }),

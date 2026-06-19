@@ -2,6 +2,7 @@ import { type Level, defaultLevelConfig } from './levelConfig';
 import { Hole } from './objects/hole';
 import { Tee } from './objects/tee';
 import { Wall } from './objects/wall';
+import { Vec2Schema } from '@/utils/data';
 import { Vector2 } from '@/utils/vec';
 
 const width = 400;
@@ -35,7 +36,8 @@ export function defaultLevel(): Level {
       new Tee({
         position: new Vector2(0, height / 2 - teeInset),
         active: true,
-        cameraOffset: new Vector2(0, -(height / 2 - teeInset)),
+        cameraTl: new Vector2(-200, -500),
+        cameraBr: new Vector2(200, 100),
       }),
     ],
     config: defaultLevelConfig,
