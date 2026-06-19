@@ -4,6 +4,7 @@ import type { PathInfo } from './levelObject';
 import { PolyObject, PolyObjectSchema } from './polyObject';
 import type { RigidBody } from './rigidBody';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import type { LevelScene } from '@/scenes/levelScene';
 import { getLevelConfig } from '@/scenes/state';
 import { blendColors } from '@/utils/colorUtils';
 import { numberSchema } from '@/utils/data';
@@ -89,8 +90,8 @@ export class Boost extends PolyObject<typeof BoostSchema> {
     this.boostTime = BOOST_EFFECT_TIME;
   }
 
-  override reset(): void {
-    super.reset();
+  override reset(scene: LevelScene): void {
+    super.reset(scene);
     this.boostTime = 0;
   }
 }

@@ -4,6 +4,7 @@ import { Floor } from './floor';
 import { LevelObject, LevelObjectSchema, type PathInfo } from './levelObject';
 import { PolyObject } from './polyObject';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import type { LevelScene } from '@/scenes/levelScene';
 import { getLevelConfig, getLevelScene } from '@/scenes/state';
 import { AABB } from '@/utils/aabb';
 import { Vec2Schema, positiveNumberSchema } from '@/utils/data';
@@ -36,9 +37,13 @@ export abstract class RigidBody<
 
   public prevPos: Vector2;
   public velocity: Vector2;
-  protected constraint: Constraint | null = null;
+  public constraint: Constraint | null = null;
   public inWater = false;
   protected waterAnimation = 0;
+  public savedVelocity = new Vector2(0);
+  public savedConstraint: Constraint | null = null;
+  public savedInWater = false;
+  public savedWaterAnimation = 0;
 
   constructor(options: z.input<SchemaType>) {
     super(options);
@@ -263,13 +268,22 @@ export abstract class RigidBody<
     }
   }
 
-  override reset(): void {
-    super.reset();
+  override reset(scene: LevelScene): void {
+    super.reset(scene);
+    this.velocity = this.savedVelocity;
+    this.prevPos = this.pos;
+    this.constraint = this.savedConstraint;
+    this.inWater = this.savedInWater;
+    this.waterAnimation = this.savedWaterAnimation;
+  }
+
+  override sceneReset(scene: LevelScene): void {
     this.velocity = this.data.velocity;
     this.prevPos = this.pos;
     this.constraint = null;
     this.inWater = false;
     this.waterAnimation = 0;
+    super.sceneReset(scene);
   }
 
   override editorScale(scale: Vector2): void {

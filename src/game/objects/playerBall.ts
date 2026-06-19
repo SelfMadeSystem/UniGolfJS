@@ -1,5 +1,6 @@
 import { Ball, BallSchema } from './ball';
 import { Tee } from './tee';
+import type { LevelScene } from '@/scenes/levelScene';
 import { getLevelScene } from '@/scenes/state';
 import { Vector2 } from '@/utils/vec';
 import type z from 'zod';
@@ -8,6 +9,8 @@ export const PlayerBallSchema = BallSchema;
 
 export class PlayerBall extends Ball {
   static override schema = PlayerBallSchema;
+
+  public shouldExist = false;
 
   constructor(
     options: z.input<typeof PlayerBallSchema>,
@@ -35,6 +38,7 @@ export class PlayerBall extends Ball {
       if (!tee.isPointInside(this.pos)) continue;
 
       this.setActiveTee(tee);
+      scene.saveStateAllObjects();
       break;
     }
   }
@@ -49,7 +53,17 @@ export class PlayerBall extends Ball {
     tee.focusCamera();
   }
 
+  override saveState(): void {
+    super.saveState();
+    this.shouldExist = true;
+  }
+
   override reset() {
+    if (this.shouldExist) return;
+    this.delete();
+  }
+
+  override sceneReset(scene: LevelScene): void {
     this.delete();
   }
 }

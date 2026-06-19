@@ -37,7 +37,7 @@ export abstract class LevelScene extends Scene {
     const { objects } = level;
 
     this.objects = new LevelObjectCollection(objects);
-    this.resetAllObjects(true);
+    this.sceneResetAllObjects();
     // make sure water's rendering logic is always active, even if there are no water objects in the level
     this.objects.addType(Water);
 
@@ -260,9 +260,21 @@ export abstract class LevelScene extends Scene {
     this.objects.prepend(obj);
   }
 
-  resetAllObjects(sceneReset = false): void {
+  sceneResetAllObjects(): void {
     for (const obj of this.objects) {
-      obj.reset(sceneReset, this);
+      obj.sceneReset(this);
+    }
+  }
+
+  resetAllObjects(): void {
+    for (const obj of this.objects) {
+      obj.reset(this);
+    }
+  }
+
+  saveStateAllObjects(): void {
+    for (const obj of this.objects) {
+      obj.saveState();
     }
   }
 }

@@ -4,6 +4,7 @@ import { CircleObject, CircleObjectSchema } from './circleObject';
 import type { PathInfo } from './levelObject';
 import type { RigidBody } from './rigidBody';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
+import type { LevelScene } from '@/scenes/levelScene';
 import { getLevelConfig, getLevelScene } from '@/scenes/state';
 import { blendColors } from '@/utils/colorUtils';
 import { objectIdSchema, positiveNumberSchema, rgbSchema } from '@/utils/data';
@@ -140,8 +141,8 @@ export class Portal extends CircleObject<typeof PortalSchema> {
     pairedPortal.teleportedBodies.add(rigidBody);
   }
 
-  override reset(): void {
-    super.reset();
+  override reset(scene: LevelScene): void {
+    super.reset(scene);
     this.effectTime = 0;
     this.teleportedBodies.clear();
   }

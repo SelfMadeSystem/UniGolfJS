@@ -252,8 +252,8 @@ export abstract class LevelObject<
    */
   editorRotateShapeCW(): void {}
 
-  override reset(sceneReset?: boolean, scene?: LevelScene): void {
-    super.reset(sceneReset, scene);
+  override reset(scene: LevelScene): void {
+    super.reset(scene);
     this.emitAabbChange();
   }
 }

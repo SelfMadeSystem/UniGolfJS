@@ -178,19 +178,22 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     });
   }
 
-  override reset(sceneReset = false, scene?: LevelScene): void {
-    super.reset();
+  override reset(scene: LevelScene): void {
+    super.reset(scene);
     if (this.ball) {
       this.ball.delete();
       this.ball = null;
     }
     this.driverPos = null;
     this.shot = true;
+  }
 
-    if (sceneReset && this.get('active')) {
+  override sceneReset(scene: LevelScene): void {
+    if (this.get('active')) {
       this.activate(scene);
       this.focusCamera(true, scene);
     }
+    super.sceneReset(scene);
   }
 
   focusCamera(forceCamera = false, scene = getLevelScene()): void {
