@@ -296,4 +296,9 @@ export abstract class RigidBody<
     this.velocity = this.data.velocity;
     this.prevPos = this.data.position;
   }
+
+  squash() {
+    this.inWater = true;
+    this.velocity = new Vector2(0, 0);
+  }
 }

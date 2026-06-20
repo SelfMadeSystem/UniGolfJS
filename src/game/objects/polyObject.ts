@@ -42,7 +42,7 @@ const baseQuarterCirclePoints = Array.from({ length: 16 }, (_, i) => {
   return new Vector2(Math.cos(angle), Math.sin(angle)).sub([0.5, 0.5]);
 });
 
-const SHAPE_POINTS = {
+export const SHAPE_POINTS = {
   rectangle: [
     new Vector2(-0.5, -0.5),
     new Vector2(0.5, -0.5),

@@ -1,3 +1,5 @@
+import { KineticObject } from './objects/kineticObject';
+import type { LevelObject } from './objects/levelObject';
 import { PolyObject } from './objects/polyObject';
 import { RigidBody } from './objects/rigidBody';
 import type { LevelScene } from '@/scenes/levelScene';
@@ -165,8 +167,8 @@ export function polyCollision(
 
 export type RigidCollision = SimpleCollision & {
   kind: 'rigid';
-  objectA: RigidBody<any>;
-  objectB: RigidBody<any>;
+  body: RigidBody<any>;
+  object: RigidBody<any>;
 };
 
 export type PolyCollision = SimpleCollision & {
@@ -175,9 +177,75 @@ export type PolyCollision = SimpleCollision & {
   object: PolyObject<any>;
 };
 
-export type ObjectCollision = RigidCollision | PolyCollision;
+export type KineticCollision = SimpleCollision & {
+  kind: 'kinetic';
+  body: RigidBody<any>;
+  object: KineticObject<any>;
+};
 
-export function getCollision(
+export type ObjectCollision = RigidCollision | PolyCollision | KineticCollision;
+
+function getRigidCollision(
+  info: RigidBodyInfo,
+  body: RigidBody,
+  obj: RigidBody,
+): RigidCollision | undefined {
+  if (
+    !body.canCollide(obj) ||
+    !body.getMovementAABB().intersects(obj.getMovementAABB())
+  )
+    return;
+  const infoB = {
+    position: obj.pos,
+    velocity: obj.velocity,
+    radius: obj.radius,
+  };
+  const result = rigidBodyCollision(info, infoB);
+  if (!result) return;
+  return { ...result, body: body, object: obj, kind: 'rigid' };
+}
+
+function getKineticCollision(
+  info: RigidBodyInfo,
+  body: RigidBody,
+  obj: KineticObject,
+): KineticCollision | undefined {
+  if (!obj.isSolid) return;
+  if (!body.getMovementAABB().intersects(obj.getMovementAABB())) return;
+  const result = polyCollision(
+    {
+      ...info,
+      velocity: body.velocity.sub(obj.velocity),
+    },
+    obj.getBasePoints(),
+  );
+  if (!result) return;
+  return { ...result, body, object: obj, kind: 'kinetic' };
+}
+
+function getPolyCollision(
+  info: RigidBodyInfo,
+  body: RigidBody,
+  obj: PolyObject,
+): PolyCollision | undefined {
+  if (!obj.isSolid) return;
+  if (!body.getMovementAABB().intersects(obj.getAABB())) return;
+  const result = polyCollision(info, obj.getPoints());
+  if (!result) return;
+  return { ...result, body, object: obj, kind: 'poly' };
+}
+
+function getCollision(
+  info: RigidBodyInfo,
+  body: RigidBody,
+  obj: LevelObject<any>,
+): ObjectCollision | undefined {
+  if (obj instanceof RigidBody) return getRigidCollision(info, body, obj);
+  if (obj instanceof KineticObject) return getKineticCollision(info, body, obj);
+  if (obj instanceof PolyObject) return getPolyCollision(info, body, obj);
+}
+
+function getLevelCollision(
   body: RigidBody,
   level: LevelScene,
 ): ObjectCollision | null {
@@ -192,30 +260,7 @@ export function getCollision(
   for (const obj of level.objects.queryByBBox(aabb)) {
     if (obj === body) continue;
 
-    let collision: ObjectCollision | null = null;
-    if (obj instanceof RigidBody) {
-      if (
-        !body.canCollide(obj) ||
-        !body.getMovementAABB().intersects(obj.getMovementAABB())
-      )
-        continue;
-      const infoB = {
-        position: obj.pos,
-        velocity: obj.velocity,
-        radius: obj.radius,
-      };
-      const result = rigidBodyCollision(infoA, infoB);
-      if (result) {
-        collision = { ...result, objectA: body, objectB: obj, kind: 'rigid' };
-      }
-    } else if (obj instanceof PolyObject) {
-      if (!obj.isSolid) continue;
-      if (!body.getMovementAABB().intersects(obj.getAABB())) continue;
-      const result = polyCollision(infoA, obj.getPoints());
-      if (result) {
-        collision = { ...result, body, object: obj, kind: 'poly' };
-      }
-    }
+    let collision: ObjectCollision | undefined = getCollision(infoA, body, obj);
 
     if (
       collision &&
@@ -228,90 +273,124 @@ export function getCollision(
   return earliestCollision;
 }
 
+export function resolveRigidCollision(collision: RigidCollision): void {
+  const { body: objectA, object: objectB, normal, overlap } = collision;
+
+  if (overlap) {
+    // Separate the objects to resolve overlap
+    // const totalRadius = objectA.radius + objectB.radius;
+    const separationA = normal.mult(overlap);
+    const separationB = normal.mult(-overlap);
+    objectA.pos = objectA.pos.add(separationA);
+    objectB.pos = objectB.pos.add(separationB);
+    return;
+  }
+
+  const relativeVelocity = objectB.velocity.sub(objectA.velocity);
+  const velAlongNormal = relativeVelocity.dot(normal);
+  if (velAlongNormal > 0) return;
+
+  const impulseMagnitude =
+    (-2 * velAlongNormal) / (1 / objectA.totalMass + 1 / objectB.totalMass);
+  const impulse = normal.mult(impulseMagnitude);
+
+  objectA.velocity = objectA.velocity.sub(impulse.div(objectA.totalMass));
+  objectB.velocity = objectB.velocity.add(impulse.div(objectB.totalMass));
+}
+
+export function resolvePolyCollision(collision: PolyCollision): void {
+  const { body, normal, object } = collision;
+  const velAlongNormal = body.velocity.dot(normal);
+  if (velAlongNormal > 0) return;
+
+  body.velocity = body.velocity.sub(
+    normal.mult((1 + object.bounciness) * velAlongNormal),
+  );
+  if (!body.getConstraint()) object.onCollision(body);
+}
+
+export function resolveKineticCollision(collision: KineticCollision): void {
+  const { body, normal, object } = collision;
+  const vRelBefore = body.velocity.sub(object.velocity);
+  const velAlongNormal = vRelBefore.dot(normal);
+  if (velAlongNormal > 0) return;
+
+  const vRelAfter = vRelBefore.sub(
+    normal.mult((1 + object.bounciness) * velAlongNormal),
+  );
+  body.velocity = vRelAfter.add(object.velocity);
+  if (!body.getConstraint()) object.onCollision(body);
+}
+
 export function resolveCollision(collision: ObjectCollision): void {
-  if (collision.kind === 'rigid') {
-    const { objectA, objectB, normal, overlap } = collision;
-
-    if (overlap) {
-      // Separate the objects to resolve overlap
-      // const totalRadius = objectA.radius + objectB.radius;
-      const separationA = normal.mult(overlap);
-      const separationB = normal.mult(-overlap);
-      objectA.pos = objectA.pos.add(separationA);
-      objectB.pos = objectB.pos.add(separationB);
-      return;
-    }
-
-    const relativeVelocity = objectB.velocity.sub(objectA.velocity);
-    const velAlongNormal = relativeVelocity.dot(normal);
-    if (velAlongNormal > 0) return;
-
-    const impulseMagnitude =
-      (-2 * velAlongNormal) / (1 / objectA.totalMass + 1 / objectB.totalMass);
-    const impulse = normal.mult(impulseMagnitude);
-
-    objectA.velocity = objectA.velocity.sub(impulse.div(objectA.totalMass));
-    objectB.velocity = objectB.velocity.add(impulse.div(objectB.totalMass));
-  } else if (collision.kind === 'poly') {
-    const { body, normal, object } = collision;
-    const velAlongNormal = body.velocity.dot(normal);
-    if (velAlongNormal > 0) return;
-
-    body.velocity = body.velocity.sub(
-      normal.mult((1 + object.bounciness) * velAlongNormal),
-    );
-    if (!body.getConstraint()) object.onCollision(body);
+  switch (collision.kind) {
+    case 'rigid':
+      resolveRigidCollision(collision);
+      break;
+    case 'poly':
+      resolvePolyCollision(collision);
+      break;
+    case 'kinetic':
+      resolveKineticCollision(collision);
+      break;
   }
 }
 
 export function stepPhysics(level: LevelScene): void {
   let timeRemaining = 1;
-  let iteration = 0;
+  const collisionCount: Map<RigidBody<any>, number> = new Map();
 
   while (timeRemaining > 0) {
     let earliestCollision: ObjectCollision | null = null;
 
     for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
-      if (obj.velocity.lenSq() > 0) {
-        const collision = getCollision(obj, level);
-        if (
-          collision &&
-          collision.step <= timeRemaining &&
-          (!earliestCollision || collision.step < earliestCollision.step)
-        ) {
-          earliestCollision = collision;
+      const collision = getLevelCollision(obj, level);
+      if (collision && (collisionCount.get(obj) ?? 0) >= 10) {
+        if (collision && collision.kind !== 'rigid') {
+          obj.squash();
         }
+        continue;
+      }
+      if (
+        collision &&
+        collision.step <= timeRemaining &&
+        (!earliestCollision || collision.step < earliestCollision.step)
+      ) {
+        earliestCollision = collision;
       }
     }
 
     if (!earliestCollision) {
       // No collisions, move all objects by their full velocity
-      for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
-        obj.pos = obj.pos.add(obj.velocity.mult(timeRemaining));
-      }
+      moveBodies(level, timeRemaining);
       break;
     }
 
     // Move all objects up to the point of collision
     const step = earliestCollision.step;
-    for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
-      obj.pos = obj.pos.add(obj.velocity.mult(step));
-    }
+    moveBodies(level, step);
 
     // Resolve the collision
     resolveCollision(earliestCollision);
 
     timeRemaining -= step;
-    iteration++;
-    if (iteration > 10) {
-      // console.warn(
-      //   "Too many collision iterations, breaking out to prevent infinite loop",
-      // );
-      break;
-    }
+
+    collisionCount.set(
+      earliestCollision.body,
+      (collisionCount.get(earliestCollision.body) || 0) + 1,
+    );
   }
 
   for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
     obj.postPhysics();
+  }
+}
+
+function moveBodies(level: LevelScene, step: number) {
+  for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
+    obj.pos = obj.pos.add(obj.velocity.mult(step));
+  }
+  for (const obj of level.objects.getByType<KineticObject>(KineticObject)) {
+    obj.pos = obj.pos.add(obj.velocity.mult(step));
   }
 }

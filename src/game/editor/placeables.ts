@@ -6,6 +6,7 @@ import { ConveyorBelt } from '../objects/conveyorBelt';
 import { Floor } from '../objects/floor';
 import { Hole } from '../objects/hole';
 import type { LevelObject } from '../objects/levelObject';
+import { MovingWall } from '../objects/movingWall';
 import { Portal } from '../objects/portal';
 import { Slope } from '../objects/slope';
 import { Tee } from '../objects/tee';
@@ -131,6 +132,19 @@ export const placeableGroups: PlaceableGroup[] = [
       id: 'wall',
       name: 'Wall',
       clazz: Wall,
+    }),
+  ),
+  createPlaceableGroup(
+    {
+      id: 'movingWall',
+      name: 'Moving Wall',
+      icon: 'ph:wall-light',
+      clazz: MovingWall,
+    },
+    createShapeVariations({
+      id: 'movingWall',
+      name: 'Moving Wall',
+      clazz: MovingWall,
     }),
   ),
   createPlaceableGroup(
