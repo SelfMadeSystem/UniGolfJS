@@ -4,6 +4,7 @@ import { LevelObject, LevelObjectSchema } from './levelObject';
 import { PlayerBall } from './playerBall';
 import { type RenderInfo, type RenderPass, pass } from '@/render/drawable';
 import type { PointerInfo } from '@/render/pointerEvents';
+import type { LevelScene } from '@/scenes/levelScene';
 import { getLevelScene } from '@/scenes/state';
 import { AABB } from '@/utils/aabb';
 import {
@@ -55,6 +56,14 @@ export class Tee extends LevelObject<typeof TeeSchema> {
 
   constructor(options: z.input<typeof TeeSchema>) {
     super(options);
+    this.on('active', v => {
+      if (!v) return;
+      const scene = getLevelScene();
+      if (!scene) return;
+      if (scene.activeTee === this) return;
+      scene.activeTee?.set('active', false);
+      this.activate(scene);
+    });
   }
 
   override getAABB(): AABB {
@@ -196,6 +205,12 @@ export class Tee extends LevelObject<typeof TeeSchema> {
     }
   }
 
+  override duplicate(): LevelObject<any> {
+    const dupe = super.duplicate() as this;
+    dupe.set('active', false);
+    return dupe;
+  }
+
   // override reset(scene: LevelScene): void {
   //   super.reset(scene);
   //   if (this.ball) {
@@ -206,13 +221,13 @@ export class Tee extends LevelObject<typeof TeeSchema> {
   //   this.shot = true;
   // }
 
-  // override sceneReset(scene: LevelScene): void {
-  //   if (this.get('active')) {
-  //     this.activate(scene);
-  //     this.focusCamera(true, scene);
-  //   }
-  //   super.sceneReset(scene);
-  // }
+  override sceneReset(scene: LevelScene): void {
+    if (this.get('active')) {
+      this.activate(scene);
+      this.focusCamera(true, scene);
+    }
+    super.sceneReset(scene);
+  }
 
   customCamera(): boolean {
     return (

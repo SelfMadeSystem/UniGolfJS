@@ -36,8 +36,8 @@ export function defaultLevel(): Level {
       new Tee({
         position: new Vector2(0, height / 2 - teeInset),
         active: true,
-        cameraTl: new Vector2(-200, -500),
-        cameraBr: new Vector2(200, 100),
+        cameraTl: new Vector2(-200, -300),
+        cameraBr: new Vector2(200, 300),
       }),
     ],
     config: defaultLevelConfig,

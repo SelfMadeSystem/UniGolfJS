@@ -226,7 +226,7 @@ export abstract class LevelObject<
   /**
    * Duplicates the object, giving it a new ID. The duplicate is not added to any scene or level by default.
    */
-  duplicate(): LevelObject {
+  duplicate(): LevelObject<any> {
     const newObj = deserializeLevelObject(serializeLevelObject(this));
     newObj.data.id = nanoid();
     return newObj;
