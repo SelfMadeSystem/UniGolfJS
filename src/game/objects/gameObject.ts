@@ -119,7 +119,9 @@ export abstract class GameObject<
 
   delete(fromLevel = false): void {}
 
-  sceneReset(scene: LevelScene) {}
+  sceneReset(scene: LevelScene) {
+    this.pos = this.data.position;
+  }
 
   getState(): Record<string, unknown> {
     return {

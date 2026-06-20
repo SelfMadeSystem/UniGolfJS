@@ -290,4 +290,10 @@ export abstract class RigidBody<
     // @ts-expect-error abstract classes don't work well with generic schemas
     this.set('radius', (this.radius * (scale.x + scale.y)) / 2);
   }
+
+  override sceneReset(scene: LevelScene): void {
+    super.sceneReset(scene);
+    this.velocity = this.data.velocity;
+    this.prevPos = this.data.position;
+  }
 }
