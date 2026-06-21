@@ -46,9 +46,22 @@ export abstract class KineticObject<
     this.partialPos = this.pos;
   }
 
-  setVelocityTowards(target: Vector2, speed: number): void {
-    // Try to prevent IEEE floating point errors as much as possible
-    target = target.sub(this.data.position).sub(this._posDelta);
+  /**
+   * @argument target The target position in relative space
+   */
+  public hasReached(target: Vector2) {
+    return (
+      target.distSq(this._posDelta) === 0 ||
+      (this.velocity.lenSq() > 0 &&
+        target.sub(this._posDelta).dot(this.velocity) <= 0)
+    );
+  }
+
+  /**
+   * @argument target The target position in relative space
+   */
+  public setVelocityTowards(target: Vector2, speed: number) {
+    target = target.sub(this._posDelta);
     if (target.lenSq() < speed * speed) {
       this.velocity = target;
     } else {

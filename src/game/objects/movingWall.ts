@@ -38,15 +38,12 @@ export class MovingWall extends KineticObject<typeof MovingWallSchema> {
     if (this.moveTo.equals(this.moveFrom)) return;
 
     // if past moveTo, swap moveTo and moveFrom
-    if (
-      this.velocity.lenSq() > 0 &&
-      this.moveTo.sub(this._posDelta).dot(this.velocity) <= 0
-    ) {
+    if (this.hasReached(this.moveTo)) {
       const temp = this.moveTo;
       this.moveTo = this.moveFrom;
       this.moveFrom = temp;
     }
-    this.setVelocityTowards(this.moveTo.add(this.data.position), this.speed);
+    this.setVelocityTowards(this.moveTo, this.speed);
   }
 
   override render(info: RenderInfo): Iterable<RenderPass> {
