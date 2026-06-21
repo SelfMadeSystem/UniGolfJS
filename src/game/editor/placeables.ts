@@ -3,6 +3,7 @@ import { Boost } from '../objects/boost';
 import { BouncyWall } from '../objects/bouncyWall';
 import { BreakableWall } from '../objects/breakableWall';
 import { ConveyorBelt } from '../objects/conveyorBelt';
+import { Door } from '../objects/door';
 import { Floor } from '../objects/floor';
 import { Hole } from '../objects/hole';
 import type { LevelObject } from '../objects/levelObject';
@@ -145,6 +146,19 @@ export const placeableGroups: PlaceableGroup[] = [
       id: 'movingWall',
       name: 'Moving Wall',
       clazz: MovingWall,
+    }),
+  ),
+  createPlaceableGroup(
+    {
+      id: 'door',
+      name: 'Door',
+      icon: 'ph:door-open-light',
+      clazz: Door,
+    },
+    createShapeVariations({
+      id: 'door',
+      name: 'Door',
+      clazz: Door,
     }),
   ),
   createPlaceableGroup(
