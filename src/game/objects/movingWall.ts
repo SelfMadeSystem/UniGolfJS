@@ -40,13 +40,13 @@ export class MovingWall extends KineticObject<typeof MovingWallSchema> {
     // if past moveTo, swap moveTo and moveFrom
     if (
       this.velocity.lenSq() > 0 &&
-      this.moveTo.sub(this.pos).dot(this.velocity) <= 0
+      this.moveTo.sub(this._posDelta).dot(this.velocity) <= 0
     ) {
       const temp = this.moveTo;
       this.moveTo = this.moveFrom;
       this.moveFrom = temp;
     }
-    this.setVelocityTowards(this.moveTo, this.speed);
+    this.setVelocityTowards(this.moveTo.add(this.data.position), this.speed);
   }
 
   override render(info: RenderInfo): Iterable<RenderPass> {
@@ -84,9 +84,9 @@ export class MovingWall extends KineticObject<typeof MovingWallSchema> {
 
   override sceneReset(scene: LevelScene): void {
     super.sceneReset(scene);
-    this.moveFrom = this.data.position;
-    this.moveTo = this.data.moveTo.add(this.data.position);
-    this.velocity = this.moveTo.sub(this.pos).setLength(this.speed);
+    this.moveFrom = new Vector2(0, 0);
+    this.moveTo = this.data.moveTo;
+    this.velocity = this.moveTo.setLength(this.speed);
   }
 }
 registerLevelObject('movingWall', MovingWall);
