@@ -108,7 +108,7 @@ export class Vector2 implements BBox {
   }
 
   length(): number {
-    return Math.sqrt(this.x * this.x + this.y * this.y);
+    return Math.hypot(this.x, this.y);
   }
 
   setLength(length: number): Vector2 {

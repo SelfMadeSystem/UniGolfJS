@@ -39,6 +39,10 @@ export abstract class RigidBody<
   public velocity: Vector2;
   public constraint: Constraint | null = null;
   public inWater = false;
+
+  public velocityAccum: Vector2 = new Vector2(0);
+  public startTickPos: Vector2 = new Vector2(0);
+
   protected waterAnimation = 0;
 
   constructor(options: z.input<SchemaType>) {

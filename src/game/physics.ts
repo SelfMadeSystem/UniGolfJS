@@ -337,6 +337,8 @@ export function resolveCollision(collision: ObjectCollision): void {
 }
 
 export function stepPhysics(level: LevelScene): void {
+  resetPhysicsProperties(level);
+
   let timeRemaining = 1;
   const collisionCount: Map<RigidBody<any>, number> = new Map();
 
@@ -386,11 +388,24 @@ export function stepPhysics(level: LevelScene): void {
   }
 }
 
-function moveBodies(level: LevelScene, step: number) {
+function resetPhysicsProperties(level: LevelScene) {
   for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
-    obj.pos = obj.pos.add(obj.velocity.mult(step));
+    obj.startTickPos = obj.pos;
+    obj.velocityAccum = new Vector2(0, 0);
   }
   for (const obj of level.objects.getByType<KineticObject>(KineticObject)) {
-    obj.pos = obj.pos.add(obj.velocity.mult(step));
+    obj.startTickPos = obj.posDelta;
+    obj.velocityAccum = new Vector2(0, 0);
+  }
+}
+
+function moveBodies(level: LevelScene, step: number) {
+  for (const obj of level.objects.getByType<RigidBody>(RigidBody)) {
+    obj.velocityAccum = obj.velocityAccum.add(obj.velocity.mult(step));
+    obj.pos = obj.startTickPos.add(obj.velocityAccum);
+  }
+  for (const obj of level.objects.getByType<KineticObject>(KineticObject)) {
+    obj.velocityAccum = obj.velocityAccum.add(obj.velocity.mult(step));
+    obj.posDelta = obj.startTickPos.add(obj.velocityAccum);
   }
 }
