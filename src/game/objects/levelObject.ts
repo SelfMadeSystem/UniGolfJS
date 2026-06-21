@@ -7,7 +7,7 @@ import { GameObject, GameObjectSchema } from './gameObject';
 import { type RenderPass, pass } from '@/render/drawable';
 import { getLevelConfig, getLevelScene } from '@/scenes/state';
 import { AABB } from '@/utils/aabb';
-import { generatePathsFromPoints } from '@/utils/pathUtils';
+import { generatePathsFromPolys } from '@/utils/pathUtils';
 import { Vector2 } from '@/utils/vec';
 import { nanoid } from 'nanoid';
 import type z from 'zod';
@@ -139,7 +139,7 @@ export abstract class LevelObject<
   }
 
   static *renderPoints({
-    points,
+    polys,
     outlineLayer,
     heightLayer,
     fillLayer,
@@ -151,12 +151,12 @@ export abstract class LevelObject<
     waterWallHeight,
     debug = false,
   }: {
-    points: Vector2[];
+    polys: Vector2[][];
     debug?: boolean;
   } & PathInfo): Iterable<RenderPass> {
     const { shadowPath, heightPath, outlinePath, fillPath, waterWallPath } =
-      generatePathsFromPoints(
-        points,
+      generatePathsFromPolys(
+        polys,
         outline ?? 0,
         height ?? 0,
         waterWallHeight ?? 0,
@@ -184,11 +184,13 @@ export abstract class LevelObject<
         ctx.strokeStyle = '#0f0';
         ctx.lineWidth = 0.5;
         ctx.beginPath();
-        for (let i = 0; i < points.length; i++) {
-          const curr = points[i]!;
-          const next = points[(i + 1) % points.length]!;
-          ctx.moveTo(curr.x, curr.y);
-          ctx.lineTo(next.x, next.y);
+        for (const points of polys) {
+          for (let i = 0; i < points.length; i++) {
+            const curr = points[i]!;
+            const next = points[(i + 1) % points.length]!;
+            ctx.moveTo(curr.x, curr.y);
+            ctx.lineTo(next.x, next.y);
+          }
         }
         ctx.stroke();
       });

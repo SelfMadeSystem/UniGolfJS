@@ -16,7 +16,7 @@ export abstract class KineticObject<
   static override schema = KineticSchema;
 
   public prevPos: Vector2;
-  public partialPos: Vector2;
+  public renderPos: Vector2;
   public velocity: Vector2 = new Vector2(0, 0);
   public velocityAccum: Vector2 = new Vector2(0);
   public startTickPos: Vector2 = new Vector2(0);
@@ -43,7 +43,7 @@ export abstract class KineticObject<
   constructor(options: z.input<SchemaType>) {
     super(options);
     this.prevPos = this.pos;
-    this.partialPos = this.pos;
+    this.renderPos = this.pos;
   }
 
   /**
@@ -74,21 +74,13 @@ export abstract class KineticObject<
     this.prevPos = this.pos;
   }
 
-  getBasePoints(): Vector2[] {
-    return super.getPoints();
-  }
-
-  override getPoints(): Vector2[] {
-    const { shape, rotation } = this.data;
-    const basePoints = SHAPE_POINTS[shape];
-    return basePoints.map(p =>
-      p.rot90(rotation).mult(this.scale).add(this.partialPos),
-    );
+  override getRenderPolygons(): Vector2[][] {
+    return this.getBasePolygons().map(p => p.map(v => v.add(this.renderPos)));
   }
 
   override polyRender(info: RenderInfo): Iterable<RenderPass> {
     const scene = getLevelScene();
-    this.partialPos = this.prevPos.lerp(
+    this.renderPos = this.prevPos.lerp(
       this.pos,
       scene?.playing ? info.tickInterp : 1,
     );

@@ -145,14 +145,11 @@ export function segmentCollision(
 
 export function polyCollision(
   body: RigidBodyInfo,
-  vertices: Vector2[],
+  segments: Segment[],
 ): SimpleCollision | null {
   let earliestCollision: SimpleCollision | null = null;
 
-  for (let i = 0; i < vertices.length; i++) {
-    const start = vertices[i]!;
-    const end = vertices[(i + 1) % vertices.length]!;
-    const segment = new Segment(start, end);
+  for (const segment of segments) {
     const collision = segmentCollision(body, segment);
     if (
       collision &&
@@ -217,7 +214,7 @@ function getKineticCollision(
       ...info,
       velocity: body.velocity.sub(obj.velocity),
     },
-    obj.getBasePoints(),
+    obj.getSegments(),
   );
   if (!result) return;
   return { ...result, body, object: obj, kind: 'kinetic' };
@@ -230,7 +227,7 @@ function getPolyCollision(
 ): PolyCollision | undefined {
   if (!obj.isSolid) return;
   if (!body.getMovementAABB().intersects(obj.getAABB())) return;
-  const result = polyCollision(info, obj.getPoints());
+  const result = polyCollision(info, obj.getSegments());
   if (!result) return;
   return { ...result, body, object: obj, kind: 'poly' };
 }

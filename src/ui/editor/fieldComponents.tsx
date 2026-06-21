@@ -25,6 +25,7 @@ import {
 } from '@/utils/data';
 import { Vector2 } from '@/utils/vec';
 import { useCallback, useEffect, useState } from 'react';
+import { ZodArray } from 'zod';
 
 // showInEditor meta: when true, display a picker button to set Vec2 from scene
 // relativeTo meta: when set, the picker will be relative to the specified object's value
@@ -228,11 +229,13 @@ function ShapeField({ value, onChange }: FieldComponentProps<string>) {
       value={value}
       onChange={e => onChange(e.target.value)}
     >
-      {shapeSchema.options.map(option => (
-        <option key={option} value={option}>
-          {option}
-        </option>
-      ))}
+      {shapeSchema.options.map(option =>
+        option instanceof ZodArray ? null : (
+          <option key={option.value} value={option.value}>
+            {option.value}
+          </option>
+        ),
+      )}
     </select>
   );
 }

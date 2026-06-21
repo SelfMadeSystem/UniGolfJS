@@ -4,9 +4,9 @@ import { FillRule, simplify } from 'ishape_wasm';
 /**
  * Creates a union shape from a list of polygons.
  */
-export function unionPolygons(polygons: Vector2[][]): Vector2[][][] {
+export function unionPolygons(polygons: Vector2[][][]): Vector2[][][] {
   const simplified = simplify(
-    polygons.map(p => p.map(p => p.a)),
+    polygons.map(p => p.map(p => p.map(p => p.a))),
     FillRule.NonZero,
   );
   if (!simplified) {

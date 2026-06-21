@@ -62,15 +62,7 @@ export class Floor extends PolyObject<typeof FloorSchema> {
   }
 
   *renderDragging(info: RenderInfo): Iterable<RenderPass> {
-    const points = this.getPoints();
-    if (points.length < 3) return;
-
-    const path = new Path2D();
-    path.moveTo(points[0]!.x, points[0]!.y);
-    for (let i = 1; i < points.length; i++) {
-      path.lineTo(points[i]!.x, points[i]!.y);
-    }
-    path.closePath();
+    const path = this.getPath();
 
     yield pass(LAYERS.FLOOR, ctx => {
       ctx.fillStyle = this.data.floorColor;

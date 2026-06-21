@@ -96,6 +96,47 @@ export function generateCounterClockwisePoints(points: Vector2[]): Vector2[] {
   return generateClockwisePoints(points).reverse();
 }
 
+export function generatePathsFromPolys(
+  points: Vector2[][],
+  outline: number,
+  height: number,
+  waterWallHeight: number,
+): {
+  shadowPath: Path2D;
+  heightPath: Path2D;
+  outlinePath: Path2D;
+  fillPath: Path2D;
+  waterWallPath: Path2D;
+} {
+  const shadowPath: Path2D = new Path2D();
+  const heightPath: Path2D = new Path2D();
+  const outlinePath: Path2D = new Path2D();
+  const fillPath: Path2D = new Path2D();
+  const waterWallPath: Path2D = new Path2D();
+  for (const poly of points) {
+    const {
+      shadowPath: sp,
+      heightPath: hp,
+      outlinePath: op,
+      fillPath: fp,
+      waterWallPath: wp,
+    } = generatePathsFromPoints(poly, outline, height, waterWallHeight);
+    shadowPath.addPath(sp);
+    heightPath.addPath(hp);
+    outlinePath.addPath(op);
+    fillPath.addPath(fp);
+    waterWallPath.addPath(wp);
+  }
+
+  return {
+    shadowPath,
+    heightPath,
+    outlinePath,
+    fillPath,
+    waterWallPath,
+  };
+}
+
 export function generatePathsFromPoints(
   points: Vector2[],
   outline: number,

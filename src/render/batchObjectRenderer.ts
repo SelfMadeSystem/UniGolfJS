@@ -76,7 +76,7 @@ function* getPathsImpl<T extends PolyObject<any>>(
     if (cache) {
       yield cache;
     } else {
-      const polygons = Array.from(cluster.items, floor => floor.getPoints());
+      const polygons = Array.from(cluster.items, floor => floor.getPolygons());
       const union = unionPolygons(polygons);
       const path = new Path2D();
       for (const polygon of union) {

@@ -43,12 +43,13 @@ export const NormalVec2Schema = z.codec(
 export const rgbSchema = z.string();
 // .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/);
 
-export const shapeSchema = z.enum([
-  'rectangle',
-  'triangle',
-  'quarterCircle',
-  'inverseQuarterCircle',
-  'circle',
+export const shapeSchema = z.union([
+  z.literal('rectangle'),
+  z.literal('triangle'),
+  z.literal('quarterCircle'),
+  z.literal('inverseQuarterCircle'),
+  z.literal('circle'),
+  z.array(z.array(Vec2Schema)),
 ]);
 export const rotationSchema = z.union([
   z.literal(0),

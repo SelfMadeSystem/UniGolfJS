@@ -101,34 +101,48 @@ export abstract class PolyObject<
     this.set('scale', aabb.size);
   }
 
-  getPoints(): Vector2[] {
+  getBasePolygons(): Vector2[][] {
     const { shape, rotation } = this.data;
-    const basePoints = SHAPE_POINTS[shape];
-    return basePoints.map(p =>
-      p.rot90(rotation).mult(this.scale).add(this.pos),
-    );
+    const basePoints = Array.isArray(shape) ? shape : [SHAPE_POINTS[shape]];
+    return basePoints.map(p => p.map(v => v.rot90(rotation).mult(this.scale)));
+  }
+
+  getPolygons(): Vector2[][] {
+    return this.getBasePolygons().map(p => p.map(v => v.add(this.pos)));
+  }
+
+  getRenderPolygons(): Vector2[][] {
+    return this.getPolygons();
+  }
+
+  getPhysicsPolygons(): Vector2[][] {
+    return this.getPolygons();
   }
 
   getSegments(): Segment[] {
-    const points = this.getPoints();
+    const polys = this.getPhysicsPolygons();
     const segments: Segment[] = [];
-    for (let i = 0; i < points.length; i++) {
-      const start = points[i]!;
-      const end = points[(i + 1) % points.length]!;
-      segments.push(new Segment(start, end));
+    for (const points of polys) {
+      for (let i = 0; i < points.length; i++) {
+        const start = points[i]!;
+        const end = points[(i + 1) % points.length]!;
+        segments.push(new Segment(start, end));
+      }
     }
     return segments;
   }
 
   override getPath(): Path2D {
     const path = new Path2D();
-    const points = this.getPoints();
-    if (points.length > 0) {
-      path.moveTo(points[0]!.x, points[0]!.y);
-      for (let i = 1; i < points.length; i++) {
-        path.lineTo(points[i]!.x, points[i]!.y);
+    const polys = this.getRenderPolygons();
+    if (polys.length > 0) {
+      for (const points of polys) {
+        path.moveTo(points[0]!.x, points[0]!.y);
+        for (let i = 1; i < points.length; i++) {
+          path.lineTo(points[i]!.x, points[i]!.y);
+        }
+        path.closePath();
       }
-      path.closePath();
     }
     return path;
   }
@@ -156,10 +170,10 @@ export abstract class PolyObject<
   abstract getPathInfo(info: RenderInfo): PathInfo;
 
   *polyRender(info: RenderInfo): Iterable<RenderPass> {
-    const points = this.getPoints();
+    const polys = this.getRenderPolygons();
     const pathInfo = this.getPathInfo(info);
     yield* PolyObject.renderPoints({
-      points,
+      polys,
       ...pathInfo,
       debug: this.data.debug,
     });
