@@ -36,7 +36,15 @@ export abstract class RigidBody<
   static override schema = RigidBodySchema;
 
   public prevPos: Vector2;
-  public velocity: Vector2;
+  private _velocity: Vector2;
+  public get velocity(): Vector2 {
+    return this._velocity;
+  }
+  public set velocity(value: Vector2) {
+    if (this._velocity.equals(value)) return;
+    this._velocity = value;
+    this.emitAabbChange();
+  }
   public constraint: Constraint | null = null;
   public inWater = false;
 
@@ -47,7 +55,7 @@ export abstract class RigidBody<
 
   constructor(options: z.input<SchemaType>) {
     super(options);
-    this.velocity = this.data.velocity;
+    this._velocity = this.data.velocity;
     this.prevPos = this.pos;
     //@ts-expect-error abstract classes don't work well with generic schemas
     this.on('radius', () => {

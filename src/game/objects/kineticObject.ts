@@ -17,7 +17,15 @@ export abstract class KineticObject<
 
   public prevPos: Vector2;
   public renderPos: Vector2;
-  public velocity: Vector2 = new Vector2(0, 0);
+  private _velocity: Vector2 = new Vector2(0, 0);
+  public get velocity(): Vector2 {
+    return this._velocity;
+  }
+  public set velocity(value: Vector2) {
+    if (this._velocity.equals(value)) return;
+    this._velocity = value;
+    this.emitAabbChange();
+  }
   public velocityAccum: Vector2 = new Vector2(0);
   public startTickPos: Vector2 = new Vector2(0);
   protected _posDelta: Vector2 = new Vector2(0, 0);
