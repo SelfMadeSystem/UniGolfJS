@@ -7,12 +7,7 @@ export class Vector2 implements BBox {
   public readonly x: number;
   public readonly y: number;
 
-  constructor(
-    ...args:
-      | [number]
-      | [number, number]
-      | [[number, number] | { x: number; y: number }]
-  ) {
+  constructor(...args: [number | VecLike] | [number, number]) {
     if (args[0] instanceof Object) {
       if ('x' in args[0]) {
         this.x = args[0].x;
@@ -228,6 +223,20 @@ export class Vector2 implements BBox {
       return new Vector2(round(this.x, x.x), round(this.y, x.y));
     }
     return new Vector2(round(this.x, x), round(this.y, y ?? x));
+  }
+
+  min(other: VecLike | number): Vector2 {
+    const o = new Vector2(other);
+    return new Vector2(Math.min(this.x, o.x), Math.min(this.y, o.y));
+  }
+
+  max(other: VecLike | number): Vector2 {
+    const o = new Vector2(other);
+    return new Vector2(Math.max(this.x, o.x), Math.max(this.y, o.y));
+  }
+
+  clamp(min: VecLike | number, max: VecLike | number): Vector2 {
+    return this.min(max).max(min);
   }
 
   clone(): Vector2 {
