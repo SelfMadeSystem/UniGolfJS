@@ -8,6 +8,7 @@ import { Vec2PosMode } from '@/game/editor/modes/vec2PosMode';
 import { LAYERS } from '@/game/levelConfig';
 import { getLevelObjectClass } from '@/game/levelObjectRegistry';
 import type { LevelObject } from '@/game/objects/levelObject';
+import { PolyObject } from '@/game/objects/polyObject';
 import { pass } from '@/render/drawable';
 import { EditScene } from '@/scenes/editScene';
 import { getLevelScene } from '@/scenes/state';
@@ -23,9 +24,10 @@ import {
   shapeSchema,
   stringSchema,
 } from '@/utils/data';
+import { excludeShape, unionPolygons } from '@/utils/shapeUtils';
 import { Vector2 } from '@/utils/vec';
 import { useCallback, useEffect, useState } from 'react';
-import { ZodArray } from 'zod';
+import z, { ZodArray } from 'zod';
 
 // showInEditor meta: when true, display a picker button to set Vec2 from scene
 // relativeTo meta: when set, the picker will be relative to the specified object's value
@@ -222,21 +224,105 @@ function ColorField({ value, onChange }: FieldComponentProps<string>) {
   );
 }
 
-function ShapeField({ value, onChange }: FieldComponentProps<string>) {
+function ShapeField({
+  value,
+  onChange,
+  object,
+}: FieldComponentProps<z.infer<typeof shapeSchema>>) {
+  const [picking, setPicking] = useState<'union' | 'exclude' | null>(null);
+
+  const onSelected = useCallback(
+    (objectB: PolyObject, type: 'union' | 'exclude') => {
+      const objectA = object as PolyObject;
+      const polyA = objectA.getPhysicsPolygons();
+      const polyB = objectB.getPhysicsPolygons();
+      const newPoly = (
+        type === 'union'
+          ? unionPolygons([polyA, polyB])
+          : excludeShape(polyA, polyB)
+      ).flat();
+      const points = newPoly.flat().flat();
+      let min = new Vector2(Infinity);
+      let max = new Vector2(-Infinity);
+
+      for (const point of points) {
+        min = min.min(point);
+        max = max.max(point);
+      }
+      const pos = min.avg(max);
+      const scale = max.sub(min);
+      objectA.set('position', pos);
+      objectA.set('scale', scale);
+      objectB.delete(true);
+      // TODO: Add ^^ to history and fix rendering
+      onChange(newPoly.map(p => p.map(v => v.sub(pos).div(scale))));
+    },
+    [object, onChange],
+  );
+
+  const startPicker = useCallback(
+    (type: 'union' | 'exclude') => {
+      const levelScene = getLevelScene();
+      if (!(levelScene instanceof EditScene)) return;
+
+      const editManager = levelScene.editManager;
+      if (editManager.currentMode instanceof SelectObjectMode) {
+        editManager.currentMode.cancel();
+        return;
+      }
+
+      const restoreMode = editManager.currentMode;
+      levelScene.editManager.currentMode = new SelectObjectMode(
+        editManager,
+        PolyObject,
+        (object: LevelObject<any>) => {
+          // FIXME: types are incorrect
+          onSelected(object as PolyObject, type);
+        },
+        () => {
+          editManager.overrideMode = false;
+        },
+        restoreMode,
+      );
+
+      setPicking(type);
+      editManager.overrideMode = true;
+    },
+    [onSelected],
+  );
+
   return (
-    <select
-      className="rounded bg-gray-800 px-2 text-white"
-      value={value}
-      onChange={e => onChange(e.target.value)}
-    >
-      {shapeSchema.options.map(option =>
-        option instanceof ZodArray ? null : (
-          <option key={option.value} value={option.value}>
-            {option.value}
-          </option>
-        ),
-      )}
-    </select>
+    <>
+      <select
+        className="rounded bg-gray-800 px-2 text-white"
+        value={typeof value === 'string' ? value : undefined}
+        onChange={e => onChange(e.target.value as z.infer<typeof shapeSchema>)}
+      >
+        {shapeSchema.options.map(option =>
+          option instanceof ZodArray ? null : (
+            <option key={option.value} value={option.value}>
+              {option.value}
+            </option>
+          ),
+        )}
+      </select>
+      <button
+        type="button"
+        className="rounded bg-gray-700 px-2 py-1 text-white disabled:cursor-not-allowed disabled:bg-gray-800"
+        onClick={() => startPicker('union')}
+        title="Union"
+      >
+        {picking ? 'Cancel' : 'Union'}
+      </button>
+      <button
+        type="button"
+        className="rounded bg-gray-700 px-2 py-1 text-white disabled:cursor-not-allowed disabled:bg-gray-800"
+        onClick={() => startPicker('exclude')}
+        title="Exclude"
+      >
+        {picking ? 'Cancel' : 'Exclude'}
+      </button>
+    </>
   );
 }
 
