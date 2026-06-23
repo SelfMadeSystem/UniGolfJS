@@ -25,7 +25,12 @@ export class MoveMode implements InteractionMode {
   }
 
   pointerup(info: PointerInfo): void {
-    if (!this.moved) return;
+    if (!this.moved) {
+      for (const obj of this.editManager.selectedObjects) {
+        obj.stopDragging();
+      }
+      return;
+    }
 
     const newState = new Map<LevelObject, Vector2>();
     for (const obj of this.editManager.selectedObjects) {
