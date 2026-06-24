@@ -145,7 +145,7 @@ function PropertyField({
   const FieldComp = getSchemaComponent(fieldSchema);
 
   const handleChange = useCallback(
-    (newValue: unknown) => {
+    (newValue: unknown, undo?: () => void, redo?: () => void) => {
       if (fieldSchema.safeParse(newValue).success === false) return;
       const oldValue = object.get(fieldKey as any);
       object.set(fieldKey as any, newValue);
@@ -179,9 +179,11 @@ function PropertyField({
         object,
         redo() {
           object.set(fieldKey as any, newValue);
+          redo?.();
         },
         undo() {
           object.set(fieldKey as any, oldValue);
+          undo?.();
         },
       };
       scene.editManager.history.push(state);

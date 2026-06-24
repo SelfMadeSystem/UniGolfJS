@@ -251,11 +251,29 @@ function ShapeField({
       }
       const pos = min.avg(max);
       const scale = max.sub(min);
+      const ogPos = objectA.get('position');
+      const ogScale = objectA.get('scale');
       objectA.set('position', pos);
       objectA.set('scale', scale);
       objectB.delete(true);
-      // TODO: Add ^^ to history and fix rendering
-      onChange(newPoly.map(p => p.map(v => v.sub(pos).div(scale))));
+
+      const undo = () => {
+        objectA.set('position', ogPos);
+        objectA.set('scale', ogScale);
+        getLevelScene()?.addObjectToLevel(objectB);
+      };
+
+      const redo = () => {
+        objectA.set('position', pos);
+        objectA.set('scale', scale);
+        objectA.delete(true);
+      };
+
+      onChange(
+        newPoly.map(p => p.map(v => v.sub(pos).div(scale))),
+        undo,
+        redo,
+      );
     },
     [object, onChange],
   );

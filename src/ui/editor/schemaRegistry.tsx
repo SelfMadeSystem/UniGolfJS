@@ -4,7 +4,7 @@ import type { $ZodTypeDef } from 'zod/v4/core';
 
 export type FieldComponentProps<T = any> = {
   value: T;
-  onChange: (v: T) => void;
+  onChange: (v: T, undo?: () => void, redo?: () => void) => void;
   schema: z.ZodType;
   object: unknown;
   key: string;
