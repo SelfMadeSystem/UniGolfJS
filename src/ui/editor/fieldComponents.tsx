@@ -19,11 +19,13 @@ import {
   numberSchema,
   objectIdSchema,
   positiveNumberSchema,
+  positiveNumberTo1Schema,
   rgbSchema,
   rotationSchema,
   shapeSchema,
   stringSchema,
 } from '@/utils/data';
+import { clamp } from '@/utils/mathUtils';
 import { excludeShape, unionPolygons } from '@/utils/shapeUtils';
 import { Vector2 } from '@/utils/vec';
 import { useCallback, useEffect, useState } from 'react';
@@ -253,20 +255,24 @@ function ShapeField({
       const scale = max.sub(min);
       const ogPos = objectA.get('position');
       const ogScale = objectA.get('scale');
+      const ogRot = objectA.get('rotation');
       objectA.set('position', pos);
       objectA.set('scale', scale);
+      objectA.set('rotation', 0);
       objectB.delete(true);
 
       const undo = () => {
         objectA.set('position', ogPos);
         objectA.set('scale', ogScale);
+        objectA.set('rotation', ogRot);
         getLevelScene()?.addObjectToLevel(objectB);
       };
 
       const redo = () => {
         objectA.set('position', pos);
         objectA.set('scale', scale);
-        objectA.delete(true);
+        objectA.set('rotation', 0);
+        objectB.delete(true);
       };
 
       onChange(
@@ -379,6 +385,22 @@ function PositiveNumberField({ value, onChange }: FieldComponentProps<number>) {
       min={0}
       value={value}
       onChange={e => onChange(Math.max(0, Number(e.target.value)))}
+    />
+  );
+}
+
+function PositiveNumberTo1Field({
+  value,
+  onChange,
+}: FieldComponentProps<number>) {
+  return (
+    <input
+      className="w-24 rounded bg-gray-800 px-2 text-white"
+      type="number"
+      min={0}
+      max={1}
+      value={value}
+      onChange={e => onChange(clamp(Number(e.target.value), 0, 1))}
     />
   );
 }
@@ -512,6 +534,7 @@ registerSchemaComponent(shapeSchema, ShapeField);
 registerSchemaComponent(rotationSchema, RotationField);
 registerSchemaComponent(numberSchema, NumberField);
 registerSchemaComponent(positiveNumberSchema, PositiveNumberField);
+registerSchemaComponent(positiveNumberTo1Schema, PositiveNumberTo1Field);
 registerSchemaComponent(booleanSchema, BooleanField);
 registerSchemaComponent(stringSchema, StringField);
 registerSchemaComponent(objectIdSchema, ObjectIdField);

@@ -60,6 +60,7 @@ export const rotationSchema = z.union([
 
 export const numberSchema = z.number();
 export const positiveNumberSchema = z.number().positive();
+export const positiveNumberTo1Schema = z.number().positive().max(1);
 export const booleanSchema = z.boolean();
 export const stringSchema = z.string();
 /** Validated at runtime since it's non-trivial to enforce at compile or schema level */

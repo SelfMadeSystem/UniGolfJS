@@ -4,7 +4,7 @@ import type { RenderInfo, RenderPass } from '@/render/drawable';
 import { AABB } from '@/utils/aabb';
 import {
   Vec2Schema,
-  numberSchema,
+  positiveNumberTo1Schema,
   rotationSchema,
   shapeSchema,
 } from '@/utils/data';
@@ -20,7 +20,7 @@ export const PolyObjectSchema = LevelObjectSchema.extend({
   }),
   shape: shapeSchema.default('rectangle'),
   rotation: rotationSchema.default(0),
-  bounciness: numberSchema.default(1),
+  bounciness: positiveNumberTo1Schema.default(1),
 });
 
 const CCW_ROT_TABLE = {
